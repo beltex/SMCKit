@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		4C192CAD1992A249002D39AB /* smc.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C192CAC1992A249002D39AB /* smc.swift */; };
 		4C2C0E1B1991993E00808039 /* main.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C2C0E1A1991993E00808039 /* main.swift */; };
 /* End PBXBuildFile section */
 
@@ -23,6 +24,7 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		4C192CAC1992A249002D39AB /* smc.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = smc.swift; sourceTree = "<group>"; };
 		4C2C0E171991993E00808039 /* swift-smc */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = "swift-smc"; sourceTree = BUILT_PRODUCTS_DIR; };
 		4C2C0E1A1991993E00808039 /* main.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = main.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -58,6 +60,7 @@
 			isa = PBXGroup;
 			children = (
 				4C2C0E1A1991993E00808039 /* main.swift */,
+				4C192CAC1992A249002D39AB /* smc.swift */,
 			);
 			path = "swift-smc";
 			sourceTree = "<group>";
@@ -119,6 +122,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				4C2C0E1B1991993E00808039 /* main.swift in Sources */,
+				4C192CAD1992A249002D39AB /* smc.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
