@@ -213,4 +213,20 @@ public class SMC {
             println(result & 0x3fff)
         }
     }
+    
+    ////////////////////////////////////////////////////////////////////////////
+    // PRIVATE METHODS - HELPERS
+    ////////////////////////////////////////////////////////////////////////////
+    
+    private func toUInt32(key : String) -> UInt32 {
+        var ans   : UInt32 = 0
+        var shift : UInt32 = 24
+
+        for char in key.utf8 {
+            ans += UInt32(char) << shift
+            shift -= 8
+        }
+        
+        return ans.littleEndian
+    }
 }
