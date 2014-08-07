@@ -139,8 +139,6 @@ if (result != kIOReturnSuccess) {
     //return -1
 }
 
-var r2 : kern_return_t
-
 
 var input  = SMCParamStruct()
 var output = SMCParamStruct()
@@ -156,19 +154,19 @@ input.data8 = 9
 println("SWIFT DATA8: \(input.data8)")
 
 
-r2 = IOConnectCallStructMethod(conn, 2, &input, inputStructCnt, &output, &outputStructCnt)
+result = IOConnectCallStructMethod(conn, 2, &input, inputStructCnt, &output, &outputStructCnt)
 
 
-if (r2 == kIOReturnSuccess) {
+if (result == kIOReturnSuccess) {
     println("WORKS")
     //    println("BTYE ARRAY CHECK: \(input.bytes[0])")
 }
 else {
     println("///////////////////////////")
     println("NOOO")
-    println((r2>>26)&0x3f)
-    println((r2>>14)&0xfff)
-    println(r2 & 0x3fff)
+    println((result>>26)&0x3f)
+    println((result>>14)&0xfff)
+    println(result & 0x3fff)
 }
 
 
@@ -187,10 +185,10 @@ outputStructCnt = 80
 
 var ans = [UInt8](count: 32, repeatedValue: 0)
 
-r2 = IOConnectCallStructMethod(conn, 2, &input, inputStructCnt, &output, &outputStructCnt)
+result = IOConnectCallStructMethod(conn, 2, &input, inputStructCnt, &output, &outputStructCnt)
 
 
-if (r2 == kIOReturnSuccess) {
+if (result == kIOReturnSuccess) {
     println("WORKS")
     //    println("TEMP: \(output.bytes)")
     //    println("SIZEOF VALUE \(sizeofValue(output.bytes))")
@@ -207,9 +205,9 @@ if (r2 == kIOReturnSuccess) {
 else {
     println("///////////////////////////")
     println("NOOO")
-    println((r2>>26)&0x3f)
-    println((r2>>14)&0xfff)
-    println(r2 & 0x3fff)
+    println((result>>26)&0x3f)
+    println((result>>14)&0xfff)
+    println(result & 0x3fff)
 }
 
 if (IOServiceClose(conn) != kIOReturnSuccess) {

@@ -20,7 +20,7 @@ public class SMC {
     // PRIVATE ENUMS
     ////////////////////////////////////////////////////////////////////////////
     
-    private enum SELECTORS : UInt8 {
+    private enum SELECTORS : UInt32 {
         case kSMCUserClientOpen  = 0
         case kSMCUserClientClose = 1
         case kSMCHandleYPCEvent  = 2  // READ SELECTOR
@@ -118,7 +118,9 @@ public class SMC {
     // External param name?
     
     func getTemp(key : TEMPS) -> Double {
-        return 0.0
+        var data = readSMC(key.toRaw())
+
+        return Double(((UInt(data[0]) * UInt(256) + UInt(data[1])) >> UInt(2))) / 64.0
     }
     
     func getFanRPM(key : FANS) -> Int {
@@ -164,11 +166,51 @@ public class SMC {
     // PRIVATE METHODS
     ////////////////////////////////////////////////////////////////////////////
     
-    private func readSMC() {
+    private func readSMC(key : String) -> [UInt8] {
+        var inputStruct  = SMCParamStruct()
+        var outputStruct = SMCParamStruct()
+        var data         = [UInt8](count: 32, repeatedValue: 0)
         
+        inputStruct.key = 1413689412 // key
+        inputStruct.data8 = UInt8(SELECTORS.kSMCGetKeyInfo.toRaw())
+        
+        callSMC(&inputStruct, outputStruct : &outputStruct)
+        
+        inputStruct.keyInfo.dataSize = outputStruct.keyInfo.dataSize
+        inputStruct.data8 = UInt8(SELECTORS.kSMCReadKey.toRaw())
+        
+        callSMC(&inputStruct, outputStruct : &outputStruct)
+        
+        data[0] = outputStruct.bytes_0
+        data[1] = outputStruct.bytes_1
+        
+        return data
     }
     
     private func writeSMC() {
         
+    }
+    
+    private func callSMC(inout inputStruct  : SMCParamStruct,
+                         inout outputStruct : SMCParamStruct) {
+        var result          : kern_return_t
+        var inputStructCnt  : size_t = UInt(sizeof(SMCParamStruct))
+        var outputStructCnt : size_t = UInt(sizeof(SMCParamStruct))
+        
+        result = IOConnectCallStructMethod(conn,
+                                           SELECTORS.kSMCHandleYPCEvent.toRaw(),
+                                           &inputStruct,
+                                           inputStructCnt,
+                                           &outputStruct,
+                                           &outputStructCnt)
+        
+        if (result != kIOReturnSuccess) {
+            println("ERROR")
+            
+            // TODO: proper mach error conversion
+            println((result>>26)&0x3f)
+            println((result>>14)&0xfff)
+            println(result & 0x3fff)
+        }
     }
 }
