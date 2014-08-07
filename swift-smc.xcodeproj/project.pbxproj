@@ -59,8 +59,8 @@
 		4C2C0E191991993E00808039 /* swift-smc */ = {
 			isa = PBXGroup;
 			children = (
-				4C2C0E1A1991993E00808039 /* main.swift */,
 				4C192CAC1992A249002D39AB /* smc.swift */,
+				4C2C0E1A1991993E00808039 /* main.swift */,
 			);
 			path = "swift-smc";
 			sourceTree = "<group>";

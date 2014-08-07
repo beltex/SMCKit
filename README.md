@@ -11,6 +11,6 @@ makes the changes, slowing down or speeding up fans as necessary."_
 
 ### References
 
-- [OSX and iOS Kerenl Programming](http://www.apress.com/9781430235361-4892)
+- [OS X and iOS Kernel Programming](http://www.apress.com/9781430235361-4892)
 - [Mac OS X and iOS Internals: To the Apple's Core](http://ca.wiley.com/WileyCDA/WileyTitle/productCd-1118057651.html)
 - [iOS Hacker's Handbook](http://ca.wiley.com/WileyCDA/WileyTitle/productCd-1118204123.html)

@@ -7,7 +7,7 @@ public class SMC {
     ////////////////////////////////////////////////////////////////////////////
     
     public enum TEMPS : String {
-        case CPU = "TN0P"
+        case CPU = "TC0D"
         case GPU = "TC0P"
     }
     
@@ -119,8 +119,9 @@ public class SMC {
     
     func getTemp(key : TEMPS) -> Double {
         var data = readSMC(key.toRaw())
-
-        return Double(((UInt(data[0]) * UInt(256) + UInt(data[1])) >> UInt(2))) / 64.0
+        var temp : Double = Double(((UInt(data[0]) * UInt(256) + UInt(data[1])) >> UInt(2))) / 64.0
+        
+        return ceil(temp)
     }
     
     func getFanRPM(key : FANS) -> Int {
@@ -171,11 +172,11 @@ public class SMC {
         var outputStruct = SMCParamStruct()
         var data         = [UInt8](count: 32, repeatedValue: 0)
         
-        inputStruct.key = 1413689412 // key
+        inputStruct.key = toUInt32(key)
         inputStruct.data8 = UInt8(SELECTORS.kSMCGetKeyInfo.toRaw())
         
         callSMC(&inputStruct, outputStruct : &outputStruct)
-        
+                
         inputStruct.keyInfo.dataSize = outputStruct.keyInfo.dataSize
         inputStruct.data8 = UInt8(SELECTORS.kSMCReadKey.toRaw())
         
@@ -219,14 +220,26 @@ public class SMC {
     ////////////////////////////////////////////////////////////////////////////
     
     private func toUInt32(key : String) -> UInt32 {
-        var ans   : UInt32 = 0
-        var shift : UInt32 = 24
+        var ans   : Int32 = 0
+        var shift : Int32 = 24
 
         for char in key.utf8 {
-            ans += UInt32(char) << shift
+            ans += (Int32(char) << shift)
             shift -= 8
         }
         
-        return ans.littleEndian
+        return UInt32(ans).littleEndian
+    }
+    
+    private func toString(key : UInt32) -> String {
+        var ans = String()
+        var shift : Int32 = 24
+
+        for var index = 0; index < 4; ++index {
+            ans += Character(UnicodeScalar(UInt32(Int32(key) >> shift)))
+            shift -= 8
+        }
+        
+        return ans
     }
 }
