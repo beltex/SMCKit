@@ -1,3 +1,23 @@
+/*
+ * {description}
+ *
+ * Copyright (C) 2014  beltex <https://github.com/beltex>
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License along
+ * with this program; if not, write to the Free Software Foundation, Inc.,
+ * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+ */
+
 import IOKit
 
 public class SMC {
@@ -6,12 +26,12 @@ public class SMC {
     // PUBLIC ENUMS
     ////////////////////////////////////////////////////////////////////////////
     
-    public enum TEMPS : String {
+    public enum TMP : String {
         case CPU = "TC0D"
         case GPU = "TC0P"
     }
     
-    public enum FANS : String {
+    public enum FAN : String {
         case CPU = "TN0P"
         case GPU = "TC0P"
     }
@@ -20,7 +40,7 @@ public class SMC {
     // PRIVATE ENUMS
     ////////////////////////////////////////////////////////////////////////////
     
-    private enum SELECTORS : UInt32 {
+    private enum SELECTOR : UInt32 {
         case kSMCUserClientOpen  = 0
         case kSMCUserClientClose = 1
         case kSMCHandleYPCEvent  = 2  // READ SELECTOR
@@ -59,8 +79,8 @@ public class SMC {
     
     private struct SMCParamStruct {
         var key        : UInt32 = 0
-        var vers       : SMCVersion = SMCVersion()
-        var pLimitData : SMCPLimitData = SMCPLimitData()
+        var vers       : SMCVersion     = SMCVersion()
+        var pLimitData : SMCPLimitData  = SMCPLimitData()
         var keyInfo    : SMCKeyInfoData = SMCKeyInfoData()
         var padding    : UInt16 = 0     // padding ignore on the C side
         var result     : UInt8 = 0
@@ -117,18 +137,18 @@ public class SMC {
     
     // External param name?
     
-    func getTemp(key : TEMPS) -> Double {
+    func getTemp(key : TMP) -> Double {
         var data = readSMC(key.toRaw())
         var temp : Double = Double(((UInt(data[0]) * UInt(256) + UInt(data[1])) >> UInt(2))) / 64.0
         
         return ceil(temp)
     }
     
-    func getFanRPM(key : FANS) -> Int {
+    func getFanRPM(key : FAN) -> Int {
         return 0
     }
     
-    func setFanRPM(key : FANS, RPM : Int) -> Bool {
+    func setFanRPM(key : FAN, RPM : Int) -> Bool {
         return true
     }
     
@@ -173,12 +193,12 @@ public class SMC {
         var data         = [UInt8](count: 32, repeatedValue: 0)
         
         inputStruct.key = toUInt32(key)
-        inputStruct.data8 = UInt8(SELECTORS.kSMCGetKeyInfo.toRaw())
+        inputStruct.data8 = UInt8(SELECTOR.kSMCGetKeyInfo.toRaw())
         
         callSMC(&inputStruct, outputStruct : &outputStruct)
-                
+        
         inputStruct.keyInfo.dataSize = outputStruct.keyInfo.dataSize
-        inputStruct.data8 = UInt8(SELECTORS.kSMCReadKey.toRaw())
+        inputStruct.data8 = UInt8(SELECTOR.kSMCReadKey.toRaw())
         
         callSMC(&inputStruct, outputStruct : &outputStruct)
         
@@ -199,7 +219,7 @@ public class SMC {
         var outputStructCnt : size_t = UInt(sizeof(SMCParamStruct))
         
         result = IOConnectCallStructMethod(conn,
-                                           SELECTORS.kSMCHandleYPCEvent.toRaw(),
+                                           SELECTOR.kSMCHandleYPCEvent.toRaw(),
                                            &inputStruct,
                                            inputStructCnt,
                                            &outputStruct,

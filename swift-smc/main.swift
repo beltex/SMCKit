@@ -6,6 +6,6 @@ if (smc.openSMC() != kIOReturnSuccess) {
         println("ERROR")
 }
 
-println(smc.getTemp(SMC.TEMPS.CPU))
+println(smc.getTemp(SMC.TMP.CPU))
 
 smc.closeSMC()
