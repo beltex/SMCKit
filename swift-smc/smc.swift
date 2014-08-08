@@ -27,13 +27,38 @@ public class SMC {
     ////////////////////////////////////////////////////////////////////////////
     
     public enum TMP : String {
-        case CPU = "TC0D"
-        case GPU = "TC0P"
+        // T: Temperature
+        // C: CPU
+        // G: GPU
+        // P: Proximity
+        // D: Diode
+        //
+        
+        case AMBIENT_AIR_0          = "TA0P"
+        case AMBIENT_AIR_1          = "TA1P"
+        case CPU_0_DIODE            = "TC0D"
+        case CPU_0_HEATSINK         = "TC0H"
+        case CPU_0_PROXIMITY        = "TC0P"
+        case ENCLOSURE_BASE_0       = "TB0T"
+        case ENCLOSURE_BASE_1       = "TB1T"
+        case ENCLOSURE_BASE_2       = "TB2T"
+        case ENCLOSURE_BASE_3       = "TB3T"
+        case GPU_0_DIODE            = "TG0D"
+        case GPU_0_HEATSINK         = "TG0H"
+        case GPU_0_PROXIMITY        = "TG0P"
+        case HARD_DRIVE_BAY         = "TH0P"
+        case MEMORY_SLOT_0          = "TM0S"
+        case MEMORY_SLOTS_PROXIMITY = "TM0P"
+        case NORTHBRIDGE            = "TN0H"
+        case NORTHBRIDGE_DIODE      = "TN0D"
+        case NORTHBRIDGE_PROXIMITY  = "TN0P"
+        case THUNDERBOLT_0          = "TI0P"
+        case THUNDERBOLT_1          = "TI1P"
+        case WIRELESS_MODULE        = "TW0P"
     }
     
     public enum FAN : String {
-        case CPU = "TN0P"
-        case GPU = "TC0P"
+        case FAN_0 = "F0Ac"
     }
     
     ////////////////////////////////////////////////////////////////////////////
@@ -72,7 +97,7 @@ public class SMC {
     }
     
     private struct SMCKeyInfoData {
-        var dataSize       : IOByteCount = 0
+        var dataSize       : IOByteCount = 0    // how many vals in the array
         var dataType       : UInt32 = 0
         var dataAttributes : UInt8 = 0
     }
@@ -144,8 +169,39 @@ public class SMC {
         return ceil(temp)
     }
     
-    func getFanRPM(key : FAN) -> Int {
-        return 0
+    func getFanRPM(key : FAN) -> Double {
+        // fpe2
+        
+        var data = readSMC(key.toRaw())
+        
+        println(data)
+        
+//        var ans = 0
+//        ans += Int(data[0]) << (2 - 1 - 0) * (8 - 2);
+//        ans += (Int(data[1]) & 0xff) >> 2;
+//        
+//        var t = (Int(data[1]) & 0x03)
+        
+//        (data[0] << UInt8(6)) + ((data[1] & 0xff) >> 2) + ((data[1] & UInt8(0x03)) * 0.25)
+        
+        return 0.0
+        
+//        var total :UInt8 = 0
+//        var size = 2
+//        var e : UInt8 = 2
+//        
+//        for var i = 0; i < size ; i++ {
+//            if (i == (size - 1)) {
+//                total += (data[i] & 0xff) >> e
+//            }
+//            else {
+//                total += data[i] << (size - 1 - i) * (8 - e)
+//            }
+//        }
+        
+//        
+//        
+//        return Double(total) + (Double((Int(data[size-1]) & 0x03)) * 0.25)
     }
     
     func setFanRPM(key : FAN, RPM : Int) -> Bool {
