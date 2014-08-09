@@ -5,7 +5,8 @@ A System Management Controller (SMC) API in Swift from user space for Intel
 based Macs. The API works by talking to the AppleSMC.kext (kernel
 extension), the closed source driver for the SMC.
 
-Requires Xcode 6 - Beta 5.
+Requires Xcode 6 - Beta 5
+
 
 ### System Management Controller
 
@@ -25,7 +26,16 @@ For more see:
 - [Power Management Unit](http://en.wikipedia.org/wiki/Power_Management_Unit)
 
 
+### License
 
+This project is under the **GNU General Public License v2.0**.
+
+
+### References
+
+- [OS X and iOS Kernel Programming](http://www.apress.com/9781430235361-4892)
+- [Mac OS X and iOS Internals: To the Apple's Core](http://ca.wiley.com/WileyCDA/WileyTitle/productCd-1118057651.html)
+- [iOS Hacker's Handbook](http://ca.wiley.com/WileyCDA/WileyTitle/productCd-1118204123.html)
 
 
 ### Fun
@@ -43,10 +53,3 @@ IORegistryEntrySetCFProperty( _smc,
 Almost certainly a reference to Bob Dylan's
 <a href="http://en.wikipedia.org/wiki/The_Times_They_Are_a-Changin%27_(song)">The Times They Are a-Changin'</a>
 :)
-
-
-### References
-
-- [OS X and iOS Kernel Programming](http://www.apress.com/9781430235361-4892)
-- [Mac OS X and iOS Internals: To the Apple's Core](http://ca.wiley.com/WileyCDA/WileyTitle/productCd-1118057651.html)
-- [iOS Hacker's Handbook](http://ca.wiley.com/WileyCDA/WileyTitle/productCd-1118204123.html)
