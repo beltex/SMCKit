@@ -107,6 +107,7 @@ public class SMC {
         case FAN_0         = "F0Ac"
         case FAN_0_MIN_RPM = "F0Mn"
         case FAN_0_MAX_RPM = "F0Mx"
+        case NUM_FANS      = "FNum"
     }
     
     
@@ -119,7 +120,7 @@ public class SMC {
     private enum RESULT : UInt8 {
         case kSMCKeyNotFound = 0x84
         case kSMCSuccess     = 0
-        case kSMCError	     = 1
+        case kSMCError       = 1
     };
     
     
@@ -286,6 +287,18 @@ public class SMC {
     
     public func getFanMaxRPM(num : UInt) -> (UInt, kern_return_t) {
         return fanCall("F" + String(num) + "Mx")
+    }
+    
+    
+    /**
+    Get the number of fans on this machine
+
+    :returns: The number of fans and the kernel return value
+    */
+    public func getNumFans() -> (UInt, kern_return_t) {
+        var result = readSMC("FNum")
+        
+        return (UInt(result.0[0]), result.1)
     }
     
     
