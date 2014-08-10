@@ -84,7 +84,12 @@ public class SMC {
     /**
     
     These are only available to kernel space IOKit code, thus we have to manually
-    import them here.
+    import them here. Most of these are not needed, but for the sake of
+    completeness.
+    
+    One to keep in mind is kIOReturnBadArgument, this occurs when the structs
+    being passed over to the SMC do not translate over correctly from Swift to
+    C.
     
     See "Accessing Hardware From Applications -> Handling Errors" Apple doc
     */
@@ -251,11 +256,12 @@ public class SMC {
     :returns: Temperature in Celsius. If the sensor is not found, or an error
               occurs, return will be zero
     */
-    public func getTemp(key : TMP) -> UInt {
-       var data = readSMC(key.toRaw())
+    public func getTemp(key : TMP) -> (UInt, kern_return_t) {
+       var result = readSMC(key.toRaw())
+       var data   = result.0
         
-       // We drop decimal value (data[1]) for now - thus maybe be off +/- 1
-       return (UInt(data[0]) * 256) >> 8
+       // We drop the decimal value (data[1]) for now - thus maybe be off +/- 1
+       return (UInt(data[0]), result.1)
     }
     
     
@@ -266,11 +272,15 @@ public class SMC {
     :returns: The fan RPM. If the fan is not found, or an error occurs, return
              will be zero
     */
-    public func getFanRPM(key : FAN) -> UInt {
-        var data = readSMC(key.toRaw())
+    public func getFanRPM(key : FAN) -> (UInt, kern_return_t) {
+        var result = readSMC(key.toRaw())
+        var ans : UInt = 0
+        var data = result.0
         
-        // FIXME: Proper convert of fpe2 data
-        return 1
+        ans += UInt(data[0]) << 6
+        ans += (UInt(data[1]) & 0xff) >> 2
+        
+        return (ans, result.1)
     }
     
     
@@ -308,8 +318,6 @@ public class SMC {
         
         result = IOServiceOpen(service, mach_task_self_, 0, &conn)
         IOObjectRelease(service)
-        
-
 
         return result
     }
@@ -366,25 +374,66 @@ public class SMC {
     :param: key The SMC key
     :returns: Array of 32 UInt8 vals, the raw data return from the SMC
     */
-    private func readSMC(key : String) -> [UInt8] {
+    private func readSMC(key : String) -> ([UInt8], kern_return_t) {
+        var result : kern_return_t
         var inputStruct  = SMCParamStruct()
         var outputStruct = SMCParamStruct()
         var data         = [UInt8](count: 32, repeatedValue: 0)
         
+        // First call to AppleSMC - get key info
         inputStruct.key = toUInt32(key)
         inputStruct.data8 = UInt8(SELECTOR.kSMCGetKeyInfo.toRaw())
         
-        callSMC(&inputStruct, outputStruct : &outputStruct)
+        result = callSMC(&inputStruct, outputStruct : &outputStruct)
         
+        if (result != kIOReturnSuccess) {
+            return (data, result)
+        }
+        
+        // Second call to AppleSMC - now we can get the data
         inputStruct.keyInfo.dataSize = outputStruct.keyInfo.dataSize
         inputStruct.data8 = UInt8(SELECTOR.kSMCReadKey.toRaw())
         
-        callSMC(&inputStruct, outputStruct : &outputStruct)
+        result = callSMC(&inputStruct, outputStruct : &outputStruct)
         
-        data[0] = outputStruct.bytes_0
-        data[1] = outputStruct.bytes_1
+        if (result != kIOReturnSuccess) {
+            return (data, result)
+        }
         
-        return data
+        data[0]  = outputStruct.bytes_0
+        data[1]  = outputStruct.bytes_1
+        data[2]  = outputStruct.bytes_2
+        data[3]  = outputStruct.bytes_3
+        data[4]  = outputStruct.bytes_4
+        data[5]  = outputStruct.bytes_5
+        data[6]  = outputStruct.bytes_6
+        data[7]  = outputStruct.bytes_7
+        data[8]  = outputStruct.bytes_8
+        data[9]  = outputStruct.bytes_9
+        data[10] = outputStruct.bytes_10
+        data[11] = outputStruct.bytes_11
+        data[12] = outputStruct.bytes_12
+        data[13] = outputStruct.bytes_13
+        data[14] = outputStruct.bytes_14
+        data[15] = outputStruct.bytes_15
+        data[16] = outputStruct.bytes_16
+        data[17] = outputStruct.bytes_17
+        data[18] = outputStruct.bytes_18
+        data[19] = outputStruct.bytes_19
+        data[20] = outputStruct.bytes_20
+        data[21] = outputStruct.bytes_21
+        data[22] = outputStruct.bytes_22
+        data[23] = outputStruct.bytes_23
+        data[24] = outputStruct.bytes_24
+        data[25] = outputStruct.bytes_25
+        data[26] = outputStruct.bytes_26
+        data[27] = outputStruct.bytes_27
+        data[28] = outputStruct.bytes_28
+        data[29] = outputStruct.bytes_29
+        data[30] = outputStruct.bytes_30
+        data[31] = outputStruct.bytes_31
+        
+        return (data, result)
     }
     
     
@@ -408,8 +457,18 @@ public class SMC {
     private func callSMC(inout inputStruct  : SMCParamStruct,
                          inout outputStruct : SMCParamStruct) -> kern_return_t {
         var result          : kern_return_t
+        
+        // When the structs are cast to SMCParamStruct on the C side (AppleSMC)
+        // there expected to be 80 bytes. This may not be the case on the Swift
+        // side. One hack is to simply hardcode this to 80.
         var inputStructCnt  : size_t = UInt(sizeof(SMCParamStruct))
         var outputStructCnt : size_t = UInt(sizeof(SMCParamStruct))
+                            
+        if (inputStructCnt != 80) {
+            // Houston, we have a problem. Depending how far off this is from
+            // 80, call may or may not work.
+            return IORETURN.kIOReturnBadArgument.toRaw()
+        }
         
         result = IOConnectCallStructMethod(conn,
                                            SELECTOR.kSMCHandleYPCEvent.toRaw(),
@@ -418,7 +477,9 @@ public class SMC {
                                            &outputStruct,
                                            &outputStructCnt)
                             
-        // TODO: Error check result here?
+        if (result != kIOReturnSuccess) {
+            result = err_get_code(result)
+        }
 
         return result
     }
@@ -465,8 +526,13 @@ public class SMC {
     
     /**
     IOReturn error code lookup
+    
+    :param: err The raw error code
+    :returns: The IOReturn error code. If not found, returns the original error.
     */
-    private func err_get_code(err: kern_return_t) -> kern_return_t? {
-        return IORETURN.fromRaw(err & 0x3fff)?.toRaw()
+    private func err_get_code(err : kern_return_t) -> kern_return_t {
+        var lookup : kern_return_t? = IORETURN.fromRaw(err & 0x3fff)?.toRaw()
+        
+        return (lookup ?? err)
     }
 }

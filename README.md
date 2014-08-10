@@ -26,16 +26,16 @@ For more see:
 - [Power Management Unit](http://en.wikipedia.org/wiki/Power_Management_Unit)
 
 
+### References
+
+- [iOS Hacker's Handbook](http://ca.wiley.com/WileyCDA/WileyTitle/productCd-1118204123.html)
+- [Mac OS X and iOS Internals: To the Apple's Core](http://ca.wiley.com/WileyCDA/WileyTitle/productCd-1118057651.html)
+- [OS X and iOS Kernel Programming](http://www.apress.com/9781430235361-4892)
+
+
 ### License
 
 This project is under the **GNU General Public License v2.0**.
-
-
-### References
-
-- [OS X and iOS Kernel Programming](http://www.apress.com/9781430235361-4892)
-- [Mac OS X and iOS Internals: To the Apple's Core](http://ca.wiley.com/WileyCDA/WileyTitle/productCd-1118057651.html)
-- [iOS Hacker's Handbook](http://ca.wiley.com/WileyCDA/WileyTitle/productCd-1118204123.html)
 
 
 ### Fun
