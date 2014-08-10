@@ -74,14 +74,6 @@ public class SMC {
     
     
     /**
-    SMC keys for fans - 4 byte multi-character constants
-    */
-    public enum FAN : String {
-        case FAN_0 = "F0Ac"
-    }
-    
-    
-    /**
     
     These are only available to kernel space IOKit code, thus we have to manually
     import them here. Most of these are not needed, but for the sake of
@@ -109,6 +101,16 @@ public class SMC {
     
     
     /**
+    SMC keys for fans - 4 byte multi-character constants
+    */
+    private enum FAN : String {
+        case FAN_0         = "F0Ac"
+        case FAN_0_MIN_RPM = "F0Mn"
+        case FAN_0_MAX_RPM = "F0Mx"
+    }
+    
+    
+    /**
     Defined by AppleSMC.kext. See SMCParamStruct.
     
     These are SMC specific, thus we wrap them in mach errors when returning
@@ -116,7 +118,7 @@ public class SMC {
     */
     private enum RESULT : UInt8 {
         case kSMCKeyNotFound = 0x84
-        case kSMCSuccess	 = 0
+        case kSMCSuccess     = 0
         case kSMCError	     = 1
     };
     
@@ -272,15 +274,18 @@ public class SMC {
     :returns: The fan RPM. If the fan is not found, or an error occurs, return
              will be zero
     */
-    public func getFanRPM(key : FAN) -> (UInt, kern_return_t) {
-        var result = readSMC(key.toRaw())
-        var ans : UInt = 0
-        var data = result.0
-        
-        ans += UInt(data[0]) << 6
-        ans += (UInt(data[1]) & 0xff) >> 2
-        
-        return (ans, result.1)
+    public func getFanRPM(num : UInt) -> (UInt, kern_return_t) {
+        return fanCall("F" + String(num) + "Ac")
+    }
+    
+    
+    public func getFanMinRPM(num : UInt) -> (UInt, kern_return_t) {
+        return fanCall("F" + String(num) + "Mn")
+    }
+    
+    
+    public func getFanMaxRPM(num : UInt) -> (UInt, kern_return_t) {
+        return fanCall("F" + String(num) + "Mx")
     }
     
     
@@ -293,10 +298,10 @@ public class SMC {
     :param: rpm The speed you would like to set the fan to.
     :returns: True if successful, false otherwise.
     */
-    public func setFanRPM(key : FAN, rpm : UInt) -> Bool {
+    public func setFanRPM(num : UInt, rpm : UInt) -> kern_return_t {
         // FIXME: Implement this
         // TODO: Make sure to have checks that rpm value is with range of fan
-        return true
+        return kIOReturnSuccess
     }
     
     
@@ -367,6 +372,18 @@ public class SMC {
 
     // MARK: Private Methods
 
+    
+    private func fanCall(key : String) -> (UInt, kern_return_t) {
+        var result = readSMC(key)
+        var ans : UInt = 0
+        var data = result.0
+        
+        ans += UInt(data[0]) << 6
+        ans += (UInt(data[1]) & 0xff) >> 2
+        
+        return (ans, result.1)
+    }
+    
     
     /**
     Read data from the SMC
