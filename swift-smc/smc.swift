@@ -264,6 +264,8 @@ public class SMC {
        var data   = result.0
         
        // We drop the decimal value (data[1]) for now - thus maybe be off +/- 1
+       // Data type is sp78 - unsigned floating point
+       // http://stackoverflow.com/questions/22160746/fpe2-and-sp78-data-types
        return (UInt(data[0]), result.1)
     }
     
@@ -312,9 +314,25 @@ public class SMC {
     :returns: True if successful, false otherwise.
     */
     public func setFanRPM(num : UInt, rpm : UInt) -> kern_return_t {
-        // FIXME: Implement this
-        // TODO: Make sure to have checks that rpm value is with range of fan
-        return kIOReturnSuccess
+        var min = getFanMinRPM(num)
+        var max = getFanMaxRPM(num)
+        
+        // Safety check: rpm must be within acceptable range of fan speed
+        if (min.1 == kIOReturnSuccess && max.1 == kIOReturnSuccess) {
+            
+            //&& rpm >= min.0 && rpm <= max.0) {
+            // now call write
+            
+            var data = [UInt8](count: 32, repeatedValue: 0)
+            data[0] = UInt8(rpm >> 6)
+            data[1] = UInt8((rpm << 2) ^ (UInt(data[0]) << 8))
+                               
+            return writeSMC("F" + String(num) + "Mn", data: data)
+        }
+        else {
+            println("Unsafe fan RPM")
+            return IORETURN.kIOReturnBadArgument.toRaw()
+        }
     }
     
     
@@ -387,12 +405,15 @@ public class SMC {
 
     
     private func fanCall(key : String) -> (UInt, kern_return_t) {
+        // Data type for fan calls - fpe2
+        // This is assumend to mean floating point, with 2 exponent bits
+        // http://stackoverflow.com/questions/22160746/fpe2-and-sp78-data-types
         var result = readSMC(key)
         var ans : UInt = 0
         var data = result.0
         
         ans += UInt(data[0]) << 6
-        ans += (UInt(data[1]) & 0xff) >> 2
+        ans += UInt(data[1]) >> 2
         
         return (ans, result.1)
     }
@@ -472,8 +493,40 @@ public class SMC {
     
     :returns:
     */
-    private func writeSMC() {
+    private func writeSMC(key : String, data : [UInt8]) -> kern_return_t {
         // FIXME: Implement this
+        var result : kern_return_t
+        var inputStruct  = SMCParamStruct()
+        var outputStruct = SMCParamStruct()
+        
+        // First call to AppleSMC - get key info
+        inputStruct.key = toUInt32(key)
+        inputStruct.data8 = UInt8(SELECTOR.kSMCGetKeyInfo.toRaw())
+        
+        result = callSMC(&inputStruct, outputStruct : &outputStruct)
+        
+        if (result != kIOReturnSuccess) {
+            return result
+        }
+        
+        
+        // Second call to AppleSMC - now we can get the data
+        
+        // TODO: Check that dataSize is the same as given from user
+        inputStruct.keyInfo.dataSize = outputStruct.keyInfo.dataSize
+        inputStruct.data8 = UInt8(SELECTOR.kSMCWriteKey.toRaw())
+        
+        inputStruct.bytes_0 = data[0]
+        inputStruct.bytes_1 = data[1]
+        
+        result = callSMC(&inputStruct, outputStruct : &outputStruct)
+        println(outputStruct.result)
+        println(outputStruct.bytes_0)
+        if (result != kIOReturnSuccess) {
+            return result
+        }
+        
+        return result
     }
     
     
