@@ -417,7 +417,9 @@ public class SMC {
     :returns: Temperature in Celsius. If the sensor is not found, or an error
               occurs, return will be zero
     */
-    public func getTemp(key : TMP) -> (UInt, kern_return_t, UInt8) {
+    public func getTmp(key : TMP) -> (tmp      : UInt,
+                                      IOReturn : kern_return_t,
+                                      kSMC     : UInt8) {
        var result = readSMC(key.toRaw())
         
        // We drop the decimal value (data[1]) for now - thus maybe be off +/- 1
@@ -439,17 +441,17 @@ public class SMC {
     :returns: The fan RPM. If the fan is not found, or an error occurs, return
               will be zero
     */
-    public func getFanRPM(num : UInt) -> (UInt, kern_return_t) {
+    public func getFanRPM(num : UInt) -> (rpm : UInt, kern_return_t) {
         return fanCall("F" + String(num) + "Ac")
     }
     
     
-    public func getFanMinRPM(num : UInt) -> (UInt, kern_return_t) {
+    public func getFanMinRPM(num : UInt) -> (rpm : UInt, kern_return_t) {
         return fanCall("F" + String(num) + "Mn")
     }
     
     
-    public func getFanMaxRPM(num : UInt) -> (UInt, kern_return_t) {
+    public func getFanMaxRPM(num : UInt) -> (rpm : UInt, kern_return_t) {
         return fanCall("F" + String(num) + "Mx")
     }
     
@@ -459,7 +461,9 @@ public class SMC {
 
     :returns: The number of fans and the kernel return value
     */
-    public func getNumFans() -> (UInt, kern_return_t, UInt8) {
+    public func getNumFans() -> (numFans  : UInt,
+                                 IOReturn : kern_return_t,
+                                 kSMC     : UInt8) {
         var result = readSMC(FAN.NUM_FANS.toRaw())
         
         return (UInt(result.data[0]), result.IOReturn, result.kSMC)
@@ -688,6 +692,7 @@ public class SMC {
         var ans   : Int32 = 0
         var shift : Int32 = 24
 
+        // Assumes 4 char length
         for char in key.utf8 {
             ans += (Int32(char) << shift)
             shift -= 8
@@ -699,14 +704,21 @@ public class SMC {
     
     /**
     For converting the dataType return from the SMC to human readable
+    4 byte multi-character constant.
+    
+    :param: dataType The data type as returned from a SMC read key info call
+    :returns: 4-byte multi-character constant representation
     */
-    private func toString(key : UInt32) -> String {
-        // FIXME: This doesn't work correctly
+    private func toString(dataType : UInt32) -> String {
         var ans = String()
         var shift : Int32 = 24
 
         for var index = 0; index < 4; ++index {
-            ans += Character(UnicodeScalar(UInt32(Int32(key) >> shift)))
+            // To get each char, we shift it into the lower 8 bits, and then
+            // & by 255 to insolate it
+            var char = (Int32(dataType) >> shift) & 0xff
+            
+            ans += Character(UnicodeScalar(UInt32(char)))
             shift -= 8
         }
         
@@ -717,10 +729,15 @@ public class SMC {
     /**
     IOReturn error code lookup
     
+    See "Accessing Hardware From Applications -> Handling Errors" Apple doc for
+    more information.
+    
     :param: err The raw error code
     :returns: The IOReturn error code. If not found, returns the original error.
     */
     private func getErrorCode(err : kern_return_t) -> kern_return_t {
+        // kern_return_t is an Int32. The final 14 bits specify the error code
+        // itself, hence the &
         var lookup : kern_return_t? = IOReturn.fromRaw(err & 0x3fff)?.toRaw()
         
         return (lookup ?? err)

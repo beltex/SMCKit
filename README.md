@@ -41,6 +41,27 @@ into your Xcode project."_
 
 ### Usage
 
+```swift
+import IOKit
+
+var smc = SMC()
+
+// Open a connection to the SMC
+if (smc.openSMC() == kIOReturnSuccess) {
+    var result = smc.getTmp(SMC.TMP.CPU_0_DIODE)
+    
+    println("CPU 0 Diode Temperature: \(result.tmp)°C")
+    println("IO Return Code: \(result.IOReturn)")
+    println("SMC Return Code: \(result.kSMC)")
+    
+    // Make sure to close the connection
+    smc.closeSMC()
+}
+else {
+    println("ERROR: Failed to open connection to SMC")
+}
+```
+
 
 ### References
 
