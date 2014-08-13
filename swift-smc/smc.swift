@@ -53,7 +53,7 @@ public class SMC {
     Sources:
     
     - iStat Pro
-    - http://github.com/hholtmann/smcFanControl
+    - https://github.com/hholtmann/smcFanControl
     - https://github.com/jedda/OSX-Monitoring-Tools
     - http://www.parhelia.ch/blog/statics/k3_keys.html
     */
@@ -121,6 +121,7 @@ public class SMC {
     more information.
     */
     public enum IOReturn : kern_return_t {
+        case kIOReturnSuccess          = 0      // KERN_SUCCESS - OK
         case kIOReturnError            = 0x2bc  // General error
         case kIOReturnNoMemory         = 0x2bd  // Can't allocate memory
         case kIOReturnNoResources      = 0x2be  // Resource shortage
@@ -338,6 +339,71 @@ public class SMC {
     
     
     /**
+    Open a connection to the SMC
+    
+    :returns:
+    */
+    public func openSMC() -> kern_return_t {
+        var result  : kern_return_t
+        var service : io_service_t
+        
+        service = IOServiceGetMatchingService(kIOMasterPortDefault,
+                  IOServiceMatching(IOSERVICE_SMC).takeUnretainedValue())
+        
+        if (service == 0) {
+            return IOReturn.kIOReturnNoDevice.toRaw()
+        }
+        
+        result = IOServiceOpen(service, mach_task_self_, 0, &conn)
+        IOObjectRelease(service)
+        
+        return result
+    }
+    
+    
+    /**
+    Close connection to the SMC
+    
+    :returns:
+    */
+    public func closeSMC() -> kern_return_t {
+        return IOServiceClose(conn)
+    }
+    
+    
+    /**
+    Check if an SMC key is valid. Useful for determining if a certain machine
+    has particular sensor or fan for example.
+    
+    :returns:
+    */
+    public func isKeyValid(key : String) -> kern_return_t {
+        // TODO: Bool or kern_return_t for return type?
+        
+        var result : kern_return_t
+        var inputStruct  = SMCParamStruct()
+        var outputStruct = SMCParamStruct()
+        
+        inputStruct.key = toUInt32(key)
+        inputStruct.data8 = UInt8(Selector.kSMCGetKeyInfo.toRaw())
+        
+        result = callSMC(&inputStruct, outputStruct : &outputStruct)
+        
+        if (outputStruct.result == kSMC.kSMCKeyNotFound.toRaw()) {
+            return IOReturn.kIOReturnNoDevice.toRaw()
+        }
+        else if (outputStruct.result == kSMC.kSMCError.toRaw()) {
+            return IOReturn.kIOReturnError.toRaw()
+        }
+        
+        // TODO: Check the result error code
+        // IORETURN.fromRaw(result & 0x3fff)
+        
+        return result
+    }
+    
+    
+    /**
     Get the current temperature from a sensor
     
     :param: key The temperature sensor to read from
@@ -352,6 +418,11 @@ public class SMC {
        // http://stackoverflow.com/questions/22160746/fpe2-and-sp78-data-types
        return (UInt(result.data[0]), result.IOReturn, result.kSMC)
     }
+    
+    
+    //--------------------------------------------------------------------------
+    // MARK: PUBLIC METHODS - FANS
+    //--------------------------------------------------------------------------
     
     
     /**
@@ -419,71 +490,6 @@ public class SMC {
         }
     }
     
-    
-    /**
-    Open a connection to the SMC
-    
-    :returns:
-    */
-    public func openSMC() -> kern_return_t {
-        var result  : kern_return_t
-        var service : io_service_t
-        
-        service = IOServiceGetMatchingService(kIOMasterPortDefault,
-                                              IOServiceMatching(IOSERVICE_SMC).takeUnretainedValue())
-        
-        if (service == 0) {
-            return IOReturn.kIOReturnNoDevice.toRaw()
-        }
-        
-        result = IOServiceOpen(service, mach_task_self_, 0, &conn)
-        IOObjectRelease(service)
-
-        return result
-    }
-    
-    
-    /**
-    Close connection to the SMC
-    
-    :returns:
-    */
-    public func closeSMC() -> kern_return_t {
-        return IOServiceClose(conn)
-    }
-    
-    
-    /**
-    Check if an SMC key is valid. Useful for determining if a certain machine
-    has particular sensor or fan for example.
-    
-    :returns:
-    */
-    public func isKeyValid(key : String) -> kern_return_t {
-        // TODO: Bool or kern_return_t for return type?
-        
-        var result : kern_return_t
-        var inputStruct  = SMCParamStruct()
-        var outputStruct = SMCParamStruct()
-        
-        inputStruct.key = toUInt32(key)
-        inputStruct.data8 = UInt8(Selector.kSMCGetKeyInfo.toRaw())
-        
-        result = callSMC(&inputStruct, outputStruct : &outputStruct)
-        
-        if (outputStruct.result == kSMC.kSMCKeyNotFound.toRaw()) {
-            return IOReturn.kIOReturnNoDevice.toRaw()
-        }
-        else if (outputStruct.result == kSMC.kSMCError.toRaw()) {
-            return IOReturn.kIOReturnError.toRaw()
-        }
-        
-        // TODO: Check the result error code
-        // IORETURN.fromRaw(result & 0x3fff)
-        
-        return result
-    }
-    
 
     //--------------------------------------------------------------------------
     // MARK: PRIVATE METHODS
@@ -511,7 +517,9 @@ public class SMC {
     :param: key The SMC key
     :returns: Array of 32 UInt8 vals, the raw data return from the SMC
     */
-    private func readSMC(key : String) -> (data : [UInt8], IOReturn : kern_return_t, kSMC: UInt8) {
+    private func readSMC(key : String) -> (data     : [UInt8],
+                                           IOReturn : kern_return_t,
+                                           kSMC     : UInt8) {
         var result : kern_return_t
         var inputStruct  = SMCParamStruct()
         var outputStruct = SMCParamStruct()
