@@ -111,6 +111,17 @@ public class SMC {
     
     
     /**
+    SMC data types - 4 byte multi-character constants
+    
+    Sources: See TMP enum
+    */
+    public enum DataType : String {
+        case SP78 = "sp78"
+        case FPE2 = "fpe2"
+    }
+    
+    
+    /**
     IOKit Error Codes - as defined in IOReturn.h
 
     These are only available to kernel space IOKit code (except for
