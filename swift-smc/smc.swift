@@ -265,9 +265,23 @@ public class SMC {
     
     
     /**
-    Defined by AppleSMC.kext. See SMCParamStruct.
-
-    // TODO: Expliation
+    Defined by AppleSMC.kext.
+    
+    This is the predefined struct that must be passed to communicate with the
+    AppleSMC driver. While the driver is closed source, the definition of this
+    struct happened to appear in the Apple PowerManagement project at around
+    version 211, and soon after disappeared. It can be seen in the PrivateLib.c
+    file under pmconfigd. Given that it is C code, this is the closest
+    translation to Swift from a type perspective.
+    
+    ISSUES
+    
+    - Padding for struct alignment when passed over to C side
+    - Can't read array once passed back from C, thus enumerate 32 UInt8 values
+      instead
+    - Size of struct must be 80 bytes
+    
+    https://www.opensource.apple.com/source/PowerManagement/PowerManagement-211/
     */
     private struct SMCParamStruct {
         var key        : UInt32 = 0
@@ -341,7 +355,7 @@ public class SMC {
     /**
     Open a connection to the SMC
     
-    :returns:
+    :returns: kIOReturnSuccess on successful connection to the SMC.
     */
     public func openSMC() -> kern_return_t {
         var result  : kern_return_t
@@ -351,7 +365,10 @@ public class SMC {
                   IOServiceMatching(IOSERVICE_SMC).takeUnretainedValue())
         
         if (service == 0) {
-            return IOReturn.kIOReturnNoDevice.toRaw()
+            // NOTE: IOServiceMatching documents 0 on failure
+            
+            println("\(IOSERVICE_SMC) NOT FOUND")
+            return IOReturn.kIOReturnError.toRaw()
         }
         
         result = IOServiceOpen(service, mach_task_self_, 0, &conn)
@@ -364,7 +381,7 @@ public class SMC {
     /**
     Close connection to the SMC
     
-    :returns:
+    :returns: kIOReturnSuccess on successful close of connection to the SMC.
     */
     public func closeSMC() -> kern_return_t {
         return IOServiceClose(conn)
@@ -375,11 +392,11 @@ public class SMC {
     Check if an SMC key is valid. Useful for determining if a certain machine
     has particular sensor or fan for example.
     
-    :returns:
+    :returns: The SMC return code. See kSMC enum.
     */
-    public func isKeyValid(key : String) -> kern_return_t {
-        // TODO: Bool or kern_return_t for return type?
-        
+    public func isKeyValid(key : String) -> UInt8 {
+        // TODO: Should this return the result kern_return_t as well?
+    
         var result : kern_return_t
         var inputStruct  = SMCParamStruct()
         var outputStruct = SMCParamStruct()
@@ -388,18 +405,8 @@ public class SMC {
         inputStruct.data8 = UInt8(Selector.kSMCGetKeyInfo.toRaw())
         
         result = callSMC(&inputStruct, outputStruct : &outputStruct)
-        
-        if (outputStruct.result == kSMC.kSMCKeyNotFound.toRaw()) {
-            return IOReturn.kIOReturnNoDevice.toRaw()
-        }
-        else if (outputStruct.result == kSMC.kSMCError.toRaw()) {
-            return IOReturn.kIOReturnError.toRaw()
-        }
-        
-        // TODO: Check the result error code
-        // IORETURN.fromRaw(result & 0x3fff)
-        
-        return result
+                                                
+        return outputStruct.result
     }
     
     

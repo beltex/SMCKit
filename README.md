@@ -5,8 +5,6 @@ A System Management Controller (SMC) API in Swift from user space for Intel
 based Macs. The API works by talking to the AppleSMC.kext (kernel
 extension), the closed source driver for the SMC.
 
-Requires Xcode 6 - Beta 5
-
 
 ### System Management Controller
 
@@ -26,6 +24,24 @@ For more see:
 - [Power Management Unit](http://en.wikipedia.org/wiki/Power_Management_Unit)
 
 
+### Requirements
+
+- Xcode 6 - Beta 5
+- OS X 10.9+
+
+
+### Installation
+
+_"The infrastructure and best practices for distributing Swift libraries is
+currently being developed by the developer community during this beta period of
+the language and Xcode. In the meantime, you can simply copy the smc.swift file
+into your Xcode project."_
+-via [Alamofire](https://github.com/Alamofire/Alamofire)
+
+
+### Usage
+
+
 ### References
 
 - [iOS Hacker's Handbook](http://ca.wiley.com/WileyCDA/WileyTitle/productCd-1118204123.html)
@@ -40,7 +56,9 @@ This project is under the **GNU General Public License v2.0**.
 
 ### Fun
 
-In the very same PrivateLib.c file, the following snippet can be found:
+In the very same
+[PrivateLib.c](https://www.opensource.apple.com/source/PowerManagement/PowerManagement-211/pmconfigd/PrivateLib.c)
+file, the following snippet can be found:
 
 ```c
 // And simply AppleSMC with kCFBooleanTrue to let them know time is changed.
