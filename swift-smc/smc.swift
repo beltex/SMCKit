@@ -29,7 +29,9 @@ SMC.
 public class SMC {
     
     
-    // MARK: Public Enums
+    //--------------------------------------------------------------------------
+    // MARK: PUBLIC ENUMS
+    //--------------------------------------------------------------------------
     
     
     /**
@@ -38,7 +40,7 @@ public class SMC {
     Not applicable to all Mac's of course. In adition, the definition of the 
     codes may not be 100% accurate necessarily. Finally, list is incomplete.
 
-    Presumed letter translations
+    Presumed letter translations:
     
     - T = Temperature (if first char)
     - C = CPU
@@ -82,11 +84,28 @@ public class SMC {
     
     /**
     SMC keys for fans - 4 byte multi-character constants
+    
+    Number of fans on Macs vary of course, thus not all keys will be applicable.
+    
+    Presumed letter translations:
+    
+    - F  = Fan
+    - Ac = Acutal
+    - Mn = Min
+    - Mx = Max
+    
+    Sources: See TMP enum
     */
     public enum FAN : String {
         case FAN_0         = "F0Ac"
         case FAN_0_MIN_RPM = "F0Mn"
         case FAN_0_MAX_RPM = "F0Mx"
+        case FAN_1         = "F1Ac"
+        case FAN_1_MIN_RPM = "F1Mn"
+        case FAN_1_MAX_RPM = "F1Mx"
+        case FAN_2         = "F2Ac"
+        case FAN_2_MIN_RPM = "F2Mn"
+        case FAN_2_MAX_RPM = "F2Mx"
         case NUM_FANS      = "FNum"
     }
     
@@ -98,7 +117,8 @@ public class SMC {
     kIOReturnSuccess), thus we have to manually import them here. Most of these
     are not revleant to us, but for the sake of completeness.
     
-    See "Accessing Hardware From Applications -> Handling Errors" Apple doc
+    See "Accessing Hardware From Applications -> Handling Errors" Apple doc for
+    more information.
     */
     public enum IOReturn : kern_return_t {
         case kIOReturnError            = 0x2bc  // General error
@@ -169,8 +189,7 @@ public class SMC {
     /**
     Defined by AppleSMC.kext. See SMCParamStruct.
     
-    These are SMC specific return codes, they are returned in addition to IOKit
-    return codes.
+    These are SMC specific return codes
     */
     public enum kSMC : UInt8 {
         case kSMCSuccess     = 0
@@ -179,7 +198,9 @@ public class SMC {
     };
     
     
-    // MARK: Private Enums
+    //--------------------------------------------------------------------------
+    // MARK: PRIVATE ENUMS
+    //--------------------------------------------------------------------------
     
     
     /**
@@ -187,7 +208,7 @@ public class SMC {
     
     Method selectors
     */
-    private enum SELECTOR : UInt32 {
+    private enum Selector : UInt32 {
         case kSMCUserClientOpen  = 0
         case kSMCUserClientClose = 1
         case kSMCHandleYPCEvent  = 2
@@ -199,7 +220,9 @@ public class SMC {
     };
     
 
-    // MARK: Private Structs
+    //--------------------------------------------------------------------------
+    // MARK: PRIVATE STRUCTS
+    //--------------------------------------------------------------------------
     
     
     /**
@@ -234,7 +257,7 @@ public class SMC {
                  know how to interpret it (translate it to human readable)
     */
     private struct SMCKeyInfoData {
-        var dataSize       : IOByteCount = 0    // how many vals in the array
+        var dataSize       : IOByteCount = 0
         var dataType       : UInt32      = 0
         var dataAttributes : UInt8       = 0
     }
@@ -290,7 +313,9 @@ public class SMC {
     }
     
     
-    // MARK: Private Attributes
+    //--------------------------------------------------------------------------
+    // MARK: PRIVATE ATTRIBUTES
+    //--------------------------------------------------------------------------
     
     
     /**
@@ -307,7 +332,9 @@ public class SMC {
     private let IOSERVICE_SMC = "AppleSMC"
     
     
-    // MARK: Public Methods
+    //--------------------------------------------------------------------------
+    // MARK: PUBLIC METHODS
+    //--------------------------------------------------------------------------
     
     
     /**
@@ -440,7 +467,7 @@ public class SMC {
         var outputStruct = SMCParamStruct()
         
         inputStruct.key = toUInt32(key)
-        inputStruct.data8 = UInt8(SELECTOR.kSMCGetKeyInfo.toRaw())
+        inputStruct.data8 = UInt8(Selector.kSMCGetKeyInfo.toRaw())
         
         result = callSMC(&inputStruct, outputStruct : &outputStruct)
         
@@ -458,7 +485,9 @@ public class SMC {
     }
     
 
-    // MARK: Private Methods
+    //--------------------------------------------------------------------------
+    // MARK: PRIVATE METHODS
+    //--------------------------------------------------------------------------
 
     
     private func fanCall(key : String) -> (UInt, kern_return_t) {
@@ -490,7 +519,7 @@ public class SMC {
         
         // First call to AppleSMC - get key info
         inputStruct.key = toUInt32(key)
-        inputStruct.data8 = UInt8(SELECTOR.kSMCGetKeyInfo.toRaw())
+        inputStruct.data8 = UInt8(Selector.kSMCGetKeyInfo.toRaw())
         
         result = callSMC(&inputStruct, outputStruct : &outputStruct)
         
@@ -501,7 +530,7 @@ public class SMC {
         
         // Second call to AppleSMC - now we can get the data
         inputStruct.keyInfo.dataSize = outputStruct.keyInfo.dataSize
-        inputStruct.data8 = UInt8(SELECTOR.kSMCReadKey.toRaw())
+        inputStruct.data8 = UInt8(Selector.kSMCReadKey.toRaw())
         
         result = callSMC(&inputStruct, outputStruct : &outputStruct)
         
@@ -561,7 +590,7 @@ public class SMC {
         
         // First call to AppleSMC - get key info
         inputStruct.key = toUInt32(key)
-        inputStruct.data8 = UInt8(SELECTOR.kSMCGetKeyInfo.toRaw())
+        inputStruct.data8 = UInt8(Selector.kSMCGetKeyInfo.toRaw())
         
         result = callSMC(&inputStruct, outputStruct : &outputStruct)
         
@@ -574,7 +603,7 @@ public class SMC {
         
         // TODO: Check that dataSize is the same as given from user
         inputStruct.keyInfo.dataSize = outputStruct.keyInfo.dataSize
-        inputStruct.data8 = UInt8(SELECTOR.kSMCWriteKey.toRaw())
+        inputStruct.data8 = UInt8(Selector.kSMCWriteKey.toRaw())
         
         inputStruct.bytes_0 = data[0]
         inputStruct.bytes_1 = data[1]
@@ -614,7 +643,7 @@ public class SMC {
         }
         
         result = IOConnectCallStructMethod(conn,
-                                           SELECTOR.kSMCHandleYPCEvent.toRaw(),
+                                           Selector.kSMCHandleYPCEvent.toRaw(),
                                            &inputStruct,
                                            inputStructCnt,
                                            &outputStruct,
@@ -629,7 +658,9 @@ public class SMC {
     }
     
 
-    // MARK: Private Methods - Helpers
+    //--------------------------------------------------------------------------
+    // MARK: PRIVATE METHODS - HELPERS
+    //--------------------------------------------------------------------------
 
     
     /**
