@@ -35,9 +35,8 @@ public class SMC {
     /**
     SMC keys for temperature sensors - 4 byte multi-character constants
 
-    Sourced from various locations (see README). Not applicable to all Mac's of
-    course. The actual definition of all the codes is not 100% accurate
-    necessarily. List is also incomplete.
+    Not applicable to all Mac's of course. In adition, the definition of the 
+    codes may not be 100% accurate necessarily. Finally, list is incomplete.
 
     Presumed letter translations
     
@@ -47,6 +46,14 @@ public class SMC {
     - P = Proximity
     - D = Diode
     - H = Heatsink
+
+
+    Sources:
+    
+    - iStat Pro
+    - http://github.com/hholtmann/smcFanControl
+    - https://github.com/jedda/OSX-Monitoring-Tools
+    - http://www.parhelia.ch/blog/statics/k3_keys.html
     */
     public enum TMP : String {
         case AMBIENT_AIR_0          = "TA0P"
@@ -74,18 +81,26 @@ public class SMC {
     
     
     /**
+    SMC keys for fans - 4 byte multi-character constants
+    */
+    public enum FAN : String {
+        case FAN_0         = "F0Ac"
+        case FAN_0_MIN_RPM = "F0Mn"
+        case FAN_0_MAX_RPM = "F0Mx"
+        case NUM_FANS      = "FNum"
+    }
     
-    These are only available to kernel space IOKit code, thus we have to manually
-    import them here. Most of these are not needed, but for the sake of
-    completeness.
     
-    One to keep in mind is kIOReturnBadArgument, this occurs when the structs
-    being passed over to the SMC do not translate over correctly from Swift to
-    C.
+    /**
+    IOKit Error Codes - as defined in IOReturn.h
+
+    These are only available to kernel space IOKit code (except for
+    kIOReturnSuccess), thus we have to manually import them here. Most of these
+    are not revleant to us, but for the sake of completeness.
     
     See "Accessing Hardware From Applications -> Handling Errors" Apple doc
     */
-    public enum IORETURN : kern_return_t {
+    public enum IOReturn : kern_return_t {
         case kIOReturnError            = 0x2bc  // General error
         case kIOReturnNoMemory         = 0x2bd  // Can't allocate memory
         case kIOReturnNoResources      = 0x2be  // Resource shortage
@@ -94,8 +109,10 @@ public class SMC {
         case kIOReturnNotPrivileged    = 0x2c1  // Privilege violation
         case kIOReturnBadArgument      = 0x2c2  // Invalid argument
         case kIOReturnLockedRead       = 0x2c3  // Device read locked
-        case kIOReturnExclusiveAccess  = 0x2c5  // Exclusive access and device already open
-        case kIOReturnBadMessageID     = 0x2c6  // Sent/received messages had different msg_id
+        case kIOReturnExclusiveAccess  = 0x2c5  // Exclusive access and device
+                                                // already open
+        case kIOReturnBadMessageID     = 0x2c6  // Sent/received messages had
+                                                // different msg_id
         case kIOReturnUnsupported      = 0x2c7  // Unsupported function
         case kIOReturnVMError          = 0x2c8  // Misc. VM failure
         case kIOReturnInternalError    = 0x2c9  // Internal error
@@ -119,10 +136,12 @@ public class SMC {
         case kIOReturnNoSpace          = 0x2db  // No space for data
         case kIOReturnQM2Error         = 0x2dc  // ??? - kIOReturn???Error
         case kIOReturnPortExists       = 0x2dd  // Port already exists
-        case kIOReturnCannotWire       = 0x2de  // Can't wire down physical memory
+        case kIOReturnCannotWire       = 0x2de  // Can't wire down physical
+                                                // memory
         case kIOReturnNoInterrupt      = 0x2df  // No interrupt attached
         case kIOReturnNoFrames         = 0x2e0  // No DMA frames enqueued
-        case kIOReturnMessageTooLarge  = 0x2e1  // Oversized msg received on interrupt port
+        case kIOReturnMessageTooLarge  = 0x2e1  // Oversized msg received on
+                                                // interrupt port
         case kIOReturnNotPermitted     = 0x2e2  // Not permitted
         case kIOReturnNoPower          = 0x2e3  // No power to device
         case kIOReturnNoMedia          = 0x2e4  // Media not present
@@ -130,43 +149,37 @@ public class SMC {
         case kIOReturnUnsupportedMode  = 0x2e6  // No such mode
         case kIOReturnUnderrun         = 0x2e7  // Data underrun
         case kIOReturnOverrun          = 0x2e8  // Data overrun
-        case kIOReturnDeviceError      = 0x2e9  // The device is not working properly!
-        case kIOReturnNoCompletion     = 0x2ea  // A completion routine is required
+        case kIOReturnDeviceError      = 0x2e9  // The device is not working
+                                                // properly!
+        case kIOReturnNoCompletion     = 0x2ea  // A completion routine is
+                                                // required
         case kIOReturnAborted          = 0x2eb  // Operation aborted
-        case kIOReturnNoBandwidth      = 0x2ec  // Bus bandwidth would be exceeded
+        case kIOReturnNoBandwidth      = 0x2ec  // Bus bandwidth would be
+                                                // exceeded
         case kIOReturnNotResponding    = 0x2ed  // Device not responding
-        case kIOReturnIsoTooOld        = 0x2ee  // Isochronous I/O request for distant past!
-        case kIOReturnIsoTooNew        = 0x2ef  // Isochronous I/O request for distant future
+        case kIOReturnIsoTooOld        = 0x2ee  // Isochronous I/O request for
+                                                // distant past!
+        case kIOReturnIsoTooNew        = 0x2ef  // Isochronous I/O request for
+                                                // distant future
         case kIOReturnNotFound         = 0x2f0  // Data was not found
         case kIOReturnInvalid          = 0x1    // Should never be seen
     }
-    
-    
-    // MARK: Private Enums
-    
-    
-    /**
-    SMC keys for fans - 4 byte multi-character constants
-    */
-    private enum FAN : String {
-        case FAN_0         = "F0Ac"
-        case FAN_0_MIN_RPM = "F0Mn"
-        case FAN_0_MAX_RPM = "F0Mx"
-        case NUM_FANS      = "FNum"
-    }
-    
+
     
     /**
     Defined by AppleSMC.kext. See SMCParamStruct.
     
-    These are SMC specific, thus we wrap them in mach errors when returning
-    to the user
+    These are SMC specific return codes, they are returned in addition to IOKit
+    return codes.
     */
-    private enum RESULT : UInt8 {
-        case kSMCKeyNotFound = 0x84
+    public enum kSMC : UInt8 {
         case kSMCSuccess     = 0
         case kSMCError       = 1
+        case kSMCKeyNotFound = 0x84
     };
+    
+    
+    // MARK: Private Enums
     
     
     /**
@@ -304,14 +317,13 @@ public class SMC {
     :returns: Temperature in Celsius. If the sensor is not found, or an error
               occurs, return will be zero
     */
-    public func getTemp(key : TMP) -> (UInt, kern_return_t) {
+    public func getTemp(key : TMP) -> (UInt, kern_return_t, UInt8) {
        var result = readSMC(key.toRaw())
-       var data   = result.0
         
        // We drop the decimal value (data[1]) for now - thus maybe be off +/- 1
        // Data type is sp78 - unsigned floating point
        // http://stackoverflow.com/questions/22160746/fpe2-and-sp78-data-types
-       return (UInt(data[0]), result.1)
+       return (UInt(result.data[0]), result.IOReturn, result.kSMC)
     }
     
     
@@ -320,7 +332,7 @@ public class SMC {
     
     :param: key The fan to check
     :returns: The fan RPM. If the fan is not found, or an error occurs, return
-             will be zero
+              will be zero
     */
     public func getFanRPM(num : UInt) -> (UInt, kern_return_t) {
         return fanCall("F" + String(num) + "Ac")
@@ -342,10 +354,10 @@ public class SMC {
 
     :returns: The number of fans and the kernel return value
     */
-    public func getNumFans() -> (UInt, kern_return_t) {
-        var result = readSMC("FNum")
+    public func getNumFans() -> (UInt, kern_return_t, UInt8) {
+        var result = readSMC(FAN.NUM_FANS.toRaw())
         
-        return (UInt(result.0[0]), result.1)
+        return (UInt(result.data[0]), result.IOReturn, result.kSMC)
     }
     
     
@@ -376,7 +388,7 @@ public class SMC {
         }
         else {
             println("Unsafe fan RPM")
-            return IORETURN.kIOReturnBadArgument.toRaw()
+            return IOReturn.kIOReturnBadArgument.toRaw()
         }
     }
     
@@ -394,7 +406,7 @@ public class SMC {
                                               IOServiceMatching(IOSERVICE_SMC).takeUnretainedValue())
         
         if (service == 0) {
-            return IORETURN.kIOReturnNoDevice.toRaw()
+            return IOReturn.kIOReturnNoDevice.toRaw()
         }
         
         result = IOServiceOpen(service, mach_task_self_, 0, &conn)
@@ -432,11 +444,11 @@ public class SMC {
         
         result = callSMC(&inputStruct, outputStruct : &outputStruct)
         
-        if (outputStruct.result == RESULT.kSMCKeyNotFound.toRaw()) {
-            return IORETURN.kIOReturnNoDevice.toRaw()
+        if (outputStruct.result == kSMC.kSMCKeyNotFound.toRaw()) {
+            return IOReturn.kIOReturnNoDevice.toRaw()
         }
-        else if (outputStruct.result == RESULT.kSMCError.toRaw()) {
-            return IORETURN.kIOReturnError.toRaw()
+        else if (outputStruct.result == kSMC.kSMCError.toRaw()) {
+            return IOReturn.kIOReturnError.toRaw()
         }
         
         // TODO: Check the result error code
@@ -455,12 +467,12 @@ public class SMC {
         // http://stackoverflow.com/questions/22160746/fpe2-and-sp78-data-types
         var result = readSMC(key)
         var ans : UInt = 0
-        var data = result.0
+        var data = result.data
         
         ans += UInt(data[0]) << 6
         ans += UInt(data[1]) >> 2
         
-        return (ans, result.1)
+        return (ans, result.IOReturn)
     }
     
     
@@ -470,7 +482,7 @@ public class SMC {
     :param: key The SMC key
     :returns: Array of 32 UInt8 vals, the raw data return from the SMC
     */
-    private func readSMC(key : String) -> ([UInt8], kern_return_t) {
+    private func readSMC(key : String) -> (data : [UInt8], IOReturn : kern_return_t, kSMC: UInt8) {
         var result : kern_return_t
         var inputStruct  = SMCParamStruct()
         var outputStruct = SMCParamStruct()
@@ -482,8 +494,9 @@ public class SMC {
         
         result = callSMC(&inputStruct, outputStruct : &outputStruct)
         
-        if (result != kIOReturnSuccess) {
-            return (data, result)
+        if (result != kIOReturnSuccess ||
+            outputStruct.result != kSMC.kSMCSuccess.toRaw()) {
+            return (data, result, outputStruct.result)
         }
         
         // Second call to AppleSMC - now we can get the data
@@ -492,10 +505,12 @@ public class SMC {
         
         result = callSMC(&inputStruct, outputStruct : &outputStruct)
         
-        if (result != kIOReturnSuccess) {
-            return (data, result)
+        if (result != kIOReturnSuccess ||
+            outputStruct.result != kSMC.kSMCSuccess.toRaw()) {
+            return (data, result, outputStruct.result)
         }
         
+        // Set the data
         data[0]  = outputStruct.bytes_0
         data[1]  = outputStruct.bytes_1
         data[2]  = outputStruct.bytes_2
@@ -529,7 +544,7 @@ public class SMC {
         data[30] = outputStruct.bytes_30
         data[31] = outputStruct.bytes_31
         
-        return (data, result)
+        return (data, result, outputStruct.result)
     }
     
     
@@ -584,7 +599,7 @@ public class SMC {
     */
     private func callSMC(inout inputStruct  : SMCParamStruct,
                          inout outputStruct : SMCParamStruct) -> kern_return_t {
-        var result          : kern_return_t
+        var result : kern_return_t
         
         // When the structs are cast to SMCParamStruct on the C side (AppleSMC)
         // there expected to be 80 bytes. This may not be the case on the Swift
@@ -595,7 +610,7 @@ public class SMC {
         if (inputStructCnt != 80) {
             // Houston, we have a problem. Depending how far off this is from
             // 80, call may or may not work.
-            return IORETURN.kIOReturnBadArgument.toRaw()
+            return IOReturn.kIOReturnBadArgument.toRaw()
         }
         
         result = IOConnectCallStructMethod(conn,
@@ -604,9 +619,10 @@ public class SMC {
                                            inputStructCnt,
                                            &outputStruct,
                                            &outputStructCnt)
-                            
+        
         if (result != kIOReturnSuccess) {
-            result = err_get_code(result)
+            // Determine the exact error
+            result = getErrorCode(result)
         }
 
         return result
@@ -658,8 +674,8 @@ public class SMC {
     :param: err The raw error code
     :returns: The IOReturn error code. If not found, returns the original error.
     */
-    private func err_get_code(err : kern_return_t) -> kern_return_t {
-        var lookup : kern_return_t? = IORETURN.fromRaw(err & 0x3fff)?.toRaw()
+    private func getErrorCode(err : kern_return_t) -> kern_return_t {
+        var lookup : kern_return_t? = IOReturn.fromRaw(err & 0x3fff)?.toRaw()
         
         return (lookup ?? err)
     }
