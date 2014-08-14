@@ -48,12 +48,12 @@ var smc = SMC()
 
 // Open a connection to the SMC
 if (smc.openSMC() == kIOReturnSuccess) {
-    var result = smc.getTmp(SMC.TMP.CPU_0_DIODE)
-    
+    var result = smc.getTMP(SMC.TMP.CPU_0_DIODE)
+
     println("CPU 0 Diode Temperature: \(result.tmp)°C")
     println("IO Return Code: \(result.IOReturn)")
     println("SMC Return Code: \(result.kSMC)")
-    
+
     // Make sure to close the connection
     smc.closeSMC()
 }
@@ -64,6 +64,15 @@ else {
 
 
 ### References
+
+There are many projects that interface with the SMC for one purpose or another. Credit is most
+certainly due to them for the reference code. Such projects as:
+
+- [iStat Pro](https://www.apple.com/downloads/dashboard/status/istatpro.html)
+- [osx-cpu-temp](https://github.com/lavoiesl/osx-cpu-temp)
+- [smcFanControl](https://github.com/hholtmann/smcFanControl)
+
+Handy IOKit references:
 
 - [iOS Hacker's Handbook](http://ca.wiley.com/WileyCDA/WileyTitle/productCd-1118204123.html)
 - [Mac OS X and iOS Internals: To the Apple's Core](http://ca.wiley.com/WileyCDA/WileyTitle/productCd-1118057651.html)

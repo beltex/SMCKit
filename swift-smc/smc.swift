@@ -114,6 +114,8 @@ public class SMC {
     SMC data types - 4 byte multi-character constants
     
     Sources: See TMP enum
+    
+    http://stackoverflow.com/questions/22160746/fpe2-and-sp78-data-types
     */
     public enum DataType : String {
         case SP78 = "sp78"
@@ -444,8 +446,10 @@ public class SMC {
     :param: key The temperature sensor to read from
     :returns: Temperature in Celsius. If the sensor is not found, or an error
               occurs, return will be zero
+    :returns: IOReturn IOKit return code
+    :returns: kSMC SMC return code
     */
-    public func getTmp(key : TMP) -> (tmp      : UInt,
+    public func getTMP(key : TMP) -> (tmp      : UInt,
                                       IOReturn : kern_return_t,
                                       kSMC     : UInt8) {
        var result = readSMC(key.toRaw())
@@ -466,28 +470,59 @@ public class SMC {
     Get the current speed (RPM - revolutions per minute) of a fan
     
     :param: key The fan to check
-    :returns: The fan RPM. If the fan is not found, or an error occurs, return
-              will be zero
+    :returns: rpm The fan RPM. If the fan is not found, or an error occurs,
+                  return will be zero
+    :returns: IOReturn IOKit return code
+    :returns: kSMC SMC return code
     */
-    public func getFanRPM(num : UInt) -> (rpm : UInt, kern_return_t) {
-        return fanCall("F" + String(num) + "Ac")
-    }
-    
-    
-    public func getFanMinRPM(num : UInt) -> (rpm : UInt, kern_return_t) {
-        return fanCall("F" + String(num) + "Mn")
-    }
-    
-    
-    public func getFanMaxRPM(num : UInt) -> (rpm : UInt, kern_return_t) {
-        return fanCall("F" + String(num) + "Mx")
+    public func getFanRPM(num : UInt) -> (rpm      : UInt,
+                                          IOReturn : kern_return_t,
+                                          kSMC     : UInt8) {
+        var result = readSMC("F" + String(num) + "Ac")
+        return (fpe2(result.data), result.IOReturn, result.kSMC)
     }
     
     
     /**
-    Get the number of fans on this machine
+    Get the min safe speed (RPM - revolutions per minute) of a fan
+    
+    :param: key The fan to check
+    :returns: rpm The safe min fan RPM. If the fan is not found, or an error
+                  occurs, return will be zero
+    :returns: IOReturn IOKit return code
+    :returns: kSMC SMC return code
+    */
+    public func getFanMinRPM(num : UInt) -> (rpm      : UInt,
+                                             IOReturn : kern_return_t,
+                                             kSMC     : UInt8) {
+        var result = readSMC("F" + String(num) + "Mn")
+        return (fpe2(result.data), result.IOReturn, result.kSMC)
+    }
+    
+    
+    /**
+    Get the current speed (RPM - revolutions per minute) of a fan
+    
+    :param: key The fan to check
+    :returns: rpm The safe max fan RPM. If the fan is not found, or an error
+                  occurs, return will be zero
+    :returns: IOReturn IOKit return code
+    :returns: kSMC SMC return code
+    */
+    public func getFanMaxRPM(num : UInt) -> (rpm      : UInt,
+                                             IOReturn : kern_return_t,
+                                             kSMC     : UInt8) {
+        var result = readSMC("F" + String(num) + "Mx")
+        return (fpe2(result.data), result.IOReturn, result.kSMC)
+    }
+    
+    
+    /**
+    Get the number of fans on this machine.
 
-    :returns: The number of fans and the kernel return value
+    :returns: numFans The number of fans
+    :returns: IOReturn IOKit return code
+    :returns: kSMC SMC return code
     */
     public func getNumFans() -> (numFans  : UInt,
                                  IOReturn : kern_return_t,
@@ -499,33 +534,48 @@ public class SMC {
     
     
     /**
-    Set the speed (RPM - revolutions per minute) of a fan. This requires sudo.
+    Set the speed (RPM - revolutions per minute) of a fan. This method requires
+    root privlages.
 
-    NOTE: You are playing with hardware here, BE CAREFUL.
+    WARNING: You are playing with hardware here, BE CAREFUL.
 
     :param: key The fan to set
     :param: rpm The speed you would like to set the fan to.
-    :returns: True if successful, false otherwise.
+    :returns: set True if successful, false otherwise.
+    :returns: IOReturn IOKit return code
+    :returns: kSMC SMC return code
     */
-    public func setFanRPM(num : UInt, rpm : UInt) -> kern_return_t {
+    public func setFanRPM(num : UInt, rpm : UInt) -> (set      : Bool,
+                                                      IOReturn : kern_return_t,
+                                                      kSMC     : UInt8) {
+        var ans = false
         var min = getFanMinRPM(num)
         var max = getFanMaxRPM(num)
         
-        // Safety check: rpm must be within acceptable range of fan speed
-        if (min.1 == kIOReturnSuccess && max.1 == kIOReturnSuccess) {
+        // Safety check: rpm must be within safe range of fan speed
+        // TODO: This won't work after first call becuase we are overwriting Mn
+        if (min.1 == kIOReturnSuccess && max.1 == kIOReturnSuccess &&
+            rpm >= min.0 && rpm <= max.0) {
             
-            //&& rpm >= min.0 && rpm <= max.0) {
-            // now call write
-            
+            // Convert rpm to fpe2
             var data = [UInt8](count: 32, repeatedValue: 0)
             data[0] = UInt8(rpm >> 6)
             data[1] = UInt8((rpm << 2) ^ (UInt(data[0]) << 8))
-                               
-            return writeSMC("F" + String(num) + "Mn", data: data)
+                
+            // TODO: Don't use Mn key
+            var result = writeSMC("F" + String(num) + "Mn", data: data)
+            
+            if (result.IOReturn == kIOReturnSuccess &&
+                result.kSMC == kSMC.kSMCSuccess.toRaw()) {
+                ans = true
+            }
+            
+            return (ans, result.IOReturn, result.kSMC)
         }
         else {
             println("Unsafe fan RPM")
-            return IOReturn.kIOReturnBadArgument.toRaw()
+            return (ans, IOReturn.kIOReturnBadArgument.toRaw(),
+                         kSMC.kSMCError.toRaw())
         }
     }
     
@@ -535,26 +585,13 @@ public class SMC {
     //--------------------------------------------------------------------------
 
     
-    private func fanCall(key : String) -> (UInt, kern_return_t) {
-        // Data type for fan calls - fpe2
-        // This is assumend to mean floating point, with 2 exponent bits
-        // http://stackoverflow.com/questions/22160746/fpe2-and-sp78-data-types
-        var result = readSMC(key)
-        var ans : UInt = 0
-        var data = result.data
-        
-        ans += UInt(data[0]) << 6
-        ans += UInt(data[1]) >> 2
-        
-        return (ans, result.IOReturn)
-    }
-    
-    
     /**
     Read data from the SMC
     
     :param: key The SMC key
-    :returns: Array of 32 UInt8 vals, the raw data return from the SMC
+    :returns: Raw data return from the SMC
+    :returns: IOReturn IOKit return code
+    :returns: kSMC SMC return code
     */
     private func readSMC(key : String) -> (data     : [UInt8],
                                            IOReturn : kern_return_t,
@@ -625,11 +662,14 @@ public class SMC {
     
     
     /**
-    Write data to the SMC
+    Write data to the SMC.
     
-    :returns:
+    :returns: IOReturn IOKit return code
+    :returns: kSMC SMC return code
     */
-    private func writeSMC(key : String, data : [UInt8]) -> kern_return_t {
+    private func writeSMC(key  : String,
+                          data : [UInt8]) -> (IOReturn : kern_return_t,
+                                              kSMC     : UInt8) {
         var result : kern_return_t
         var inputStruct  = SMCParamStruct()
         var outputStruct = SMCParamStruct()
@@ -640,28 +680,24 @@ public class SMC {
         
         result = callSMC(&inputStruct, outputStruct : &outputStruct)
         
-        if (result != kIOReturnSuccess) {
-            return result
+        if (result != kIOReturnSuccess &&
+            outputStruct.result != kSMC.kSMCSuccess.toRaw()) {
+            return (result, outputStruct.result)
         }
         
         
         // Second call to AppleSMC - now we can get the data
-        
         // TODO: Check that dataSize is the same as given from user
         inputStruct.keyInfo.dataSize = outputStruct.keyInfo.dataSize
         inputStruct.data8 = UInt8(Selector.kSMCWriteKey.toRaw())
         
+        // Set data to write
         inputStruct.bytes_0 = data[0]
         inputStruct.bytes_1 = data[1]
         
         result = callSMC(&inputStruct, outputStruct : &outputStruct)
-        println(outputStruct.result)
-        println(outputStruct.bytes_0)
-        if (result != kIOReturnSuccess) {
-            return result
-        }
-        
-        return result
+
+        return (result, outputStruct.result)
     }
     
     
@@ -670,7 +706,7 @@ public class SMC {
     
     :param: inputStruct Struct that holds data telling the SMC what you want
     :param: outputStruct Struct holding the SMC's response
-    :returns:
+    :returns: IOKit return code
     */
     private func callSMC(inout inputStruct  : SMCParamStruct,
                          inout outputStruct : SMCParamStruct) -> kern_return_t {
@@ -703,7 +739,7 @@ public class SMC {
         return result
     }
     
-
+    
     //--------------------------------------------------------------------------
     // MARK: PRIVATE METHODS - HELPERS
     //--------------------------------------------------------------------------
@@ -754,6 +790,25 @@ public class SMC {
             shift -= 8
         }
         
+        return ans
+    }
+    
+    
+    /**
+    Convert data from SMC of fpe2 type to human readable
+    
+    :param: data Data from the SMC to be converted. Assumed data size of 2.
+    :returns: Converted data
+    */
+    private func fpe2(data : [UInt8]) -> UInt {
+        var ans : UInt = 0
+            
+        // Data type for fan calls - fpe2
+        // This is assumend to mean floating point, with 2 exponent bits
+        // http://stackoverflow.com/questions/22160746/fpe2-and-sp78-data-types
+        ans += UInt(data[0]) << 6
+        ans += UInt(data[1]) >> 2
+            
         return ans
     }
     
