@@ -52,7 +52,7 @@ public class SMC {
 
     Sources:
     
-    - iStat Pro
+    - https://www.apple.com/downloads/dashboard/status/istatpro.html
     - https://github.com/hholtmann/smcFanControl
     - https://github.com/jedda/OSX-Monitoring-Tools
     - http://www.parhelia.ch/blog/statics/k3_keys.html
@@ -403,12 +403,17 @@ public class SMC {
     Check if an SMC key is valid. Useful for determining if a certain machine
     has particular sensor or fan for example.
     
-    :returns: The SMC return code. See kSMC enum.
+    :param: key The SMC key to check. 4 byte multi-character constant. Must be
+                4 characters in length.
+    :returns: valid True if the key is found, false otherwise
+    :returns: IOReturn IOKit return code
+    :returns: kSMC SMC return code
     */
-    public func isKeyValid(key : String) -> UInt8 {
-        // TODO: Should this return the result kern_return_t as well?
-    
+    public func isKeyValid(key : String) -> (valid    : Bool,
+                                             IOReturn : kern_return_t,
+                                             kSMC     : UInt8) {
         var result : kern_return_t
+        var ans          = false
         var inputStruct  = SMCParamStruct()
         var outputStruct = SMCParamStruct()
         
@@ -417,7 +422,12 @@ public class SMC {
         
         result = callSMC(&inputStruct, outputStruct : &outputStruct)
                                                 
-        return outputStruct.result
+        if (result == kIOReturnSuccess &&
+            outputStruct.result == kSMC.kSMCSuccess.toRaw()) {
+            ans = true
+        }
+                                                
+        return (ans, result, outputStruct.result)
     }
     
     
@@ -482,7 +492,7 @@ public class SMC {
     
     
     /**
-    Set the speed (RPM - revolutions per minute) of a fan
+    Set the speed (RPM - revolutions per minute) of a fan. This requires sudo.
 
     NOTE: You are playing with hardware here, BE CAREFUL.
 
@@ -613,7 +623,6 @@ public class SMC {
     :returns:
     */
     private func writeSMC(key : String, data : [UInt8]) -> kern_return_t {
-        // FIXME: Implement this
         var result : kern_return_t
         var inputStruct  = SMCParamStruct()
         var outputStruct = SMCParamStruct()
@@ -697,13 +706,18 @@ public class SMC {
     Convert SMC key to UInt32. This must be done to pass it to the SMC.
     
     :param: key The SMC key to convert
-    :returns: UInt32 translation of it with little-endian representation
+    :returns: UInt32 translation of it with little-endian representation.
+              Returns zero if key is not 4 characters in length.
     */
     private func toUInt32(key : String) -> UInt32 {
         var ans   : Int32 = 0
         var shift : Int32 = 24
 
-        // Assumes 4 char length
+        // SMC key is expect to be 4 bytes - thus 4 chars
+        if (countElements(key) != 4) {
+            return 0
+        }
+        
         for char in key.utf8 {
             ans += (Int32(char) << shift)
             shift -= 8
