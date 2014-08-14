@@ -345,7 +345,8 @@ public class SMC {
     
     
     /**
-    Our connection to the SMC. Must close it when done.
+    Our connection to the SMC. Must init before passing it to IOServiceOpen()
+    (hence zero value) and must close it when done.
     */
     private var conn : io_connect_t = 0
     
@@ -356,6 +357,12 @@ public class SMC {
     Apple's developer site - Hardware IO Tools for Xcode)
     */
     private let IOSERVICE_SMC = "AppleSMC"
+    
+    
+    /**
+    Number of characters in an SMC key
+    */
+    private let SMC_KEY_SIZE = 4
     
     
     //--------------------------------------------------------------------------
@@ -714,7 +721,7 @@ public class SMC {
         var shift : Int32 = 24
 
         // SMC key is expect to be 4 bytes - thus 4 chars
-        if (countElements(key) != 4) {
+        if (countElements(key) != SMC_KEY_SIZE) {
             return 0
         }
         
@@ -738,7 +745,7 @@ public class SMC {
         var ans = String()
         var shift : Int32 = 24
 
-        for var index = 0; index < 4; ++index {
+        for var index = 0; index < SMC_KEY_SIZE; ++index {
             // To get each char, we shift it into the lower 8 bits, and then
             // & by 255 to insolate it
             var char = (Int32(dataType) >> shift) & 0xff
