@@ -618,11 +618,6 @@ public class SMC {
         
         result = callSMC(&inputStruct, outputStruct : &outputStruct)
         
-        if (result != kIOReturnSuccess ||
-            outputStruct.result != kSMC.kSMCSuccess.toRaw()) {
-            return (data, result, outputStruct.result)
-        }
-        
         // Set the data
         data[0]  = outputStruct.bytes_0
         data[1]  = outputStruct.bytes_1
@@ -680,12 +675,12 @@ public class SMC {
         
         result = callSMC(&inputStruct, outputStruct : &outputStruct)
         
-        if (result != kIOReturnSuccess &&
+        if (result != kIOReturnSuccess ||
             outputStruct.result != kSMC.kSMCSuccess.toRaw()) {
             return (result, outputStruct.result)
         }
         
-        
+
         // Second call to AppleSMC - now we can get the data
         // TODO: Check that dataSize is the same as given from user
         inputStruct.keyInfo.dataSize = outputStruct.keyInfo.dataSize
