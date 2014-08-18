@@ -853,14 +853,15 @@ public class SMC {
     
     
     //--------------------------------------------------------------------------
-    // MARK: PRIVATE METHODS - HELPERS - TMP CONVERTS
+    // MARK: PRIVATE METHODS - HELPERS - TMP CONVERSION
     //--------------------------------------------------------------------------
     
     
     /**
     Celsius to Fahrenheit
     */
-    public func toFahrenheit(tmp : Double) -> Double {
+    private func toFahrenheit(tmp : Double) -> Double {
+        // http://en.wikipedia.org/wiki/Fahrenheit#Definition_and_conversions
         return (tmp * 1.8) + 32
     }
     
@@ -868,7 +869,8 @@ public class SMC {
     /**
     Celsius to Kelvin
     */
-    public func toKelvin(tmp : Double) ->Double {
+    private func toKelvin(tmp : Double) -> Double {
+        // http://en.wikipedia.org/wiki/Kelvin
         return tmp + 273.15
     }
 }
