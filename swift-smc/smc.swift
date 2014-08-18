@@ -212,6 +212,16 @@ public class SMC {
     };
     
     
+    /**
+    Temperature units
+    */
+    public enum TMP_UNIT {
+        case Celsius
+        case Fahrenheit
+        case Kelvin
+    }
+    
+    
     //--------------------------------------------------------------------------
     // MARK: PRIVATE ENUMS
     //--------------------------------------------------------------------------
@@ -444,20 +454,36 @@ public class SMC {
     Get the current temperature from a sensor
     
     :param: key The temperature sensor to read from
-    :returns: Temperature in Celsius. If the sensor is not found, or an error
+    :param: unit The unit for the temperature value. Defaults to Celsius.
+    :returns: Temperature of sensor. If the sensor is not found, or an error
               occurs, return will be zero
     :returns: IOReturn IOKit return code
     :returns: kSMC SMC return code
     */
-    public func getTMP(key : TMP) -> (tmp      : UInt,
-                                      IOReturn : kern_return_t,
-                                      kSMC     : UInt8) {
+    public func getTMP(key  : TMP,
+                       unit : TMP_UNIT = TMP_UNIT.Celsius)
+                                                   -> (tmp      : Double,
+                                                       IOReturn : kern_return_t,
+                                                       kSMC     : UInt8) {
        var result = readSMC(key.toRaw())
         
        // We drop the decimal value (data[1]) for now - thus maybe be off +/- 1
-       // Data type is sp78 - unsigned floating point
+       // Data type is sp78 - signed floating point
        // http://stackoverflow.com/questions/22160746/fpe2-and-sp78-data-types
-       return (UInt(result.data[0]), result.IOReturn, result.kSMC)
+       var tmp = Double(result.data[0])
+                                                        
+       switch unit {
+           case .Celsius:
+               // Do nothing - in Celsius by default
+               // Must have complete switch though with executed command
+               tmp = tmp + 0
+           case .Fahrenheit:
+               tmp = toFahrenheit(tmp)
+           case .Kelvin:
+               tmp = toKelvin(tmp)
+       }
+    
+       return (tmp, result.IOReturn, result.kSMC)
     }
     
     
@@ -681,7 +707,7 @@ public class SMC {
         }
         
 
-        // Second call to AppleSMC - now we can get the data
+        // Second call to AppleSMC - now we can write the data
         // TODO: Check that dataSize is the same as given from user
         inputStruct.keyInfo.dataSize = outputStruct.keyInfo.dataSize
         inputStruct.data8 = UInt8(Selector.kSMCWriteKey.toRaw())
@@ -823,5 +849,26 @@ public class SMC {
         var lookup : kern_return_t? = IOReturn.fromRaw(err & 0x3fff)?.toRaw()
         
         return (lookup ?? err)
+    }
+    
+    
+    //--------------------------------------------------------------------------
+    // MARK: PRIVATE METHODS - HELPERS - TMP CONVERTS
+    //--------------------------------------------------------------------------
+    
+    
+    /**
+    Celsius to Fahrenheit
+    */
+    public func toFahrenheit(tmp : Double) -> Double {
+        return (tmp * 1.8) + 32
+    }
+    
+    
+    /**
+    Celsius to Kelvin
+    */
+    public func toKelvin(tmp : Double) ->Double {
+        return tmp + 273.15
     }
 }
