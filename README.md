@@ -26,7 +26,7 @@ For more see:
 
 ### Requirements
 
-- Xcode 6 - Beta 5
+- Xcode 6 - Beta 6
 - OS X 10.9+
 
 

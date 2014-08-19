@@ -454,7 +454,8 @@ public class SMC {
     Get the current temperature from a sensor
     
     :param: key The temperature sensor to read from
-    :param: unit The unit for the temperature value. Defaults to Celsius.
+    :param: unit The unit for the temperature value (optional). Defaults to
+                 Celsius.
     :returns: Temperature of sensor. If the sensor is not found, or an error
               occurs, return will be zero
     :returns: IOReturn IOKit return code
@@ -485,7 +486,7 @@ public class SMC {
     
        return (tmp, result.IOReturn, result.kSMC)
     }
-    
+
     
     //--------------------------------------------------------------------------
     // MARK: PUBLIC METHODS - FANS
@@ -807,7 +808,7 @@ public class SMC {
             // & by 255 to insolate it
             var char = (Int32(dataType) >> shift) & 0xff
             
-            ans += Character(UnicodeScalar(UInt32(char)))
+            ans.append(Character(UnicodeScalar(UInt32(char))))
             shift -= 8
         }
         
