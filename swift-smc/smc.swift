@@ -111,6 +111,16 @@ public class SMC {
     
     
     /**
+    Misc SMC keys - 4 byte multi-character constants
+    
+    Sources: See TMP enum
+    */
+    public enum SMC_KEY : String {
+        case NUM_KEYS = "#KEY"
+    }
+    
+    
+    /**
     SMC data types - 4 byte multi-character constants
     
     Sources: See TMP enum
@@ -447,6 +457,28 @@ public class SMC {
         }
                                                 
         return (ans, result, outputStruct.result)
+    }
+    
+    
+    /**
+    Get the number of valid SMC keys for this machine.
+    
+    :returns: numKeys The number of SMC keys
+    :returns: IOReturn IOKit return code
+    :returns: kSMC SMC return code
+    */
+    public func getNumSMCKeys() -> (numKeys  : UInt32,
+                                    IOReturn : kern_return_t,
+                                    kSMC     : UInt8) {
+        var result = readSMC(SMC_KEY.NUM_KEYS.toRaw())
+            
+        // Type ui32 - size 4
+        var numKeys = UInt32(result.data[0]) << 24
+        numKeys += UInt32(result.data[1]) << 16
+        numKeys += UInt32(result.data[2]) << 8
+        numKeys += UInt32(result.data[3])
+            
+        return (numKeys, result.IOReturn, result.kSMC)
     }
     
     
@@ -808,7 +840,7 @@ public class SMC {
             // & by 255 to insolate it
             var char = (Int32(dataType) >> shift) & 0xff
             
-            ans.append(Character(UnicodeScalar(UInt32(char))))
+            ans.append(UnicodeScalar(UInt32(char)))
             shift -= 8
         }
         

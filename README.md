@@ -72,7 +72,7 @@ certainly due to them for the reference code. Such projects as:
 - [osx-cpu-temp](https://github.com/lavoiesl/osx-cpu-temp)
 - [smcFanControl](https://github.com/hholtmann/smcFanControl)
 
-Handy IOKit references:
+Handy I/O Kit references:
 
 - [iOS Hacker's Handbook](http://ca.wiley.com/WileyCDA/WileyTitle/productCd-1118204123.html)
 - [Mac OS X and iOS Internals: To the Apple's Core](http://ca.wiley.com/WileyCDA/WileyTitle/productCd-1118057651.html)
