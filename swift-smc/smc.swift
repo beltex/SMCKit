@@ -810,7 +810,7 @@ public class SMC {
         var ans   : Int32 = 0
         var shift : Int32 = 24
 
-        // SMC key is expect to be 4 bytes - thus 4 chars
+        // SMC key is expected to be 4 bytes - thus 4 chars
         if (countElements(key) != SMC_KEY_SIZE) {
             return 0
         }

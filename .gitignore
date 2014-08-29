@@ -1,8 +1,5 @@
 # Swift.gitignore @ https://github.com/github/gitignore
 
-# swift-smc
-swift-smc/main.swift
-
 # Xcode
 build/
 *.pbxuser

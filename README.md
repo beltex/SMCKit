@@ -100,4 +100,4 @@ IORegistryEntrySetCFProperty( _smc,
 
 Almost certainly a reference to Bob Dylan's
 <a href="http://en.wikipedia.org/wiki/The_Times_They_Are_a-Changin%27_(song)">The Times They Are a-Changin'</a>
-:)
+. [Enjoy](http://hypem.com/track/5zf9/Bob+Dylan+-+The+Times+They+Are+A-Changin') :)

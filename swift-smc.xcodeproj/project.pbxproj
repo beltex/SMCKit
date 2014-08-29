@@ -8,7 +8,7 @@
 
 /* Begin PBXBuildFile section */
 		4C192CAD1992A249002D39AB /* smc.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C192CAC1992A249002D39AB /* smc.swift */; };
-		4C2C0E1B1991993E00808039 /* main.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C2C0E1A1991993E00808039 /* main.swift */; };
+		4C9A793A19B1203E00F503AB /* main.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C9A793919B1203E00F503AB /* main.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -26,7 +26,7 @@
 /* Begin PBXFileReference section */
 		4C192CAC1992A249002D39AB /* smc.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = smc.swift; sourceTree = "<group>"; };
 		4C2C0E171991993E00808039 /* swift-smc */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = "swift-smc"; sourceTree = BUILT_PRODUCTS_DIR; };
-		4C2C0E1A1991993E00808039 /* main.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = main.swift; sourceTree = "<group>"; };
+		4C9A793919B1203E00F503AB /* main.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = main.swift; path = sample/main.swift; sourceTree = SOURCE_ROOT; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -43,6 +43,7 @@
 		4C2C0E0E1991993E00808039 = {
 			isa = PBXGroup;
 			children = (
+				4C9A793819B11FEE00F503AB /* sample */,
 				4C2C0E191991993E00808039 /* swift-smc */,
 				4C2C0E181991993E00808039 /* Products */,
 			);
@@ -60,8 +61,16 @@
 			isa = PBXGroup;
 			children = (
 				4C192CAC1992A249002D39AB /* smc.swift */,
-				4C2C0E1A1991993E00808039 /* main.swift */,
 			);
+			path = "swift-smc";
+			sourceTree = "<group>";
+		};
+		4C9A793819B11FEE00F503AB /* sample */ = {
+			isa = PBXGroup;
+			children = (
+				4C9A793919B1203E00F503AB /* main.swift */,
+			);
+			name = sample;
 			path = "swift-smc";
 			sourceTree = "<group>";
 		};
@@ -121,8 +130,8 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				4C2C0E1B1991993E00808039 /* main.swift in Sources */,
 				4C192CAD1992A249002D39AB /* smc.swift in Sources */,
+				4C9A793A19B1203E00F503AB /* main.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
