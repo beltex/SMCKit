@@ -407,7 +407,7 @@ public class SMC {
         if (service == 0) {
             // NOTE: IOServiceMatching documents 0 on failure
             
-            println("\(IOSERVICE_SMC) NOT FOUND")
+            println("ERROR: \(IOSERVICE_SMC) NOT FOUND")
             return IOReturn.kIOReturnError.toRaw()
         }
         
