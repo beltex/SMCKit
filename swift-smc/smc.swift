@@ -528,7 +528,7 @@ public class SMC {
     /**
     Get the current speed (RPM - revolutions per minute) of a fan
     
-    :param: key The fan to check
+    :param: num The number of the fan to check
     :returns: rpm The fan RPM. If the fan is not found, or an error occurs,
                   return will be zero
     :returns: IOReturn IOKit return code
