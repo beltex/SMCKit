@@ -219,7 +219,7 @@ public class SMC {
         case kSMCSuccess     = 0
         case kSMCError       = 1
         case kSMCKeyNotFound = 0x84
-    };
+    }
     
     
     /**
@@ -251,7 +251,7 @@ public class SMC {
         case kSMCGetKeyCount     = 7
         case kSMCGetKeyFromIndex = 8
         case kSMCGetKeyInfo      = 9
-    };
+    }
     
 
     //--------------------------------------------------------------------------
