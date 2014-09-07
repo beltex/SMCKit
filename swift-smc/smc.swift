@@ -93,20 +93,25 @@ public class SMC {
     - Ac = Acutal
     - Mn = Min
     - Mx = Max
+    - Tg = Target
     
     Sources: See TMP enum
     */
     public enum FAN : String {
-        case FAN_0         = "F0Ac"
-        case FAN_0_MIN_RPM = "F0Mn"
-        case FAN_0_MAX_RPM = "F0Mx"
-        case FAN_1         = "F1Ac"
-        case FAN_1_MIN_RPM = "F1Mn"
-        case FAN_1_MAX_RPM = "F1Mx"
-        case FAN_2         = "F2Ac"
-        case FAN_2_MIN_RPM = "F2Mn"
-        case FAN_2_MAX_RPM = "F2Mx"
-        case NUM_FANS      = "FNum"
+        case FAN_0            = "F0Ac"
+        case FAN_0_MIN_RPM    = "F0Mn"
+        case FAN_0_MAX_RPM    = "F0Mx"
+        case FAN_0_TARGET_RPM = "F0Tg"
+        case FAN_1            = "F1Ac"
+        case FAN_1_MIN_RPM    = "F1Mn"
+        case FAN_1_MAX_RPM    = "F1Mx"
+        case FAN_1_TARGET_RPM = "F1Tg"
+        case FAN_2            = "F2Ac"
+        case FAN_2_MIN_RPM    = "F2Mn"
+        case FAN_2_MAX_RPM    = "F2Mx"
+        case FAN_2_TARGET_RPM = "F2Tg"
+        case NUM_FANS         = "FNum"
+        case FORCE_BITS       = "FS! "
     }
     
     
@@ -240,7 +245,7 @@ public class SMC {
     /**
     Defined by AppleSMC.kext. See SMCParamStruct.
     
-    Method selectors
+    Function selectors. Used to tell the SMC which function inside it to call.
     */
     private enum Selector : UInt32 {
         case kSMCUserClientOpen  = 0
@@ -314,7 +319,7 @@ public class SMC {
       instead
     - Size of struct must be 80 bytes
     
-    https://www.opensource.apple.com/source/PowerManagement/PowerManagement-211/
+    http://www.opensource.apple.com/source/PowerManagement/PowerManagement-211/
     */
     private struct SMCParamStruct {
         var key        : UInt32 = 0
@@ -545,7 +550,7 @@ public class SMC {
     /**
     Get the min safe speed (RPM - revolutions per minute) of a fan
     
-    :param: key The fan to check
+    :param: num The number of the fan to check
     :returns: rpm The safe min fan RPM. If the fan is not found, or an error
                   occurs, return will be zero
     :returns: IOReturn IOKit return code
@@ -562,7 +567,7 @@ public class SMC {
     /**
     Get the current speed (RPM - revolutions per minute) of a fan
     
-    :param: key The fan to check
+    :param: num The number of the fan to check
     :returns: rpm The safe max fan RPM. If the fan is not found, or an error
                   occurs, return will be zero
     :returns: IOReturn IOKit return code
@@ -637,7 +642,7 @@ public class SMC {
                          kSMC.kSMCError.toRaw())
         }
     }
-    
+
 
     //--------------------------------------------------------------------------
     // MARK: PRIVATE METHODS

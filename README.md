@@ -1,7 +1,7 @@
 swift-smc
 =========
 
-A System Management Controller (SMC) API in Swift from user space for Intel
+A System Management Controller (SMC) API in pure Swift from user space for Intel
 based Macs. The API works by talking to the AppleSMC.kext (kernel
 extension), the closed source driver for the SMC.
 

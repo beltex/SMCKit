@@ -26,7 +26,7 @@
 /* Begin PBXFileReference section */
 		4C192CAC1992A249002D39AB /* smc.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = smc.swift; sourceTree = "<group>"; };
 		4C2C0E171991993E00808039 /* swift-smc */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = "swift-smc"; sourceTree = BUILT_PRODUCTS_DIR; };
-		4C9A793919B1203E00F503AB /* main.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = main.swift; path = sample/main.swift; sourceTree = SOURCE_ROOT; };
+		4C9A793919B1203E00F503AB /* main.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = main.swift; path = examples/main.swift; sourceTree = SOURCE_ROOT; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -43,7 +43,7 @@
 		4C2C0E0E1991993E00808039 = {
 			isa = PBXGroup;
 			children = (
-				4C9A793819B11FEE00F503AB /* sample */,
+				4C9A793819B11FEE00F503AB /* examples */,
 				4C2C0E191991993E00808039 /* swift-smc */,
 				4C2C0E181991993E00808039 /* Products */,
 			);
@@ -65,12 +65,12 @@
 			path = "swift-smc";
 			sourceTree = "<group>";
 		};
-		4C9A793819B11FEE00F503AB /* sample */ = {
+		4C9A793819B11FEE00F503AB /* examples */ = {
 			isa = PBXGroup;
 			children = (
 				4C9A793919B1203E00F503AB /* main.swift */,
 			);
-			name = sample;
+			name = examples;
 			path = "swift-smc";
 			sourceTree = "<group>";
 		};
