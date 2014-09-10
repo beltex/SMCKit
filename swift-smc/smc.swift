@@ -531,7 +531,7 @@ public class SMC {
     
     
     /**
-    Get the current speed (RPM - revolutions per minute) of a fan
+    Get the current speed (RPM - revolutions per minute) of a fan.
     
     :param: num The number of the fan to check
     :returns: rpm The fan RPM. If the fan is not found, or an error occurs,
@@ -543,15 +543,15 @@ public class SMC {
                                           IOReturn : kern_return_t,
                                           kSMC     : UInt8) {
         var result = readSMC("F" + String(num) + "Ac")
-        return (fpe2(result.data), result.IOReturn, result.kSMC)
+        return (from_fpe2(result.data), result.IOReturn, result.kSMC)
     }
     
     
     /**
-    Get the min safe speed (RPM - revolutions per minute) of a fan
+    Get the minimum speed (RPM - revolutions per minute) of a fan.
     
     :param: num The number of the fan to check
-    :returns: rpm The safe min fan RPM. If the fan is not found, or an error
+    :returns: rpm The minimum fan RPM. If the fan is not found, or an error
                   occurs, return will be zero
     :returns: IOReturn IOKit return code
     :returns: kSMC SMC return code
@@ -560,15 +560,15 @@ public class SMC {
                                              IOReturn : kern_return_t,
                                              kSMC     : UInt8) {
         var result = readSMC("F" + String(num) + "Mn")
-        return (fpe2(result.data), result.IOReturn, result.kSMC)
+        return (from_fpe2(result.data), result.IOReturn, result.kSMC)
     }
     
     
     /**
-    Get the current speed (RPM - revolutions per minute) of a fan
+    Get the maximum speed (RPM - revolutions per minute) of a fan.
     
     :param: num The number of the fan to check
-    :returns: rpm The safe max fan RPM. If the fan is not found, or an error
+    :returns: rpm The maximum fan RPM. If the fan is not found, or an error
                   occurs, return will be zero
     :returns: IOReturn IOKit return code
     :returns: kSMC SMC return code
@@ -577,7 +577,7 @@ public class SMC {
                                              IOReturn : kern_return_t,
                                              kSMC     : UInt8) {
         var result = readSMC("F" + String(num) + "Mx")
-        return (fpe2(result.data), result.IOReturn, result.kSMC)
+        return (from_fpe2(result.data), result.IOReturn, result.kSMC)
     }
     
     
@@ -859,16 +859,32 @@ public class SMC {
     :param: data Data from the SMC to be converted. Assumed data size of 2.
     :returns: Converted data
     */
-    private func fpe2(data : [UInt8]) -> UInt {
+    private func from_fpe2(data : [UInt8]) -> UInt {
         var ans : UInt = 0
-            
+        
         // Data type for fan calls - fpe2
         // This is assumend to mean floating point, with 2 exponent bits
         // http://stackoverflow.com/questions/22160746/fpe2-and-sp78-data-types
         ans += UInt(data[0]) << 6
         ans += UInt(data[1]) >> 2
-            
+        
         return ans
+    }
+    
+    
+    /**
+    Convert to fpe2 data type to be passed to SMC.
+    
+    :param: val Value to convert
+    :return: Converted data in SMCParamStruct data format
+    */
+    private func to_fpe2(val : UInt) -> [UInt8] {
+        // TODO: check val size for overflow
+        var data = [UInt8](count: 32, repeatedValue: 0)
+        data[0] = UInt8(val >> 6)
+        data[1] = UInt8((val << 2) ^ (UInt(data[0]) << 8))
+        
+        return data
     }
     
     
