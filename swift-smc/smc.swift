@@ -634,7 +634,11 @@ public class SMC {
                          kSMC.kSMCError.toRaw())
         }
         
-        var result = writeSMC("F" + String(fanNum) + "Mn", data: to_fpe2(rpm))
+        // TODO: Don't use magic number for dataSize
+        var result = writeSMC("F" + String(fanNum) + "Mn",
+                              data     : to_fpe2(rpm),
+                              dataType : DataType.FPE2,
+                              dataSize : 2)
             
         if (result.IOReturn == kIOReturnSuccess &&
             result.kSMC == kSMC.kSMCSuccess.toRaw()) {
@@ -727,9 +731,12 @@ public class SMC {
     :returns: IOReturn IOKit return code
     :returns: kSMC SMC return code
     */
-    private func writeSMC(key  : String,
-                          data : [UInt8]) -> (IOReturn : kern_return_t,
-                                              kSMC     : UInt8) {
+    private func writeSMC(key      : String,
+                          data     : [UInt8],
+                          dataType : DataType,
+                          dataSize : IOByteCount) -> (IOReturn : kern_return_t,
+                                                      kSMC     : UInt8) {
+                                                
         var result : kern_return_t
         var inputStruct  = SMCParamStruct()
         var outputStruct = SMCParamStruct()
@@ -745,9 +752,14 @@ public class SMC {
             return (result, outputStruct.result)
         }
         
-
+        // Check if given data matches expected input
+        if (dataSize != outputStruct.keyInfo.dataSize ||
+            dataType.toRaw() != toString(outputStruct.keyInfo.dataType)) {
+            return (IOReturn.kIOReturnBadArgument.toRaw(),
+                    kSMC.kSMCError.toRaw())
+        }
+                                                        
         // Second call to AppleSMC - now we can write the data
-        // TODO: Check that dataSize is the same as given from user
         inputStruct.keyInfo.dataSize = outputStruct.keyInfo.dataSize
         inputStruct.data8 = UInt8(Selector.kSMCWriteKey.toRaw())
         
