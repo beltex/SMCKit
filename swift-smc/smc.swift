@@ -450,22 +450,23 @@ public class SMC {
     public func isKeyValid(key : String) -> (valid    : Bool,
                                              IOReturn : kern_return_t,
                                              kSMC     : UInt8) {
-        var result : kern_return_t
-        var ans          = false
-        var inputStruct  = SMCParamStruct()
-        var outputStruct = SMCParamStruct()
-        
-        inputStruct.key = toUInt32(key)
-        inputStruct.data8 = UInt8(Selector.kSMCGetKeyInfo.toRaw())
-        
-        result = callSMC(&inputStruct, outputStruct : &outputStruct)
+        var ans = false
                                                 
-        if (result == kIOReturnSuccess &&
-            outputStruct.result == kSMC.kSMCSuccess.toRaw()) {
+        if (countElements(key) != SMC_KEY_SIZE) {
+            println("ERROR: Invalid key size - must be 4 chars")
+            return (ans, IOReturn.kIOReturnBadArgument.toRaw(),
+                         kSMC.kSMCError.toRaw())
+        }
+
+        // Try a read and see if it succeeds
+        var result = readSMC(key)
+
+        if (result.IOReturn == kIOReturnSuccess &&
+            result.kSMC == kSMC.kSMCSuccess.toRaw()) {
             ans = true
         }
                                                 
-        return (ans, result, outputStruct.result)
+        return (ans, result.IOReturn, result.kSMC)
     }
     
     
