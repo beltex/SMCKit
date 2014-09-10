@@ -93,6 +93,7 @@ public class SMC {
     - Ac = Acutal
     - Mn = Min
     - Mx = Max
+    - Sf = Safe
     - Tg = Target
     
     Sources: See TMP enum
@@ -101,14 +102,17 @@ public class SMC {
         case FAN_0            = "F0Ac"
         case FAN_0_MIN_RPM    = "F0Mn"
         case FAN_0_MAX_RPM    = "F0Mx"
+        case FAN_0_SAFE_RPM   = "F0Sf"
         case FAN_0_TARGET_RPM = "F0Tg"
         case FAN_1            = "F1Ac"
         case FAN_1_MIN_RPM    = "F1Mn"
         case FAN_1_MAX_RPM    = "F1Mx"
+        case FAN_1_SAFE_RPM   = "F1Sf"
         case FAN_1_TARGET_RPM = "F1Tg"
         case FAN_2            = "F2Ac"
         case FAN_2_MIN_RPM    = "F2Mn"
         case FAN_2_MAX_RPM    = "F2Mx"
+        case FAN_2_SAFE_RPM   = "F2Sf"
         case FAN_2_TARGET_RPM = "F2Tg"
         case NUM_FANS         = "FNum"
         case FORCE_BITS       = "FS! "
@@ -531,53 +535,53 @@ public class SMC {
     
     
     /**
-    Get the current speed (RPM - revolutions per minute) of a fan
+    Get the current speed (RPM - revolutions per minute) of a fan.
     
-    :param: num The number of the fan to check
+    :param: fanNum The number of the fan to check
     :returns: rpm The fan RPM. If the fan is not found, or an error occurs,
                   return will be zero
     :returns: IOReturn IOKit return code
     :returns: kSMC SMC return code
     */
-    public func getFanRPM(num : UInt) -> (rpm      : UInt,
-                                          IOReturn : kern_return_t,
-                                          kSMC     : UInt8) {
-        var result = readSMC("F" + String(num) + "Ac")
-        return (fpe2(result.data), result.IOReturn, result.kSMC)
+    public func getFanRPM(fanNum : UInt) -> (rpm      : UInt,
+                                             IOReturn : kern_return_t,
+                                             kSMC     : UInt8) {
+        var result = readSMC("F" + String(fanNum) + "Ac")
+        return (from_fpe2(result.data), result.IOReturn, result.kSMC)
     }
     
     
     /**
-    Get the min safe speed (RPM - revolutions per minute) of a fan
+    Get the minimum speed (RPM - revolutions per minute) of a fan.
     
-    :param: num The number of the fan to check
-    :returns: rpm The safe min fan RPM. If the fan is not found, or an error
+    :param: fanNum The number of the fan to check
+    :returns: rpm The minimum fan RPM. If the fan is not found, or an error
                   occurs, return will be zero
     :returns: IOReturn IOKit return code
     :returns: kSMC SMC return code
     */
-    public func getFanMinRPM(num : UInt) -> (rpm      : UInt,
-                                             IOReturn : kern_return_t,
-                                             kSMC     : UInt8) {
-        var result = readSMC("F" + String(num) + "Mn")
-        return (fpe2(result.data), result.IOReturn, result.kSMC)
+    public func getFanMinRPM(fanNum : UInt) -> (rpm      : UInt,
+                                                IOReturn : kern_return_t,
+                                                kSMC     : UInt8) {
+        var result = readSMC("F" + String(fanNum) + "Mn")
+        return (from_fpe2(result.data), result.IOReturn, result.kSMC)
     }
     
     
     /**
-    Get the current speed (RPM - revolutions per minute) of a fan
+    Get the maximum speed (RPM - revolutions per minute) of a fan.
     
-    :param: num The number of the fan to check
-    :returns: rpm The safe max fan RPM. If the fan is not found, or an error
+    :param: fanNum The number of the fan to check
+    :returns: rpm The maximum fan RPM. If the fan is not found, or an error
                   occurs, return will be zero
     :returns: IOReturn IOKit return code
     :returns: kSMC SMC return code
     */
-    public func getFanMaxRPM(num : UInt) -> (rpm      : UInt,
-                                             IOReturn : kern_return_t,
-                                             kSMC     : UInt8) {
-        var result = readSMC("F" + String(num) + "Mx")
-        return (fpe2(result.data), result.IOReturn, result.kSMC)
+    public func getFanMaxRPM(fanNum : UInt) -> (rpm      : UInt,
+                                                IOReturn : kern_return_t,
+                                                kSMC     : UInt8) {
+        var result = readSMC("F" + String(fanNum) + "Mx")
+        return (from_fpe2(result.data), result.IOReturn, result.kSMC)
     }
     
     
@@ -592,55 +596,51 @@ public class SMC {
                                  IOReturn : kern_return_t,
                                  kSMC     : UInt8) {
         var result = readSMC(FAN.NUM_FANS.toRaw())
-        
         return (UInt(result.data[0]), result.IOReturn, result.kSMC)
     }
     
     
     /**
-    Set the speed (RPM - revolutions per minute) of a fan. This method requires
-    root privlages.
+    Set the minimum speed (RPM - revolutions per minute) of a fan. This method
+    requires root privileges. By minimum we mean that OS X can interject and
+    raise the fan speed if needed, however it will not go below this.
 
     WARNING: You are playing with hardware here, BE CAREFUL.
-
-    :param: key The fan to set
+    
+    :param: fanNum The number of the fan to check
     :param: rpm The speed you would like to set the fan to.
-    :returns: set True if successful, false otherwise.
+    :returns: result True if successful, false otherwise.
     :returns: IOReturn IOKit return code
     :returns: kSMC SMC return code
     */
-    public func setFanRPM(num : UInt, rpm : UInt) -> (set      : Bool,
-                                                      IOReturn : kern_return_t,
-                                                      kSMC     : UInt8) {
+    public func setFanMinRPM(fanNum : UInt, rpm : UInt) ->
+                                                      (result   : Bool,
+                                                       IOReturn : kern_return_t,
+                                                       kSMC     : UInt8) {
         var ans = false
-        var min = getFanMinRPM(num)
-        var max = getFanMaxRPM(num)
         
+        // TODO: Cache value
+        var maxRPM = getFanMaxRPM(fanNum)
+                                                        
         // Safety check: rpm must be within safe range of fan speed
-        // TODO: This won't work after first call becuase we are overwriting Mn
-        if (min.1 == kIOReturnSuccess && max.1 == kIOReturnSuccess &&
-            rpm >= min.0 && rpm <= max.0) {
-            
-            // Convert rpm to fpe2
-            var data = [UInt8](count: 32, repeatedValue: 0)
-            data[0] = UInt8(rpm >> 6)
-            data[1] = UInt8((rpm << 2) ^ (UInt(data[0]) << 8))
-                
-            // TODO: Don't use Mn key
-            var result = writeSMC("F" + String(num) + "Mn", data: data)
-            
-            if (result.IOReturn == kIOReturnSuccess &&
-                result.kSMC == kSMC.kSMCSuccess.toRaw()) {
-                ans = true
-            }
-            
-            return (ans, result.IOReturn, result.kSMC)
-        }
-        else {
-            println("Unsafe fan RPM")
+        // TODO: Add fan safe speed (F0Sf) to this check
+        if (!(maxRPM.IOReturn == kIOReturnSuccess &&
+              maxRPM.kSMC == kSMC.kSMCSuccess.toRaw() &&
+              rpm <= maxRPM.rpm)) {
+                                                                
+            println("WARNING: Unsafe fan RPM")
             return (ans, IOReturn.kIOReturnBadArgument.toRaw(),
                          kSMC.kSMCError.toRaw())
         }
+        
+        var result = writeSMC("F" + String(fanNum) + "Mn", data: to_fpe2(rpm))
+            
+        if (result.IOReturn == kIOReturnSuccess &&
+            result.kSMC == kSMC.kSMCSuccess.toRaw()) {
+            ans = true
+        }
+            
+        return (ans, result.IOReturn, result.kSMC)
     }
 
 
@@ -859,16 +859,32 @@ public class SMC {
     :param: data Data from the SMC to be converted. Assumed data size of 2.
     :returns: Converted data
     */
-    private func fpe2(data : [UInt8]) -> UInt {
+    private func from_fpe2(data : [UInt8]) -> UInt {
         var ans : UInt = 0
-            
+        
         // Data type for fan calls - fpe2
         // This is assumend to mean floating point, with 2 exponent bits
         // http://stackoverflow.com/questions/22160746/fpe2-and-sp78-data-types
         ans += UInt(data[0]) << 6
         ans += UInt(data[1]) >> 2
-            
+        
         return ans
+    }
+    
+    
+    /**
+    Convert to fpe2 data type to be passed to SMC.
+    
+    :param: val Value to convert
+    :return: Converted data in SMCParamStruct data format
+    */
+    private func to_fpe2(val : UInt) -> [UInt8] {
+        // TODO: check val size for overflow
+        var data = [UInt8](count: 32, repeatedValue: 0)
+        data[0] = UInt8(val >> 6)
+        data[1] = UInt8((val << 2) ^ (UInt(data[0]) << 8))
+        
+        return data
     }
     
     

@@ -1,5 +1,5 @@
 /*
-* Simple sample test client
+* Simple example client
 *
 * main.swift
 * swift-smc
