@@ -87,7 +87,7 @@ This project is under the **GNU General Public License v2.0**.
 ### Fun
 
 In the very same
-[PrivateLib.c](https://www.opensource.apple.com/source/PowerManagement/PowerManagement-211/pmconfigd/PrivateLib.c)
+[PrivateLib.c](http://www.opensource.apple.com/source/PowerManagement/PowerManagement-211/pmconfigd/PrivateLib.c)
 file, the following snippet can be found:
 
 ```c

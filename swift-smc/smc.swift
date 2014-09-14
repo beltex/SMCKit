@@ -608,7 +608,7 @@ public class SMC {
 
     WARNING: You are playing with hardware here, BE CAREFUL.
     
-    :param: fanNum The number of the fan to check
+    :param: fanNum The number of the fan to set
     :param: rpm The speed you would like to set the fan to.
     :returns: result True if successful, false otherwise.
     :returns: IOReturn IOKit return code
