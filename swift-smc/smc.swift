@@ -417,7 +417,7 @@ public class SMC {
             // NOTE: IOServiceMatching documents 0 on failure
             
             println("ERROR: \(IOSERVICE_SMC) NOT FOUND")
-            return IOReturn.kIOReturnError.toRaw()
+            return IOReturn.kIOReturnError.rawValue
         }
         
         result = IOServiceOpen(service, mach_task_self_, 0, &conn)
@@ -454,15 +454,15 @@ public class SMC {
                                                 
         if (countElements(key) != SMC_KEY_SIZE) {
             println("ERROR: Invalid key size - must be 4 chars")
-            return (ans, IOReturn.kIOReturnBadArgument.toRaw(),
-                         kSMC.kSMCError.toRaw())
+            return (ans, IOReturn.kIOReturnBadArgument.rawValue,
+                         kSMC.kSMCError.rawValue)
         }
 
         // Try a read and see if it succeeds
         var result = readSMC(key)
 
         if (result.IOReturn == kIOReturnSuccess &&
-            result.kSMC == kSMC.kSMCSuccess.toRaw()) {
+            result.kSMC == kSMC.kSMCSuccess.rawValue) {
             ans = true
         }
                                                 
@@ -480,7 +480,7 @@ public class SMC {
     public func getNumSMCKeys() -> (numKeys  : UInt32,
                                     IOReturn : kern_return_t,
                                     kSMC     : UInt8) {
-        var result = readSMC(SMC_KEY.NUM_KEYS.toRaw())
+        var result = readSMC(SMC_KEY.NUM_KEYS.rawValue)
             
         // Type ui32 - size 4
         var numKeys = UInt32(result.data[0]) << 24
@@ -508,7 +508,7 @@ public class SMC {
                                                    -> (tmp      : Double,
                                                        IOReturn : kern_return_t,
                                                        kSMC     : UInt8) {
-       var result = readSMC(key.toRaw())
+       var result = readSMC(key.rawValue)
         
        // We drop the decimal value (data[1]) for now - thus maybe be off +/- 1
        // Data type is sp78 - signed floating point
@@ -596,7 +596,7 @@ public class SMC {
     public func getNumFans() -> (numFans  : UInt,
                                  IOReturn : kern_return_t,
                                  kSMC     : UInt8) {
-        var result = readSMC(FAN.NUM_FANS.toRaw())
+        var result = readSMC(FAN.NUM_FANS.rawValue)
         return (UInt(result.data[0]), result.IOReturn, result.kSMC)
     }
     
@@ -626,12 +626,12 @@ public class SMC {
         // Safety check: rpm must be within safe range of fan speed
         // TODO: Add fan safe speed (F0Sf) to this check
         if (!(maxRPM.IOReturn == kIOReturnSuccess &&
-              maxRPM.kSMC == kSMC.kSMCSuccess.toRaw() &&
+              maxRPM.kSMC == kSMC.kSMCSuccess.rawValue &&
               rpm <= maxRPM.rpm)) {
                                                                 
             println("WARNING: Unsafe fan RPM")
-            return (ans, IOReturn.kIOReturnBadArgument.toRaw(),
-                         kSMC.kSMCError.toRaw())
+            return (ans, IOReturn.kIOReturnBadArgument.rawValue,
+                         kSMC.kSMCError.rawValue)
         }
         
         // TODO: Don't use magic number for dataSize
@@ -641,7 +641,7 @@ public class SMC {
                               dataSize : 2)
             
         if (result.IOReturn == kIOReturnSuccess &&
-            result.kSMC == kSMC.kSMCSuccess.toRaw()) {
+            result.kSMC == kSMC.kSMCSuccess.rawValue) {
             ans = true
         }
             
@@ -672,18 +672,18 @@ public class SMC {
         
         // First call to AppleSMC - get key info
         inputStruct.key = toUInt32(key)
-        inputStruct.data8 = UInt8(Selector.kSMCGetKeyInfo.toRaw())
+        inputStruct.data8 = UInt8(Selector.kSMCGetKeyInfo.rawValue)
         
         result = callSMC(&inputStruct, outputStruct : &outputStruct)
         
         if (result != kIOReturnSuccess ||
-            outputStruct.result != kSMC.kSMCSuccess.toRaw()) {
+            outputStruct.result != kSMC.kSMCSuccess.rawValue) {
             return (data, result, outputStruct.result)
         }
         
         // Second call to AppleSMC - now we can get the data
         inputStruct.keyInfo.dataSize = outputStruct.keyInfo.dataSize
-        inputStruct.data8 = UInt8(Selector.kSMCReadKey.toRaw())
+        inputStruct.data8 = UInt8(Selector.kSMCReadKey.rawValue)
         
         result = callSMC(&inputStruct, outputStruct : &outputStruct)
         
@@ -743,25 +743,25 @@ public class SMC {
         
         // First call to AppleSMC - get key info
         inputStruct.key = toUInt32(key)
-        inputStruct.data8 = UInt8(Selector.kSMCGetKeyInfo.toRaw())
+        inputStruct.data8 = UInt8(Selector.kSMCGetKeyInfo.rawValue)
         
         result = callSMC(&inputStruct, outputStruct : &outputStruct)
         
         if (result != kIOReturnSuccess ||
-            outputStruct.result != kSMC.kSMCSuccess.toRaw()) {
+            outputStruct.result != kSMC.kSMCSuccess.rawValue) {
             return (result, outputStruct.result)
         }
         
         // Check if given data matches expected input
         if (dataSize != outputStruct.keyInfo.dataSize ||
-            dataType.toRaw() != toString(outputStruct.keyInfo.dataType)) {
-            return (IOReturn.kIOReturnBadArgument.toRaw(),
-                    kSMC.kSMCError.toRaw())
+            dataType.rawValue != toString(outputStruct.keyInfo.dataType)) {
+            return (IOReturn.kIOReturnBadArgument.rawValue,
+                    kSMC.kSMCError.rawValue)
         }
                                                         
         // Second call to AppleSMC - now we can write the data
         inputStruct.keyInfo.dataSize = outputStruct.keyInfo.dataSize
-        inputStruct.data8 = UInt8(Selector.kSMCWriteKey.toRaw())
+        inputStruct.data8 = UInt8(Selector.kSMCWriteKey.rawValue)
         
         // Set data to write
         inputStruct.bytes_0  = data[0]
@@ -823,11 +823,11 @@ public class SMC {
         if (inputStructCnt != 80) {
             // Houston, we have a problem. Depending how far off this is from
             // 80, call may or may not work.
-            return IOReturn.kIOReturnBadArgument.toRaw()
+            return IOReturn.kIOReturnBadArgument.rawValue
         }
         
         result = IOConnectCallStructMethod(conn,
-                                           Selector.kSMCHandleYPCEvent.toRaw(),
+                                           Selector.kSMCHandleYPCEvent.rawValue,
                                            &inputStruct,
                                            inputStructCnt,
                                            &outputStruct,
@@ -943,7 +943,7 @@ public class SMC {
     private func getErrorCode(err : kern_return_t) -> kern_return_t {
         // kern_return_t is an Int32. The final 14 bits specify the error code
         // itself, hence the &
-        var lookup : kern_return_t? = IOReturn.fromRaw(err & 0x3fff)?.toRaw()
+        var lookup : kern_return_t? = IOReturn(rawValue: err & 0x3fff)?.rawValue
         
         return (lookup ?? err)
     }

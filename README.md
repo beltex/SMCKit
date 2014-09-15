@@ -26,7 +26,7 @@ For more see:
 
 ### Requirements
 
-- [Xcode 6.1 Beta](https://developer.apple.com/xcode/downloads/)
+- [Xcode 6.1 Beta 2](https://developer.apple.com/xcode/downloads/)
 - OS X 10.9+
 
 
