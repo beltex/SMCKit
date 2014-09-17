@@ -400,7 +400,7 @@ public class SMC {
     // MARK: PUBLIC METHODS
     //--------------------------------------------------------------------------
     
-    
+
     /**
     Open a connection to the SMC
     
@@ -521,9 +521,9 @@ public class SMC {
                // Must have complete switch though with executed command
                tmp = tmp + 0
            case .Fahrenheit:
-               tmp = toFahrenheit(tmp)
+               tmp = SMC.toFahrenheit(tmp)
            case .Kelvin:
-               tmp = toKelvin(tmp)
+               tmp = SMC.toKelvin(tmp)
        }
     
        return (tmp, result.IOReturn, result.kSMC)
@@ -548,7 +548,7 @@ public class SMC {
                                              IOReturn : kern_return_t,
                                              kSMC     : UInt8) {
         var result = readSMC("F" + String(fanNum) + "Ac")
-        return (from_fpe2(result.data), result.IOReturn, result.kSMC)
+        return (SMC.from_fpe2(result.data), result.IOReturn, result.kSMC)
     }
     
     
@@ -565,7 +565,7 @@ public class SMC {
                                                 IOReturn : kern_return_t,
                                                 kSMC     : UInt8) {
         var result = readSMC("F" + String(fanNum) + "Mn")
-        return (from_fpe2(result.data), result.IOReturn, result.kSMC)
+        return (SMC.from_fpe2(result.data), result.IOReturn, result.kSMC)
     }
     
     
@@ -582,7 +582,7 @@ public class SMC {
                                                 IOReturn : kern_return_t,
                                                 kSMC     : UInt8) {
         var result = readSMC("F" + String(fanNum) + "Mx")
-        return (from_fpe2(result.data), result.IOReturn, result.kSMC)
+        return (SMC.from_fpe2(result.data), result.IOReturn, result.kSMC)
     }
     
     
@@ -636,7 +636,7 @@ public class SMC {
         
         // TODO: Don't use magic number for dataSize
         var result = writeSMC("F" + String(fanNum) + "Mn",
-                              data     : to_fpe2(rpm),
+                              data     : SMC.to_fpe2(rpm),
                               dataType : DataType.FPE2,
                               dataSize : 2)
             
@@ -835,7 +835,7 @@ public class SMC {
         
         if (result != kIOReturnSuccess) {
             // Determine the exact error
-            result = getErrorCode(result)
+            result = SMC.getErrorCode(result)
         }
 
         return result
@@ -902,7 +902,7 @@ public class SMC {
     :param: data Data from the SMC to be converted. Assumed data size of 2.
     :returns: Converted data
     */
-    private func from_fpe2(data : [UInt8]) -> UInt {
+    private class func from_fpe2(data : [UInt8]) -> UInt {
         var ans : UInt = 0
         
         // Data type for fan calls - fpe2
@@ -921,7 +921,7 @@ public class SMC {
     :param: val Value to convert
     :return: Converted data in SMCParamStruct data format
     */
-    private func to_fpe2(val : UInt) -> [UInt8] {
+    private class func to_fpe2(val : UInt) -> [UInt8] {
         // TODO: check val size for overflow
         var data = [UInt8](count: 32, repeatedValue: 0)
         data[0] = UInt8(val >> 6)
@@ -940,7 +940,7 @@ public class SMC {
     :param: err The raw error code
     :returns: The IOReturn error code. If not found, returns the original error.
     */
-    private func getErrorCode(err : kern_return_t) -> kern_return_t {
+    private class func getErrorCode(err : kern_return_t) -> kern_return_t {
         // kern_return_t is an Int32. The final 14 bits specify the error code
         // itself, hence the &
         var lookup : kern_return_t? = IOReturn(rawValue: err & 0x3fff)?.rawValue
@@ -957,7 +957,7 @@ public class SMC {
     /**
     Celsius to Fahrenheit
     */
-    private func toFahrenheit(tmp : Double) -> Double {
+    private class func toFahrenheit(tmp : Double) -> Double {
         // http://en.wikipedia.org/wiki/Fahrenheit#Definition_and_conversions
         return (tmp * 1.8) + 32
     }
@@ -966,7 +966,7 @@ public class SMC {
     /**
     Celsius to Kelvin
     */
-    private func toKelvin(tmp : Double) -> Double {
+    private class func toKelvin(tmp : Double) -> Double {
         // http://en.wikipedia.org/wiki/Kelvin
         return tmp + 273.15
     }
