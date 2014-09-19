@@ -20,6 +20,7 @@
  */
 
 import IOKit
+import Foundation
 
 /**
 System Management Controller (SMC) API from user space for Intel based Macs.
@@ -79,6 +80,32 @@ public class SMC {
         case THUNDERBOLT_0          = "TI0P"
         case THUNDERBOLT_1          = "TI1P"
         case WIRELESS_MODULE        = "TW0P"
+        
+        /**
+        For enumerating all values of the enum. Not ideal. Seems to be the
+        cleanest current solution. See: http://stackoverflow.com/a/24137319
+        */
+        public static let allValues = [AMBIENT_AIR_0,
+                                       AMBIENT_AIR_1,
+                                       CPU_0_DIODE,
+                                       CPU_0_HEATSINK,
+                                       CPU_0_PROXIMITY,
+                                       ENCLOSURE_BASE_0,
+                                       ENCLOSURE_BASE_1,
+                                       ENCLOSURE_BASE_2,
+                                       ENCLOSURE_BASE_3,
+                                       GPU_0_DIODE,
+                                       GPU_0_HEATSINK,
+                                       GPU_0_PROXIMITY,
+                                       HARD_DRIVE_BAY,
+                                       MEMORY_SLOT_0,
+                                       MEMORY_SLOTS_PROXIMITY,
+                                       NORTHBRIDGE,
+                                       NORTHBRIDGE_DIODE,
+                                       NORTHBRIDGE_PROXIMITY,
+                                       THUNDERBOLT_0,
+                                       THUNDERBOLT_1,
+                                       WIRELESS_MODULE]
     }
     
     
@@ -438,6 +465,61 @@ public class SMC {
     
     
     /**
+    Get overall profile of the machine ("system information") that is SMC
+    related and write to disk as JSON. That is model number, valid temperature
+    sensors (keys), and fan information.
+    
+    :returns: True if successful, false otherwise.
+    */
+    public func machineProfile(path : String) -> Bool {
+        var result = false
+        var err  : NSError?
+        var data : [String : AnyObject] = ["Model"     : getModel(),
+                                           "TMP Keys"  : getAllValidTMPKeys(),
+                                           "Fan Info"  : getFanInfo()]
+
+        let opts         = NSJSONWritingOptions(1)  // Pretty print
+        let outputStream = NSOutputStream(toFileAtPath: path, append: false)
+        
+        if (outputStream == nil) {
+            return result
+        }
+        
+        outputStream?.open()
+        
+        // Check if write was successful
+        if (NSJSONSerialization.writeJSONObject(data,
+                                                toStream : outputStream!,
+                                                options  : opts,
+                                                error    : &err) > 0) {
+            result = true
+        }
+        
+        outputStream?.close()
+        
+        return result
+    }
+    
+    
+    /**
+    Get all valid SMC TMP keys.
+    
+    :returns: Array of keys.
+    */
+    public func getAllValidTMPKeys() -> [String] {
+        var keys : [String] = [ ]
+        
+        for key in TMP.allValues {
+            if (isKeyValid(key.rawValue).valid) {
+                keys.append(key.rawValue)
+            }
+        }
+        
+        return keys
+    }
+    
+    
+    /**
     Check if an SMC key is valid. Useful for determining if a certain machine
     has particular sensor or fan for example.
     
@@ -533,6 +615,24 @@ public class SMC {
     //--------------------------------------------------------------------------
     // MARK: PUBLIC METHODS - FANS
     //--------------------------------------------------------------------------
+    
+    
+    /**
+    Get overall information about the fans of the machine.
+    */
+    public func getFanInfo() -> [String : AnyObject] {
+        var numFans = getNumFans().numFans
+        var profile : [String : AnyObject] = ["# of fans" : numFans]
+        
+        for var i : UInt = 0; i < numFans; ++i {
+            // TODO: Add safe RPM
+            let vals = ["Min RPM" : getFanMinRPM(i).rpm,
+                        "Max RPM" : getFanMaxRPM(i).rpm]
+            profile.updateValue(vals, forKey: "Fan \(i)")
+        }
+        
+        return profile
+    }
     
     
     /**
