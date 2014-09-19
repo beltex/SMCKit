@@ -846,7 +846,58 @@ public class SMC {
     // MARK: PRIVATE METHODS - HELPERS
     //--------------------------------------------------------------------------
 
+
+    /**
+    Get the model name of the machine.
     
+    :returns: The model name
+    */
+    private func getModel() -> String {
+        var service : io_service_t
+        var result  : kern_return_t
+        var ptr     : UnsafeMutablePointer<Int8>
+        
+        var model          = String()
+        var io_name_t_size = sizeof(io_name_t)
+        
+        
+        service = IOServiceGetMatchingService(kIOMasterPortDefault,
+              IOServiceMatching("IOPlatformExpertDevice").takeUnretainedValue())
+        
+        if (service == 0) {
+            // Something went wrong
+            return ""
+        }
+        
+        
+        ptr = UnsafeMutablePointer<Int8>.alloc(io_name_t_size)
+        ptr.initialize(0)
+        
+        // Get the model name
+        result = IORegistryEntryGetName(service, ptr)
+        IOObjectRelease(service)
+        
+        if (result == kIOReturnSuccess) {
+            for var i = 0; i < io_name_t_size; ++i {
+                var next = ptr.advancedBy(i).memory
+                
+                // Check if at the end
+                if (next <= 0) {
+                    break
+                }
+                
+                model.append(UnicodeScalar(UInt32(next)))
+            }
+        }
+        
+        
+        // Clean up
+        ptr.dealloc(io_name_t_size)
+        
+        return model
+    }
+
+
     /**
     Convert SMC key to UInt32. This must be done to pass it to the SMC.
     
