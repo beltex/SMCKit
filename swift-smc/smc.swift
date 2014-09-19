@@ -406,7 +406,7 @@ public class SMC {
     
     :returns: kIOReturnSuccess on successful connection to the SMC.
     */
-    public func openSMC() -> kern_return_t {
+    public func open() -> kern_return_t {
         var result  : kern_return_t
         var service : io_service_t
         
@@ -432,7 +432,7 @@ public class SMC {
     
     :returns: kIOReturnSuccess on successful close of connection to the SMC.
     */
-    public func closeSMC() -> kern_return_t {
+    public func close() -> kern_return_t {
         return IOServiceClose(conn)
     }
     

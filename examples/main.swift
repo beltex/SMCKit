@@ -1,5 +1,5 @@
 /*
-* Simple example client
+* Simple example client.
 *
 * main.swift
 * swift-smc
@@ -25,17 +25,8 @@ import IOKit
 
 var smc = SMC()
 
-// Open a connection to the SMC
-if (smc.openSMC() == kIOReturnSuccess) {
-    var result = smc.getTMP(SMC.TMP.CPU_0_DIODE)
-    
-    println("CPU 0 Diode Temperature: \(result.tmp)°C")
-    println("IO Return Code: \(result.IOReturn)")
-    println("SMC Return Code: \(result.kSMC)")
-    
-    // Make sure to close the connection
-    smc.closeSMC()
-}
-else {
-    println("ERROR: Failed to open connection to SMC")
-}
+assert(smc.open() == kIOReturnSuccess, "ERROR: Connection to SMC failed")
+println("CPU 0 Diode Temperature: \(smc.getTMP(SMC.TMP.CPU_0_DIODE).tmp)°C")
+println("Fan 0 Speed: \(smc.getFanRPM(0).rpm) RPM")
+
+smc.close()
