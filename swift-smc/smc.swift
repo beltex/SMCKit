@@ -20,6 +20,7 @@
  */
 
 import IOKit
+import Foundation
 
 /**
 System Management Controller (SMC) API from user space for Intel based Macs.
@@ -79,6 +80,33 @@ public class SMC {
         case THUNDERBOLT_0          = "TI0P"
         case THUNDERBOLT_1          = "TI1P"
         case WIRELESS_MODULE        = "TW0P"
+        
+        
+        /**
+        For enumerating all values of the enum. Not ideal. Seems to be the
+        cleanest current solution. See: http://stackoverflow.com/a/24137319
+        */
+        public static let allValues = [AMBIENT_AIR_0,
+                                       AMBIENT_AIR_1,
+                                       CPU_0_DIODE,
+                                       CPU_0_HEATSINK,
+                                       CPU_0_PROXIMITY,
+                                       ENCLOSURE_BASE_0,
+                                       ENCLOSURE_BASE_1,
+                                       ENCLOSURE_BASE_2,
+                                       ENCLOSURE_BASE_3,
+                                       GPU_0_DIODE,
+                                       GPU_0_HEATSINK,
+                                       GPU_0_PROXIMITY,
+                                       HARD_DRIVE_BAY,
+                                       MEMORY_SLOT_0,
+                                       MEMORY_SLOTS_PROXIMITY,
+                                       NORTHBRIDGE,
+                                       NORTHBRIDGE_DIODE,
+                                       NORTHBRIDGE_PROXIMITY,
+                                       THUNDERBOLT_0,
+                                       THUNDERBOLT_1,
+                                       WIRELESS_MODULE]
     }
     
     
@@ -391,6 +419,12 @@ public class SMC {
     
     
     /**
+    IOService for get machine model name
+    */
+    private let IOSERVICE_MODEL = "IOPlatformExpertDevice"
+    
+    
+    /**
     Number of characters in an SMC key
     */
     private let SMC_KEY_SIZE = 4
@@ -438,6 +472,43 @@ public class SMC {
     
     
     /**
+    Get overall profile of the machine ("system information"), that is SMC
+    related data and write to disk as JSON. Includes model number, valid
+    temperature sensors (keys), and fan information.
+    
+    :returns: True if successful, false otherwise.
+    */
+    public func machineProfile(path : String) -> Bool {
+        var result = false
+        var err  : NSError?
+        var data : [String : AnyObject] = ["Model"    : getMachineModel().model,
+                                           "TMP Keys" : getAllValidTMPKeys(),
+                                           "Fan Info" : getFanInfo()]
+
+        let opts         = NSJSONWritingOptions(1)  // Pretty print
+        let outputStream = NSOutputStream(toFileAtPath: path, append: false)
+        
+        if (outputStream == nil) {
+            return result
+        }
+        
+        outputStream?.open()
+        
+        // Check if write was successful
+        if (NSJSONSerialization.writeJSONObject(data,
+                                                toStream : outputStream!,
+                                                options  : opts,
+                                                error    : &err) > 0) {
+            result = true
+        }
+        
+        outputStream?.close()
+        
+        return result
+    }
+    
+    
+    /**
     Check if an SMC key is valid. Useful for determining if a certain machine
     has particular sensor or fan for example.
     
@@ -467,6 +538,25 @@ public class SMC {
         }
                                                 
         return (ans, result.IOReturn, result.kSMC)
+    }
+    
+    
+    /**
+    Get all valid SMC temperature keys (based on TMP enum, thus list may not
+    be complete).
+    
+    :returns: Array of keys.
+    */
+    public func getAllValidTMPKeys() -> [String] {
+        var keys : [String] = [ ]
+        
+        for key in TMP.allValues {
+            if (isKeyValid(key.rawValue).valid) {
+                keys.append(key.rawValue)
+            }
+        }
+        
+        return keys
     }
     
     
@@ -533,8 +623,8 @@ public class SMC {
     //--------------------------------------------------------------------------
     // MARK: PUBLIC METHODS - FANS
     //--------------------------------------------------------------------------
-    
-    
+   
+ 
     /**
     Get the current speed (RPM - revolutions per minute) of a fan.
     
@@ -846,7 +936,80 @@ public class SMC {
     // MARK: PRIVATE METHODS - HELPERS
     //--------------------------------------------------------------------------
 
+
+    /**
+    Get overall information about the fans of the machine. For machineProfile().
     
+    :returns: Dictionary of information.
+    */
+    private func getFanInfo() -> [String : AnyObject] {
+        var numFans = getNumFans().numFans
+        var profile : [String : AnyObject] = ["# of fans" : numFans]
+        
+        for var i : UInt = 0; i < numFans; ++i {
+            // TODO: Add safe RPM
+            let vals = ["Min RPM" : getFanMinRPM(i).rpm,
+                        "Max RPM" : getFanMaxRPM(i).rpm]
+            profile.updateValue(vals, forKey: "Fan \(i)")
+        }
+        
+        return profile
+    }
+    
+
+    /**
+    Get the model name of the machine.
+    
+    :returns: The model name
+    */
+    private func getMachineModel() -> (model : String,
+                                       IOReturn : kern_return_t) {
+        var service : io_service_t
+        var result  : kern_return_t
+        var ptr     : UnsafeMutablePointer<Int8>
+        
+        var model          = String()
+        var io_name_t_size = sizeof(io_name_t)
+        
+       
+        // Find the service 
+        service = IOServiceGetMatchingService(kIOMasterPortDefault,
+                  IOServiceMatching(IOSERVICE_MODEL).takeUnretainedValue())
+        
+        if (service == 0) {
+            return (model, IOReturn.kIOReturnError.rawValue)
+        }
+        
+        
+        ptr = UnsafeMutablePointer<Int8>.alloc(io_name_t_size)
+        ptr.initialize(0)
+        
+        // Get the model name
+        result = IORegistryEntryGetName(service, ptr)
+        IOObjectRelease(service)
+        
+        if (result == kIOReturnSuccess) {
+            var next : Int8
+            for var i = 0; i < io_name_t_size; ++i {
+                next = ptr.advancedBy(i).memory
+                
+                // Check if at the end
+                if (next <= 0) {
+                    break
+                }
+                
+                model.append(UnicodeScalar(UInt32(next)))
+            }
+        }
+        
+        
+        // Clean up
+        ptr.dealloc(io_name_t_size)
+        
+        return (model, result)
+    }
+
+
     /**
     Convert SMC key to UInt32. This must be done to pass it to the SMC.
     
