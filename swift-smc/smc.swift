@@ -81,6 +81,7 @@ public class SMC {
         case THUNDERBOLT_1          = "TI1P"
         case WIRELESS_MODULE        = "TW0P"
         
+        
         /**
         For enumerating all values of the enum. Not ideal. Seems to be the
         cleanest current solution. See: http://stackoverflow.com/a/24137319
@@ -418,6 +419,12 @@ public class SMC {
     
     
     /**
+    IOService for get machine model name
+    */
+    private let IOSERVICE_MODEL = "IOPlatformExpertDevice"
+    
+    
+    /**
     Number of characters in an SMC key
     */
     private let SMC_KEY_SIZE = 4
@@ -465,18 +472,18 @@ public class SMC {
     
     
     /**
-    Get overall profile of the machine ("system information") that is SMC
-    related and write to disk as JSON. That is model number, valid temperature
-    sensors (keys), and fan information.
+    Get overall profile of the machine ("system information"), that is SMC
+    related data and write to disk as JSON. Includes model number, valid
+    temperature sensors (keys), and fan information.
     
     :returns: True if successful, false otherwise.
     */
     public func machineProfile(path : String) -> Bool {
         var result = false
         var err  : NSError?
-        var data : [String : AnyObject] = ["Model"     : getModel(),
-                                           "TMP Keys"  : getAllValidTMPKeys(),
-                                           "Fan Info"  : getFanInfo()]
+        var data : [String : AnyObject] = ["Model"    : getMachineModel().model,
+                                           "TMP Keys" : getAllValidTMPKeys(),
+                                           "Fan Info" : getFanInfo()]
 
         let opts         = NSJSONWritingOptions(1)  // Pretty print
         let outputStream = NSOutputStream(toFileAtPath: path, append: false)
@@ -498,24 +505,6 @@ public class SMC {
         outputStream?.close()
         
         return result
-    }
-    
-    
-    /**
-    Get all valid SMC TMP keys.
-    
-    :returns: Array of keys.
-    */
-    public func getAllValidTMPKeys() -> [String] {
-        var keys : [String] = [ ]
-        
-        for key in TMP.allValues {
-            if (isKeyValid(key.rawValue).valid) {
-                keys.append(key.rawValue)
-            }
-        }
-        
-        return keys
     }
     
     
@@ -549,6 +538,25 @@ public class SMC {
         }
                                                 
         return (ans, result.IOReturn, result.kSMC)
+    }
+    
+    
+    /**
+    Get all valid SMC temperature keys (based on TMP enum, thus list may not
+    be complete).
+    
+    :returns: Array of keys.
+    */
+    public func getAllValidTMPKeys() -> [String] {
+        var keys : [String] = [ ]
+        
+        for key in TMP.allValues {
+            if (isKeyValid(key.rawValue).valid) {
+                keys.append(key.rawValue)
+            }
+        }
+        
+        return keys
     }
     
     
@@ -615,26 +623,8 @@ public class SMC {
     //--------------------------------------------------------------------------
     // MARK: PUBLIC METHODS - FANS
     //--------------------------------------------------------------------------
-    
-    
-    /**
-    Get overall information about the fans of the machine.
-    */
-    public func getFanInfo() -> [String : AnyObject] {
-        var numFans = getNumFans().numFans
-        var profile : [String : AnyObject] = ["# of fans" : numFans]
-        
-        for var i : UInt = 0; i < numFans; ++i {
-            // TODO: Add safe RPM
-            let vals = ["Min RPM" : getFanMinRPM(i).rpm,
-                        "Max RPM" : getFanMaxRPM(i).rpm]
-            profile.updateValue(vals, forKey: "Fan \(i)")
-        }
-        
-        return profile
-    }
-    
-    
+   
+ 
     /**
     Get the current speed (RPM - revolutions per minute) of a fan.
     
@@ -948,11 +938,32 @@ public class SMC {
 
 
     /**
+    Get overall information about the fans of the machine. For machineProfile().
+    
+    :returns: Dictionary of information.
+    */
+    private func getFanInfo() -> [String : AnyObject] {
+        var numFans = getNumFans().numFans
+        var profile : [String : AnyObject] = ["# of fans" : numFans]
+        
+        for var i : UInt = 0; i < numFans; ++i {
+            // TODO: Add safe RPM
+            let vals = ["Min RPM" : getFanMinRPM(i).rpm,
+                        "Max RPM" : getFanMaxRPM(i).rpm]
+            profile.updateValue(vals, forKey: "Fan \(i)")
+        }
+        
+        return profile
+    }
+    
+
+    /**
     Get the model name of the machine.
     
     :returns: The model name
     */
-    private func getModel() -> String {
+    private func getMachineModel() -> (model : String,
+                                       IOReturn : kern_return_t) {
         var service : io_service_t
         var result  : kern_return_t
         var ptr     : UnsafeMutablePointer<Int8>
@@ -960,13 +971,13 @@ public class SMC {
         var model          = String()
         var io_name_t_size = sizeof(io_name_t)
         
-        
+       
+        // Find the service 
         service = IOServiceGetMatchingService(kIOMasterPortDefault,
-              IOServiceMatching("IOPlatformExpertDevice").takeUnretainedValue())
+                  IOServiceMatching(IOSERVICE_MODEL).takeUnretainedValue())
         
         if (service == 0) {
-            // Something went wrong
-            return ""
+            return (model, IOReturn.kIOReturnError.rawValue)
         }
         
         
@@ -978,8 +989,9 @@ public class SMC {
         IOObjectRelease(service)
         
         if (result == kIOReturnSuccess) {
+            var next : Int8
             for var i = 0; i < io_name_t_size; ++i {
-                var next = ptr.advancedBy(i).memory
+                next = ptr.advancedBy(i).memory
                 
                 // Check if at the end
                 if (next <= 0) {
@@ -994,7 +1006,7 @@ public class SMC {
         // Clean up
         ptr.dealloc(io_name_t_size)
         
-        return model
+        return (model, result)
     }
 
 
