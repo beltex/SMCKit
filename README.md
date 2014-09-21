@@ -3,7 +3,8 @@ swift-smc
 
 A System Management Controller (SMC) API in pure Swift from user space for Intel
 based Macs. The API works by talking to the AppleSMC.kext (kernel
-extension), the closed source driver for the SMC.
+extension), the closed source driver for the SMC. Read temperature sensors,
+get and set fan speed (RPM), etc.
 
 
 ### System Management Controller
@@ -44,7 +45,7 @@ into your Xcode project."_
 ```swift
 import IOKit
 
-var smc = SMC()
+let smc = SMC()
 
 assert(smc.open() == kIOReturnSuccess, "ERROR: Connection to SMC failed")
 println("CPU 0 Diode Temperature: \(smc.getTMP(SMC.TMP.CPU_0_DIODE).tmp)°C")
