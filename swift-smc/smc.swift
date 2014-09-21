@@ -154,6 +154,7 @@ public class SMC {
     */
     public enum SMC_KEY : String {
         case NUM_KEYS = "#KEY"
+        case BATT_PWR = "BATP"
     }
     
     
@@ -165,8 +166,9 @@ public class SMC {
     http://stackoverflow.com/questions/22160746/fpe2-and-sp78-data-types
     */
     public enum DataType : String {
-        case SP78 = "sp78"
+        case FLAG = "flag"
         case FPE2 = "fpe2"
+        case SP78 = "sp78"
     }
     
     
@@ -619,6 +621,25 @@ public class SMC {
        return (tmp, result.IOReturn, result.kSMC)
     }
 
+    
+    /**
+    Is the machine being powered by the battery?
+    
+    :returns: flag True if it is, false otherwise
+    :returns: IOReturn IOKit return code
+    :returns: kSMC SMC return code
+    */
+    public func isBatteryPowered() -> (flag     : Bool,
+                                       IOReturn : kern_return_t,
+                                       kSMC     : UInt8) {
+        let result = readSMC(SMC_KEY.BATT_PWR.rawValue)
+        
+        // Data type is flag - 1 bit. 1 if battery powered, 0 otherwise
+        var ans = result.data[0] == 1 ? true : false
+        
+        return (ans, result.IOReturn, result.kSMC)
+    }
+    
     
     //--------------------------------------------------------------------------
     // MARK: PUBLIC METHODS - FANS
