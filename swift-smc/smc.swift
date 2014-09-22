@@ -72,6 +72,9 @@ public class SMC {
         case GPU_0_HEATSINK         = "TG0H"
         case GPU_0_PROXIMITY        = "TG0P"
         case HDD_PROXIMITY          = "TH0P"
+        case HEATSINK_0             = "Th0H"
+        case HEATSINK_1             = "Th1H"
+        case HEATSINK_2             = "Th2H"
         case LCD_PROXIMITY          = "TL0P"
         case MEMORY_SLOT_0          = "TM0S"
         case MEMORY_SLOTS_PROXIMITY = "TM0P"
@@ -103,6 +106,9 @@ public class SMC {
                                        GPU_0_HEATSINK,
                                        GPU_0_PROXIMITY,
                                        HDD_PROXIMITY,
+                                       HEATSINK_0,
+                                       HEATSINK_1,
+                                       HEATSINK_2,
                                        LCD_PROXIMITY,
                                        MEMORY_SLOT_0,
                                        MEMORY_SLOTS_PROXIMITY,
