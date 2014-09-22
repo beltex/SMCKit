@@ -71,12 +71,16 @@ public class SMC {
         case GPU_0_DIODE            = "TG0D"
         case GPU_0_HEATSINK         = "TG0H"
         case GPU_0_PROXIMITY        = "TG0P"
-        case HARD_DRIVE_BAY         = "TH0P"
+        case HDD_PROXIMITY          = "TH0P"
+        case LCD_PROXIMITY          = "TL0P"
         case MEMORY_SLOT_0          = "TM0S"
         case MEMORY_SLOTS_PROXIMITY = "TM0P"
+        case MISC_PROXIMITY         = "Tm0P"
         case NORTHBRIDGE            = "TN0H"
         case NORTHBRIDGE_DIODE      = "TN0D"
         case NORTHBRIDGE_PROXIMITY  = "TN0P"
+        case ODD_PROXIMITY          = "TO0P"
+        case PWR_SUPPLY_PROXIMITY   = "Tp0P"
         case THUNDERBOLT_0          = "TI0P"
         case THUNDERBOLT_1          = "TI1P"
         case WIRELESS_MODULE        = "TW0P"
@@ -98,12 +102,16 @@ public class SMC {
                                        GPU_0_DIODE,
                                        GPU_0_HEATSINK,
                                        GPU_0_PROXIMITY,
-                                       HARD_DRIVE_BAY,
+                                       HDD_PROXIMITY,
+                                       LCD_PROXIMITY,
                                        MEMORY_SLOT_0,
                                        MEMORY_SLOTS_PROXIMITY,
+                                       MISC_PROXIMITY,
                                        NORTHBRIDGE,
                                        NORTHBRIDGE_DIODE,
                                        NORTHBRIDGE_PROXIMITY,
+                                       ODD_PROXIMITY,
+                                       PWR_SUPPLY_PROXIMITY,
                                        THUNDERBOLT_0,
                                        THUNDERBOLT_1,
                                        WIRELESS_MODULE]
@@ -498,6 +506,7 @@ public class SMC {
         outputStream?.open()
         
         // Check if write was successful
+        // TODO: Log NSError on bad write
         if (NSJSONSerialization.writeJSONObject(data,
                                                 toStream : outputStream!,
                                                 options  : opts,
