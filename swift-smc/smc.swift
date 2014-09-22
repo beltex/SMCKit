@@ -153,8 +153,9 @@ public class SMC {
     Sources: See TMP enum
     */
     public enum SMC_KEY : String {
-        case NUM_KEYS = "#KEY"
         case BATT_PWR = "BATP"
+        case NUM_KEYS = "#KEY"
+        case ODD_FULL = "MSDI"
     }
     
     
@@ -637,6 +638,25 @@ public class SMC {
         // Data type is flag - 1 bit. 1 if battery powered, 0 otherwise
         var ans = result.data[0] == 1 ? true : false
         
+        return (ans, result.IOReturn, result.kSMC)
+    }
+    
+    
+    /**
+    Is there a CD in the optical disk drive (ODD)?
+    
+    :returns: flag True if there is, false otherwise
+    :returns: IOReturn IOKit return code
+    :returns: kSMC SMC return code
+    */
+    public func isOpticalDiskDriveFull() -> (flag     : Bool,
+                                              IOReturn : kern_return_t,
+                                              kSMC     : UInt8) {
+        let result = readSMC(SMC_KEY.ODD_FULL.rawValue)
+        
+        // Data type is flag - 1 bit. 1 if CD inserted, 0 otherwise
+        let ans = result.data[0] == 1 ? true : false
+            
         return (ans, result.IOReturn, result.kSMC)
     }
     
