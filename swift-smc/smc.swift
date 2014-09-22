@@ -484,7 +484,7 @@ public class SMC {
     public func machineProfile(path : String) -> Bool {
         var result = false
         var err  : NSError?
-        var data : [String : AnyObject] = ["Model"    : getMachineModel().model,
+        let data : [String : AnyObject] = ["Model"    : getMachineModel().model,
                                            "TMP Keys" : getAllValidTMPKeys(),
                                            "Fan Info" : getFanInfo()]
 
@@ -533,7 +533,7 @@ public class SMC {
         }
 
         // Try a read and see if it succeeds
-        var result = readSMC(key)
+        let result = readSMC(key)
 
         if (result.IOReturn == kIOReturnSuccess &&
             result.kSMC == kSMC.kSMCSuccess.rawValue) {
@@ -573,7 +573,7 @@ public class SMC {
     public func getNumSMCKeys() -> (numKeys  : UInt32,
                                     IOReturn : kern_return_t,
                                     kSMC     : UInt8) {
-        var result = readSMC(SMC_KEY.NUM_KEYS.rawValue)
+        let result = readSMC(SMC_KEY.NUM_KEYS.rawValue)
             
         // Type ui32 - size 4
         var numKeys = UInt32(result.data[0]) << 24
@@ -601,7 +601,7 @@ public class SMC {
                                                    -> (tmp      : Double,
                                                        IOReturn : kern_return_t,
                                                        kSMC     : UInt8) {
-       var result = readSMC(key.rawValue)
+       let result = readSMC(key.rawValue)
         
        // We drop the decimal value (data[1]) for now - thus maybe be off +/- 1
        // Data type is sp78 - signed floating point
@@ -636,7 +636,7 @@ public class SMC {
         let result = readSMC(SMC_KEY.BATT_PWR.rawValue)
         
         // Data type is flag - 1 bit. 1 if battery powered, 0 otherwise
-        var ans = result.data[0] == 1 ? true : false
+        let ans = result.data[0] == 1 ? true : false
         
         return (ans, result.IOReturn, result.kSMC)
     }
@@ -650,8 +650,8 @@ public class SMC {
     :returns: kSMC SMC return code
     */
     public func isOpticalDiskDriveFull() -> (flag     : Bool,
-                                              IOReturn : kern_return_t,
-                                              kSMC     : UInt8) {
+                                             IOReturn : kern_return_t,
+                                             kSMC     : UInt8) {
         let result = readSMC(SMC_KEY.ODD_FULL.rawValue)
         
         // Data type is flag - 1 bit. 1 if CD inserted, 0 otherwise
@@ -678,7 +678,7 @@ public class SMC {
     public func getFanRPM(fanNum : UInt) -> (rpm      : UInt,
                                              IOReturn : kern_return_t,
                                              kSMC     : UInt8) {
-        var result = readSMC("F" + String(fanNum) + "Ac")
+        let result = readSMC("F" + String(fanNum) + "Ac")
         return (SMC.from_fpe2(result.data), result.IOReturn, result.kSMC)
     }
     
@@ -695,7 +695,7 @@ public class SMC {
     public func getFanMinRPM(fanNum : UInt) -> (rpm      : UInt,
                                                 IOReturn : kern_return_t,
                                                 kSMC     : UInt8) {
-        var result = readSMC("F" + String(fanNum) + "Mn")
+        let result = readSMC("F" + String(fanNum) + "Mn")
         return (SMC.from_fpe2(result.data), result.IOReturn, result.kSMC)
     }
     
@@ -712,7 +712,7 @@ public class SMC {
     public func getFanMaxRPM(fanNum : UInt) -> (rpm      : UInt,
                                                 IOReturn : kern_return_t,
                                                 kSMC     : UInt8) {
-        var result = readSMC("F" + String(fanNum) + "Mx")
+        let result = readSMC("F" + String(fanNum) + "Mx")
         return (SMC.from_fpe2(result.data), result.IOReturn, result.kSMC)
     }
     
@@ -727,7 +727,7 @@ public class SMC {
     public func getNumFans() -> (numFans  : UInt,
                                  IOReturn : kern_return_t,
                                  kSMC     : UInt8) {
-        var result = readSMC(FAN.NUM_FANS.rawValue)
+        let result = readSMC(FAN.NUM_FANS.rawValue)
         return (UInt(result.data[0]), result.IOReturn, result.kSMC)
     }
     
@@ -752,7 +752,7 @@ public class SMC {
         var ans = false
         
         // TODO: Cache value
-        var maxRPM = getFanMaxRPM(fanNum)
+        let maxRPM = getFanMaxRPM(fanNum)
                                                         
         // Safety check: rpm must be within safe range of fan speed
         // TODO: Add fan safe speed (F0Sf) to this check
@@ -766,7 +766,7 @@ public class SMC {
         }
         
         // TODO: Don't use magic number for dataSize
-        var result = writeSMC("F" + String(fanNum) + "Mn",
+        let result = writeSMC("F" + String(fanNum) + "Mn",
                               data     : SMC.to_fpe2(rpm),
                               dataType : DataType.FPE2,
                               dataSize : 2)
@@ -984,7 +984,7 @@ public class SMC {
     :returns: Dictionary of information.
     */
     private func getFanInfo() -> [String : AnyObject] {
-        var numFans = getNumFans().numFans
+        let numFans = getNumFans().numFans
         var profile : [String : AnyObject] = ["# of fans" : numFans]
         
         for var i : UInt = 0; i < numFans; ++i {
@@ -1006,7 +1006,6 @@ public class SMC {
     private func getMachineModel() -> (model : String,
                                        IOReturn : kern_return_t) {
         var service : io_service_t
-        var result  : kern_return_t
         var ptr     : UnsafeMutablePointer<Int8>
         
         var model          = String()
@@ -1026,7 +1025,7 @@ public class SMC {
         ptr.initialize(0)
         
         // Get the model name
-        result = IORegistryEntryGetName(service, ptr)
+        let result = IORegistryEntryGetName(service, ptr)
         IOObjectRelease(service)
         
         if (result == kIOReturnSuccess) {
@@ -1147,7 +1146,7 @@ public class SMC {
     private class func getErrorCode(err : kern_return_t) -> kern_return_t {
         // kern_return_t is an Int32. The final 14 bits specify the error code
         // itself, hence the &
-        var lookup : kern_return_t? = IOReturn(rawValue: err & 0x3fff)?.rawValue
+        let lookup : kern_return_t? = IOReturn(rawValue: err & 0x3fff)?.rawValue
         
         return (lookup ?? err)
     }
