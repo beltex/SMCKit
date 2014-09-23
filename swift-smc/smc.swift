@@ -53,6 +53,7 @@ public class SMC {
 
     Sources:
     
+    - http://www.opensource.apple.com/source/net_snmp/
     - https://www.apple.com/downloads/dashboard/status/istatpro.html
     - https://github.com/hholtmann/smcFanControl
     - https://github.com/jedda/OSX-Monitoring-Tools
@@ -142,6 +143,7 @@ public class SMC {
     */
     public enum FAN : String {
         case FAN_0            = "F0Ac"
+        case FAN_0_DESC       = "F0ID"
         case FAN_0_MIN_RPM    = "F0Mn"
         case FAN_0_MAX_RPM    = "F0Mx"
         case FAN_0_SAFE_RPM   = "F0Sf"
@@ -183,6 +185,7 @@ public class SMC {
     public enum DataType : String {
         case FLAG = "flag"
         case FPE2 = "fpe2"
+        case SFDS = "{fds"
         case SP78 = "sp78"
     }
     
@@ -307,7 +310,7 @@ public class SMC {
         case kSMCGetKeyInfo      = 9
     }
     
-
+    
     //--------------------------------------------------------------------------
     // MARK: PRIVATE STRUCTS
     //--------------------------------------------------------------------------
@@ -680,7 +683,49 @@ public class SMC {
     // MARK: PUBLIC METHODS - FANS
     //--------------------------------------------------------------------------
    
- 
+    
+    /**
+    Get the name of a fan.
+    
+    :param: fanNum The number of the fan to check
+    :returns: name The name of the fan. Return will be empty on error.
+    :returns: IOReturn IOKit return code
+    :returns: kSMC SMC return code
+    */
+    public func getFanName(fanNum : UInt) -> (name     : String,
+                                              IOReturn : kern_return_t,
+                                              kSMC     : UInt8) {
+        var name = String()
+        let result = readSMC("F" + String(fanNum) + "ID")
+        
+                                                
+        /*
+        We know the data size is 16 bytes and the type is "{fds", a custom
+        struct defined by the AppleSMC.kext. See TMP enum sources for the
+        struct.
+        
+        The last 12 bytes contain the name of the fan, an array of chars, hence
+        the loop range.
+        
+        // TODO: Use dataSize value from readSMC()
+        */
+        for var i = 4; i < 16; ++i {
+            // Check if at the end (name may not be full 12 bytes)
+            if (result.data[i] <= 0) {
+                break
+            }
+            name.append(UnicodeScalar(UInt32(result.data[i])))
+        }
+
+
+        // Strip whitespace (some names have it)
+        let whitespace = NSCharacterSet.whitespaceCharacterSet()
+        name = name.stringByTrimmingCharactersInSet(whitespace)
+
+        return (name, result.IOReturn, result.kSMC)
+    }
+    
+    
     /**
     Get the current speed (RPM - revolutions per minute) of a fan.
     
@@ -830,7 +875,7 @@ public class SMC {
         // Second call to AppleSMC - now we can get the data
         inputStruct.keyInfo.dataSize = outputStruct.keyInfo.dataSize
         inputStruct.data8 = UInt8(Selector.kSMCReadKey.rawValue)
-        
+
         result = callSMC(&inputStruct, outputStruct : &outputStruct)
         
         // Set the data
