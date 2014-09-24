@@ -77,8 +77,8 @@ public class SMC {
         case HEATSINK_1             = "Th1H"
         case HEATSINK_2             = "Th2H"
         case LCD_PROXIMITY          = "TL0P"
-        case MEMORY_SLOT_0          = "TM0S"
-        case MEMORY_SLOTS_PROXIMITY = "TM0P"
+        case MEM_SLOT_0             = "TM0S"
+        case MEM_SLOTS_PROXIMITY    = "TM0P"
         case MISC_PROXIMITY         = "Tm0P"
         case NORTHBRIDGE            = "TN0H"
         case NORTHBRIDGE_DIODE      = "TN0D"
@@ -94,34 +94,34 @@ public class SMC {
         For enumerating all values of the enum. Not ideal. Seems to be the
         cleanest current solution. See: http://stackoverflow.com/a/24137319
         */
-        public static let allValues = [AMBIENT_AIR_0,
-                                       AMBIENT_AIR_1,
-                                       CPU_0_DIODE,
-                                       CPU_0_HEATSINK,
-                                       CPU_0_PROXIMITY,
-                                       ENCLOSURE_BASE_0,
-                                       ENCLOSURE_BASE_1,
-                                       ENCLOSURE_BASE_2,
-                                       ENCLOSURE_BASE_3,
-                                       GPU_0_DIODE,
-                                       GPU_0_HEATSINK,
-                                       GPU_0_PROXIMITY,
-                                       HDD_PROXIMITY,
-                                       HEATSINK_0,
-                                       HEATSINK_1,
-                                       HEATSINK_2,
-                                       LCD_PROXIMITY,
-                                       MEMORY_SLOT_0,
-                                       MEMORY_SLOTS_PROXIMITY,
-                                       MISC_PROXIMITY,
-                                       NORTHBRIDGE,
-                                       NORTHBRIDGE_DIODE,
-                                       NORTHBRIDGE_PROXIMITY,
-                                       ODD_PROXIMITY,
-                                       PWR_SUPPLY_PROXIMITY,
-                                       THUNDERBOLT_0,
-                                       THUNDERBOLT_1,
-                                       WIRELESS_MODULE]
+        static let allValues = ["AMBIENT_AIR_0"         : AMBIENT_AIR_0,
+                                "AMBIENT_AIR_1"         : AMBIENT_AIR_1,
+                                "CPU_0_DIODE"           : CPU_0_DIODE,
+                                "CPU_0_HEATSINK"        : CPU_0_HEATSINK,
+                                "CPU_0_PROXIMITY"       : CPU_0_PROXIMITY,
+                                "ENCLOSURE_BASE_0"      : ENCLOSURE_BASE_0,
+                                "ENCLOSURE_BASE_1"      : ENCLOSURE_BASE_1,
+                                "ENCLOSURE_BASE_2"      : ENCLOSURE_BASE_2,
+                                "ENCLOSURE_BASE_3"      : ENCLOSURE_BASE_3,
+                                "GPU_0_DIODE"           : GPU_0_DIODE,
+                                "GPU_0_HEATSINK"        : GPU_0_HEATSINK,
+                                "GPU_0_PROXIMITY"       : GPU_0_PROXIMITY,
+                                "HDD_PROXIMITY"         : HDD_PROXIMITY,
+                                "HEATSINK_0"            : HEATSINK_0,
+                                "HEATSINK_1"            : HEATSINK_1,
+                                "HEATSINK_2"            : HEATSINK_2,
+                                "LCD_PROXIMITY"         : LCD_PROXIMITY,
+                                "MEM_SLOT_0"            : MEM_SLOT_0,
+                                "MEM_SLOTS_PROXIMITY"   : MEM_SLOTS_PROXIMITY,
+                                "MISC_PROXIMITY"        : MISC_PROXIMITY,
+                                "NORTHBRIDGE"           : NORTHBRIDGE,
+                                "NORTHBRIDGE_DIODE"     : NORTHBRIDGE_DIODE,
+                                "NORTHBRIDGE_PROXIMITY" : NORTHBRIDGE_PROXIMITY,
+                                "ODD_PROXIMITY"         : ODD_PROXIMITY,
+                                "PWR_SUPPLY_PROXIMITY"  : PWR_SUPPLY_PROXIMITY,
+                                "THUNDERBOLT_0"         : THUNDERBOLT_0,
+                                "THUNDERBOLT_1"         : THUNDERBOLT_1,
+                                "WIRELESS_MODULE"       : WIRELESS_MODULE]
     }
     
     
@@ -566,14 +566,14 @@ public class SMC {
     Get all valid SMC temperature keys (based on TMP enum, thus list may not
     be complete).
     
-    :returns: Array of keys.
+    :returns: Dictionary of keys (name, TMP SMC key).
     */
-    public func getAllValidTMPKeys() -> [String] {
-        var keys : [String] = [ ]
+    public func getAllValidTMPKeys() -> [String : String] {
+        var keys = [String : String]()
         
-        for key in TMP.allValues {
-            if (isKeyValid(key.rawValue).valid) {
-                keys.append(key.rawValue)
+        for (name, SMCKey) in TMP.allValues {
+            if (isKeyValid(SMCKey.rawValue).valid) {
+                keys.updateValue(name, forKey: SMCKey.rawValue)
             }
         }
         
@@ -1049,7 +1049,8 @@ public class SMC {
         
         for var i : UInt = 0; i < numFans; ++i {
             // TODO: Add safe RPM
-            let vals = ["Min RPM" : getFanMinRPM(i).rpm,
+            let vals = ["Name"    : getFanName(0).name,
+                        "Min RPM" : getFanMinRPM(i).rpm,
                         "Max RPM" : getFanMaxRPM(i).rpm]
             profile.updateValue(vals, forKey: "Fan \(i)")
         }
