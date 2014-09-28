@@ -419,7 +419,7 @@ public class SMC {
     
     
     //--------------------------------------------------------------------------
-    // MARK: PRIVATE ATTRIBUTES
+    // MARK: PRIVATE PROPERTIES
     //--------------------------------------------------------------------------
     
     
@@ -504,22 +504,29 @@ public class SMC {
         let data : [String : AnyObject] = ["Model"    : getMachineModel().model,
                                            "TMP Keys" : getAllValidTMPKeys(),
                                            "Fan Info" : getFanInfo()]
-
+        
         let opts         = NSJSONWritingOptions(1)  // Pretty print
         let outputStream = NSOutputStream(toFileAtPath: path, append: false)
-        
+
+        // Catch empty path string
         if (outputStream == nil) {
             return result
         }
         
+        
         outputStream?.open()
+
+        // Catch bad path - only once stream open
+        if (outputStream?.streamStatus == NSStreamStatus.Error) {
+            return result
+        }
         
         // Check if write was successful
         // TODO: Log NSError on bad write
         if (NSJSONSerialization.writeJSONObject(data,
                                                 toStream : outputStream!,
                                                 options  : opts,
-                                                error    : &err) > 0) {
+                                                error    : &err) != 0) {
             result = true
         }
         
