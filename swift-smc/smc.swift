@@ -505,7 +505,7 @@ public class SMC {
                                            "TMP Keys" : getAllValidTMPKeys(),
                                            "Fan Info" : getFanInfo()]
         
-        let opts         = NSJSONWritingOptions(1)  // Pretty print
+        let opts         = NSJSONWritingOptions.PrettyPrinted
         let outputStream = NSOutputStream(toFileAtPath: path, append: false)
 
         // Catch empty path string
