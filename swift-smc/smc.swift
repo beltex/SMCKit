@@ -579,7 +579,8 @@ public class SMC {
         var keys = [String : String]()
         
         for (name, SMCKey) in TMP.allValues {
-            if (isKeyValid(SMCKey.rawValue).valid) {
+            if (isKeyValid(SMCKey.rawValue).valid &&
+                readSMC(SMCKey.rawValue).data[0] > 0) {
                 keys.updateValue(name, forKey: SMCKey.rawValue)
             }
         }
@@ -861,12 +862,15 @@ public class SMC {
     :returns: kSMC SMC return code
     */
     private func readSMC(key : String) -> (data     : [UInt8],
+                                           dataType : UInt32,
+                                           dataSize : IOByteCount,
                                            IOReturn : kern_return_t,
                                            kSMC     : UInt8) {
         var result : kern_return_t
         var inputStruct  = SMCParamStruct()
         var outputStruct = SMCParamStruct()
         var data         = [UInt8](count: 32, repeatedValue: 0)
+                                            
         
         // First call to AppleSMC - get key info
         inputStruct.key = toUInt32(key)
@@ -874,9 +878,13 @@ public class SMC {
         
         result = callSMC(&inputStruct, outputStruct : &outputStruct)
         
+        // Store for return - we only get this info on key info calls
+        let dataType = outputStruct.keyInfo.dataType
+        let dataSize = outputStruct.keyInfo.dataSize
+        
         if (result != kIOReturnSuccess ||
             outputStruct.result != kSMC.kSMCSuccess.rawValue) {
-            return (data, result, outputStruct.result)
+            return (data, dataType, dataSize, result, outputStruct.result)
         }
         
         // Second call to AppleSMC - now we can get the data
@@ -919,7 +927,7 @@ public class SMC {
         data[30] = outputStruct.bytes_30
         data[31] = outputStruct.bytes_31
         
-        return (data, result, outputStruct.result)
+        return (data, dataType, dataSize, result, outputStruct.result)
     }
     
     
