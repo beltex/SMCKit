@@ -1072,7 +1072,7 @@ public class SMC {
         
         for var i : UInt = 0; i < numFans; ++i {
             // TODO: Add safe RPM
-            let vals = ["Name"    : getFanName(0).name,
+            let vals = ["Name"    : getFanName(i).name,
                         "Min RPM" : getFanMinRPM(i).rpm,
                         "Max RPM" : getFanMaxRPM(i).rpm]
             profile.updateValue(vals, forKey: "Fan \(i)")
