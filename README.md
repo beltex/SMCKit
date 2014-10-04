@@ -6,6 +6,8 @@ based Macs. The API works by talking to the AppleSMC.kext (kernel
 extension), the closed source driver for the SMC. Read temperature sensors,
 get and set fan speed (RPM), etc.
 
+For a C based version see [libsmc](https://github.com/beltex/libsmc).
+
 
 ### System Management Controller
 

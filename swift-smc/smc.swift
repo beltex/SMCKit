@@ -540,6 +540,11 @@ public class SMC {
     Check if an SMC key is valid. Useful for determining if a certain machine
     has particular sensor or fan for example.
     
+    NOTE: While a key may be valid, it can still report no data. This is a
+          known issue with for example TMP.HEATSINK_0. Thus,
+          getAllValidTMPKeys() discounts such sensors (even though isKeyValid()
+          returns true).
+    
     :param: key The SMC key to check. 4 byte multi-character constant. Must be
                 4 characters in length.
     :returns: valid True if the key is found, false otherwise
@@ -573,6 +578,9 @@ public class SMC {
     Get all valid SMC temperature keys (based on TMP enum, thus list may not
     be complete).
     
+    NOTE: Any sensor that reports a temperature of 0 is discounted.
+          TMP.HEATSINK_0 is known to do this.
+    
     :returns: Dictionary of keys (name, TMP SMC key).
     */
     public func getAllValidTMPKeys() -> [String : String] {
@@ -580,7 +588,7 @@ public class SMC {
         
         for (name, SMCKey) in TMP.allValues {
             if (isKeyValid(SMCKey.rawValue).valid &&
-                readSMC(SMCKey.rawValue).data[0] > 0) {
+                readSMC(SMCKey.rawValue).data[0] != 0) {
                 keys.updateValue(name, forKey: SMCKey.rawValue)
             }
         }
