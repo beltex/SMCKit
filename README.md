@@ -29,7 +29,7 @@ For more see:
 
 ### Requirements
 
-- [Xcode 6.1 Beta 3](https://developer.apple.com/xcode/downloads/)
+- [Xcode 6.1 GM seed 2](https://developer.apple.com/xcode/downloads/)
 - OS X 10.9+
 
 

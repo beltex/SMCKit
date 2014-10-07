@@ -191,11 +191,10 @@ public class SMC {
     
     
     /**
-    IOKit Error Codes - as defined in IOReturn.h
+    I/O Kit Error Codes - as defined in IOReturn.h
 
-    These are only available to kernel space IOKit code (except for
-    kIOReturnSuccess), thus we have to manually import them here. Most of these
-    are not revleant to us, but for the sake of completeness.
+    Swift can't import complex macros, thus we have to manually add them here.
+    Most of these are not revleant to us, but for the sake of completeness.
     
     See "Accessing Hardware From Applications -> Handling Errors" Apple doc for
     more information.
