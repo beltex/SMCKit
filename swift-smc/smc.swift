@@ -500,7 +500,7 @@ public class SMC {
     public func machineProfile(path : String) -> Bool {
         var result = false
         var err  : NSError?
-        let data : [String : AnyObject] = ["Model"    : getMachineModel().model,
+        let data : [String : AnyObject] = ["Model"    : getMachineModel(),
                                            "TMP Keys" : getAllValidTMPKeys(),
                                            "Fan Info" : getFanInfo()]
         
@@ -1084,27 +1084,23 @@ public class SMC {
     /**
     Get the model name of the machine.
     
-    :returns: The model name
+    :returns: The model name.
     */
-    private func getMachineModel() -> (model : String,
-                                       IOReturn : kern_return_t) {
-        var service : io_service_t
-        var ptr     : UnsafeMutablePointer<Int8>
-        
-        var model          = String()
-        var io_name_t_size = sizeof(io_name_t)
-        
-       
-        // Find the service 
-        service = IOServiceGetMatchingService(kIOMasterPortDefault,
-                  IOServiceMatching(IOSERVICE_MODEL).takeUnretainedValue())
+    private func getMachineModel() -> String {
+        var model = String()
+                                        
+        // Find the service
+        let service = IOServiceGetMatchingService(kIOMasterPortDefault,
+                      IOServiceMatching(IOSERVICE_MODEL).takeUnretainedValue())
         
         if (service == 0) {
-            return (model, IOReturn.kIOReturnError.rawValue)
+            return model
         }
         
         
-        ptr = UnsafeMutablePointer<Int8>.alloc(io_name_t_size)
+        // Create a pointer for the name (io_name_t - array of Int8)
+        let io_name_t_size = sizeof(io_name_t)
+        let ptr            = UnsafeMutablePointer<Int8>.alloc(io_name_t_size)
         ptr.initialize(0)
         
         // Get the model name
@@ -1112,24 +1108,25 @@ public class SMC {
         IOObjectRelease(service)
         
         if (result == kIOReturnSuccess) {
-            var next : Int8
+            // Iterate through the array to get all the chars
+            var nextChar : Int8
             for var i = 0; i < io_name_t_size; ++i {
-                next = ptr.advancedBy(i).memory
+                nextChar = ptr.advancedBy(i).memory
                 
                 // Check if at the end
-                if (next <= 0) {
+                if (nextChar <= 0) {
                     break
                 }
                 
-                model.append(UnicodeScalar(UInt32(next)))
+                model.append(UnicodeScalar(UInt32(nextChar)))
             }
         }
         
         
-        // Clean up
+        // Cleanup
         ptr.dealloc(io_name_t_size)
         
-        return (model, result)
+        return model
     }
 
 
