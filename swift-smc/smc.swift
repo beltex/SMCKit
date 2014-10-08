@@ -752,6 +752,26 @@ public class SMC {
     }
     
     
+    /**
+    Is the battery ok? Currently no details on exactly what this entails. Even
+    if service battery warning is given by OS X, this still seems to return OK.
+    
+    :returns: flag True if it is, false otherwise
+    :returns: IOReturn IOKit return code
+    :returns: kSMC SMC return code
+    */
+    public func isBatteryOk() -> (flag     : Bool,
+                                  IOReturn : kern_return_t,
+                                  kSMC     : UInt8) {
+        let result = readSMC(SMC_KEY.BATT_INFO.rawValue)
+            
+        // Sixth bit contains the battery ok flag
+        let flag = ((result.data[0] >> 6) & 1) == 1 ? true : false
+            
+        return (flag, result.IOReturn, result.kSMC)
+    }
+    
+    
     //--------------------------------------------------------------------------
     // MARK: PUBLIC METHODS - FANS
     //--------------------------------------------------------------------------
