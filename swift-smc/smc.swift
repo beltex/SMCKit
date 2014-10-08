@@ -733,6 +733,25 @@ public class SMC {
     }
     
     
+    /**
+    Is AC power present?
+    
+    :returns: flag True if it is, false otherwise
+    :returns: IOReturn IOKit return code
+    :returns: kSMC SMC return code
+    */
+    public func isACPresent() -> (flag     : Bool,
+                                  IOReturn : kern_return_t,
+                                  kSMC     : UInt8) {
+        let result = readSMC(SMC_KEY.BATT_INFO.rawValue)
+
+        // Second bit contains the AC present flag
+        let flag = ((result.data[0] >> 1) & 1) == 1 ? true : false
+            
+        return (flag, result.IOReturn, result.kSMC)
+    }
+    
+    
     //--------------------------------------------------------------------------
     // MARK: PUBLIC METHODS - FANS
     //--------------------------------------------------------------------------
