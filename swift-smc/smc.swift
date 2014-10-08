@@ -169,9 +169,27 @@ public class SMC {
     Sources: See TMP enum
     */
     public enum SMC_KEY : String {
-        case BATT_PWR = "BATP"
-        case NUM_KEYS = "#KEY"
-        case ODD_FULL = "MSDI"
+        /**
+        Battery information
+        */
+        case BATT_INFO = "BSIn"
+        
+        /**
+        Is the machine being powered by the battery?
+        */
+        case BATT_PWR  = "BATP"
+        
+        
+        /**
+        How many SMC keys does this machine have?
+        */
+        case NUM_KEYS  = "#KEY"
+        
+        
+        /**
+        Is there a CD in the optical disk drive (ODD)?
+        */
+        case ODD_FULL  = "MSDI"
     }
     
     
@@ -460,11 +478,8 @@ public class SMC {
     :returns: kIOReturnSuccess on successful connection to the SMC.
     */
     public func open() -> kern_return_t {
-        var result  : kern_return_t
-        var service : io_service_t
-        
-        service = IOServiceGetMatchingService(kIOMasterPortDefault,
-                  IOServiceMatching(IOSERVICE_SMC).takeUnretainedValue())
+        let service = IOServiceGetMatchingService(kIOMasterPortDefault,
+                      IOServiceMatching(IOSERVICE_SMC).takeUnretainedValue())
         
         if (service == 0) {
             // NOTE: IOServiceMatching documents 0 on failure
@@ -473,7 +488,7 @@ public class SMC {
             return IOReturn.kIOReturnError.rawValue
         }
         
-        result = IOServiceOpen(service, mach_task_self_, 0, &conn)
+        let result = IOServiceOpen(service, mach_task_self_, 0, &conn)
         IOObjectRelease(service)
         
         return result
@@ -657,25 +672,6 @@ public class SMC {
 
     
     /**
-    Is the machine being powered by the battery?
-    
-    :returns: flag True if it is, false otherwise
-    :returns: IOReturn IOKit return code
-    :returns: kSMC SMC return code
-    */
-    public func isBatteryPowered() -> (flag     : Bool,
-                                       IOReturn : kern_return_t,
-                                       kSMC     : UInt8) {
-        let result = readSMC(SMC_KEY.BATT_PWR.rawValue)
-        
-        // Data type is flag - 1 bit. 1 if battery powered, 0 otherwise
-        let ans = result.data[0] == 1 ? true : false
-        
-        return (ans, result.IOReturn, result.kSMC)
-    }
-    
-    
-    /**
     Is there a CD in the optical disk drive (ODD)?
     
     :returns: flag True if there is, false otherwise
@@ -686,11 +682,54 @@ public class SMC {
                                              IOReturn : kern_return_t,
                                              kSMC     : UInt8) {
         let result = readSMC(SMC_KEY.ODD_FULL.rawValue)
-        
-        // Data type is flag - 1 bit. 1 if CD inserted, 0 otherwise
-        let ans = result.data[0] == 1 ? true : false
             
-        return (ans, result.IOReturn, result.kSMC)
+        // Data type is flag - 1 bit. 1 if CD inserted, 0 otherwise
+        let flag = result.data[0] == 1 ? true : false
+            
+        return (flag, result.IOReturn, result.kSMC)
+    }
+    
+    
+    //--------------------------------------------------------------------------
+    // MARK: PUBLIC METHODS - BATTERY/POWER
+    //--------------------------------------------------------------------------
+    
+    
+    /**
+    Is the machine being powered by the battery?
+    
+    :returns: flag True if it is, false otherwise
+    :returns: IOReturn IOKit return code
+    :returns: kSMC SMC return code
+    */
+    public func isBatteryPowered() -> (flag     : Bool,
+                                       IOReturn : kern_return_t,
+                                       kSMC     : UInt8) {
+        let result = readSMC(SMC_KEY.BATT_PWR.rawValue)
+            
+        // Data type is flag - 1 bit. 1 if battery powered, 0 otherwise
+        let flag = result.data[0] == 1 ? true : false
+            
+        return (flag, result.IOReturn, result.kSMC)
+    }
+    
+    
+    /**
+    Is the machine charing?
+    
+    :returns: flag True if it is, false otherwise
+    :returns: IOReturn IOKit return code
+    :returns: kSMC SMC return code
+    */
+    public func isCharging() -> (flag     : Bool,
+                                 IOReturn : kern_return_t,
+                                 kSMC     : UInt8) {
+        let result = readSMC(SMC_KEY.BATT_INFO.rawValue)
+                                    
+        // First bit contains the charging flag
+        let flag = (result.data[0] & 1) == 1 ? true : false
+                                    
+        return (flag, result.IOReturn, result.kSMC)
     }
     
     
