@@ -7,7 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		4C192CAD1992A249002D39AB /* smc.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C192CAC1992A249002D39AB /* smc.swift */; };
+		4C192CAD1992A249002D39AB /* SMC.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C192CAC1992A249002D39AB /* SMC.swift */; };
 		4C9A793A19B1203E00F503AB /* main.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C9A793919B1203E00F503AB /* main.swift */; };
 /* End PBXBuildFile section */
 
@@ -24,8 +24,8 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
-		4C192CAC1992A249002D39AB /* smc.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = smc.swift; sourceTree = "<group>"; };
-		4C2C0E171991993E00808039 /* swift-smc */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = "swift-smc"; sourceTree = BUILT_PRODUCTS_DIR; };
+		4C192CAC1992A249002D39AB /* SMC.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SMC.swift; sourceTree = "<group>"; };
+		4C2C0E171991993E00808039 /* SMCKit */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = "SMCKit"; sourceTree = BUILT_PRODUCTS_DIR; };
 		4C9A793919B1203E00F503AB /* main.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = main.swift; path = examples/main.swift; sourceTree = SOURCE_ROOT; };
 /* End PBXFileReference section */
 
@@ -44,7 +44,7 @@
 			isa = PBXGroup;
 			children = (
 				4C9A793819B11FEE00F503AB /* examples */,
-				4C2C0E191991993E00808039 /* swift-smc */,
+				4C2C0E191991993E00808039 /* SMCKit */,
 				4C2C0E181991993E00808039 /* Products */,
 			);
 			sourceTree = "<group>";
@@ -52,17 +52,17 @@
 		4C2C0E181991993E00808039 /* Products */ = {
 			isa = PBXGroup;
 			children = (
-				4C2C0E171991993E00808039 /* swift-smc */,
+				4C2C0E171991993E00808039 /* SMCKit */,
 			);
 			name = Products;
 			sourceTree = "<group>";
 		};
-		4C2C0E191991993E00808039 /* swift-smc */ = {
+		4C2C0E191991993E00808039 /* SMCKit */ = {
 			isa = PBXGroup;
 			children = (
-				4C192CAC1992A249002D39AB /* smc.swift */,
+				4C192CAC1992A249002D39AB /* SMC.swift */,
 			);
-			path = "swift-smc";
+			path = "SMCKit";
 			sourceTree = "<group>";
 		};
 		4C9A793819B11FEE00F503AB /* examples */ = {
@@ -71,15 +71,15 @@
 				4C9A793919B1203E00F503AB /* main.swift */,
 			);
 			name = examples;
-			path = "swift-smc";
+			path = "SMCKit";
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
-		4C2C0E161991993E00808039 /* swift-smc */ = {
+		4C2C0E161991993E00808039 /* SMCKit */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = 4C2C0E1E1991993E00808039 /* Build configuration list for PBXNativeTarget "swift-smc" */;
+			buildConfigurationList = 4C2C0E1E1991993E00808039 /* Build configuration list for PBXNativeTarget "SMCKit" */;
 			buildPhases = (
 				4C2C0E131991993E00808039 /* Sources */,
 				4C2C0E141991993E00808039 /* Frameworks */,
@@ -89,9 +89,9 @@
 			);
 			dependencies = (
 			);
-			name = "swift-smc";
-			productName = "swift-smc";
-			productReference = 4C2C0E171991993E00808039 /* swift-smc */;
+			name = "SMCKit";
+			productName = "SMCKit";
+			productReference = 4C2C0E171991993E00808039 /* SMCKit */;
 			productType = "com.apple.product-type.tool";
 		};
 /* End PBXNativeTarget section */
@@ -108,7 +108,7 @@
 					};
 				};
 			};
-			buildConfigurationList = 4C2C0E121991993E00808039 /* Build configuration list for PBXProject "swift-smc" */;
+			buildConfigurationList = 4C2C0E121991993E00808039 /* Build configuration list for PBXProject "SMCKit" */;
 			compatibilityVersion = "Xcode 3.2";
 			developmentRegion = English;
 			hasScannedForEncodings = 0;
@@ -120,7 +120,7 @@
 			projectDirPath = "";
 			projectRoot = "";
 			targets = (
-				4C2C0E161991993E00808039 /* swift-smc */,
+				4C2C0E161991993E00808039 /* SMCKit */,
 			);
 		};
 /* End PBXProject section */
@@ -130,7 +130,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				4C192CAD1992A249002D39AB /* smc.swift in Sources */,
+				4C192CAD1992A249002D39AB /* SMC.swift in Sources */,
 				4C9A793A19B1203E00F503AB /* main.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -230,7 +230,7 @@
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
-		4C2C0E121991993E00808039 /* Build configuration list for PBXProject "swift-smc" */ = {
+		4C2C0E121991993E00808039 /* Build configuration list for PBXProject "SMCKit" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				4C2C0E1C1991993E00808039 /* Debug */,
@@ -239,7 +239,7 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		4C2C0E1E1991993E00808039 /* Build configuration list for PBXNativeTarget "swift-smc" */ = {
+		4C2C0E1E1991993E00808039 /* Build configuration list for PBXNativeTarget "SMCKit" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				4C2C0E1F1991993E00808039 /* Debug */,

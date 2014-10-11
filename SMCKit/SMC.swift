@@ -1,6 +1,6 @@
 /*
- * smc.swift
- * swift-smc
+ * SMC.swift
+ * SMCKit
  *
  * Copyright (C) 2014  beltex <https://github.com/beltex>
  *

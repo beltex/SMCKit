@@ -1,5 +1,5 @@
-swift-smc
-=========
+SMCKit
+======
 
 A System Management Controller (SMC) API in pure Swift from user space for Intel
 based Macs. The API works by talking to the AppleSMC.kext (kernel

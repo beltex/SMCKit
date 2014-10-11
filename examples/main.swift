@@ -2,7 +2,7 @@
 * Simple example client.
 *
 * main.swift
-* swift-smc
+* SMCKit
 *
 * Copyright (C) 2014  beltex <https://github.com/beltex>
 *
