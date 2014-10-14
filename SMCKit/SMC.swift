@@ -84,6 +84,7 @@ public class SMC {
         case NORTHBRIDGE_DIODE      = "TN0D"
         case NORTHBRIDGE_PROXIMITY  = "TN0P"
         case ODD_PROXIMITY          = "TO0P"
+        case PALM_REST              = "Ts0P"
         case PWR_SUPPLY_PROXIMITY   = "Tp0P"
         case THUNDERBOLT_0          = "TI0P"
         case THUNDERBOLT_1          = "TI1P"
@@ -118,6 +119,7 @@ public class SMC {
                                 "NORTHBRIDGE_DIODE"     : NORTHBRIDGE_DIODE,
                                 "NORTHBRIDGE_PROXIMITY" : NORTHBRIDGE_PROXIMITY,
                                 "ODD_PROXIMITY"         : ODD_PROXIMITY,
+                                "PALM_REST"             : PALM_REST,
                                 "PWR_SUPPLY_PROXIMITY"  : PWR_SUPPLY_PROXIMITY,
                                 "THUNDERBOLT_0"         : THUNDERBOLT_0,
                                 "THUNDERBOLT_1"         : THUNDERBOLT_1,
