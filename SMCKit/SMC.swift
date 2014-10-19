@@ -647,8 +647,7 @@ public class SMC {
     :returns: kSMC SMC return code
     */
     public func getTMP(key  : TMP,
-                       unit : TMP_UNIT = TMP_UNIT.Celsius)
-                                                   -> (tmp      : Double,
+                       unit : TMP_UNIT = .Celsius) -> (tmp      : Double,
                                                        IOReturn : kern_return_t,
                                                        kSMC     : UInt8) {
        let result = readSMC(key.rawValue)
@@ -1167,6 +1166,8 @@ public class SMC {
     :returns: The model name.
     */
     private func getMachineModel() -> String {
+        // This could be done using sysctl() as well
+
         var model = String()
                                         
         // Find the service
@@ -1189,16 +1190,13 @@ public class SMC {
         
         if (result == kIOReturnSuccess) {
             // Iterate through the array to get all the chars
-            var nextChar : Int8
             for var i = 0; i < io_name_t_size; ++i {
-                nextChar = ptr.advancedBy(i).memory
-                
                 // Check if at the end
-                if (nextChar <= 0) {
+                if (ptr[i] <= 0) {
                     break
                 }
                 
-                model.append(UnicodeScalar(UInt32(nextChar)))
+                model.append(UnicodeScalar(UInt32(ptr[i])))
             }
         }
         
