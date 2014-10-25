@@ -484,9 +484,11 @@ public class SMC {
                       IOServiceMatching(IOSERVICE_SMC).takeUnretainedValue())
         
         if (service == 0) {
-            // NOTE: IOServiceMatching documents 0 on failure
+            #if DEBUG
+                println("ERROR - \(__FILE__):\(__FUNCTION__) - \(IOSERVICE_SMC)"
+                        + " service not found")
+            #endif
             
-            println("ERROR: \(IOSERVICE_SMC) NOT FOUND")
             return IOReturn.kIOReturnError.rawValue
         }
         
@@ -524,8 +526,11 @@ public class SMC {
         let opts         = NSJSONWritingOptions.PrettyPrinted
         let outputStream = NSOutputStream(toFileAtPath: path, append: false)
 
-        // Catch empty path string
+        
         if (outputStream == nil) {
+            #if DEBUG
+                println("ERROR - \(__FILE__):\(__FUNCTION__) - EMPTY PATH")
+            #endif
             return result
         }
         
@@ -534,17 +539,29 @@ public class SMC {
 
         // Catch bad path - only once stream open
         if (outputStream?.streamStatus == NSStreamStatus.Error) {
+            #if DEBUG
+                println("ERROR - \(__FILE__):\(__FUNCTION__) - BAD PATH -"
+                        + " \"\(path)\"")
+            #endif
             return result
         }
         
         // Check if write was successful
-        // TODO: Log NSError on bad write
         if (NSJSONSerialization.writeJSONObject(data,
                                                 toStream : outputStream!,
                                                 options  : opts,
                                                 error    : &err) != 0) {
             result = true
         }
+        
+        
+        #if DEBUG
+            if (err != nil) {
+                println("ERROR - \(__FILE__):\(__FUNCTION__) - WRITE FAILED -"
+                        + " \(err)")
+            }
+        #endif
+        
         
         outputStream?.close()
         
@@ -573,7 +590,10 @@ public class SMC {
         var ans = false
                                                 
         if (countElements(key) != SMC_KEY_SIZE) {
-            println("ERROR: Invalid key size - must be 4 chars")
+            #if DEBUG
+                println("ERROR - \(__FILE__):\(__FUNCTION__) - INVALID KEY"
+                        + " SIZE")
+            #endif
             return (ans, IOReturn.kIOReturnBadArgument.rawValue,
                          kSMC.kSMCError.rawValue)
         }
@@ -913,8 +933,11 @@ public class SMC {
         if (!(maxRPM.IOReturn == kIOReturnSuccess &&
               maxRPM.kSMC == kSMC.kSMCSuccess.rawValue &&
               rpm <= maxRPM.rpm)) {
-                                                                
-            println("WARNING: Unsafe fan RPM")
+            #if DEBUG
+                println("ERROR - \(__FILE__):\(__FUNCTION__) - UNSAFE RPM -"
+                        + " Max \(maxRPM.rpm) RPM")
+            #endif
+            
             return (ans, IOReturn.kIOReturnBadArgument.rawValue,
                          kSMC.kSMCError.rawValue)
         }
@@ -1047,6 +1070,10 @@ public class SMC {
         // Check if given data matches expected input
         if (dataSize != outputStruct.keyInfo.dataSize ||
             dataType.rawValue != toString(outputStruct.keyInfo.dataType)) {
+            #if DEBUG
+                println("ERROR - \(__FILE__):\(__FUNCTION__) - INVALID DATA -"
+                        + " Expected input = \(outputStruct.keyInfo)")
+            #endif
             return (IOReturn.kIOReturnBadArgument.rawValue,
                     kSMC.kSMCError.rawValue)
         }
@@ -1110,11 +1137,15 @@ public class SMC {
         // there expected to be 80 bytes. This may not be the case on the Swift
         // side. One hack is to simply hardcode this to 80.
         var inputStructCnt  : size_t = UInt(sizeof(SMCParamStruct))
-        var outputStructCnt : size_t = UInt(sizeof(SMCParamStruct))
+        var outputStructCnt : size_t = inputStructCnt
                             
         if (inputStructCnt != 80) {
             // Houston, we have a problem. Depending how far off this is from
             // 80, call may or may not work.
+            #if DEBUG
+                println("WARNING - \(__FILE__):\(__FUNCTION__) - SMCParamStruct"
+                        + " size is \(inputStructCnt) bytes")
+            #endif
             return IOReturn.kIOReturnBadArgument.rawValue
         }
         
@@ -1127,7 +1158,13 @@ public class SMC {
         
         if (result != kIOReturnSuccess) {
             // Determine the exact error
+            // TODO: Get system and subsystem codes too?
+            // https://developer.apple.com/library/mac/qa/qa1075/_index.html
             result = SMC.getErrorCode(result)
+            #if DEBUG
+                println("ERROR - \(__FILE__):\(__FUNCTION__) - IOReturn ="
+                        + " \(result) - kSMC = \(outputStruct.result)")
+            #endif
         }
 
         return result
@@ -1173,8 +1210,12 @@ public class SMC {
         // Find the service
         let service = IOServiceGetMatchingService(kIOMasterPortDefault,
                       IOServiceMatching(IOSERVICE_MODEL).takeUnretainedValue())
-        
+
         if (service == 0) {
+            #if DEBUG
+                println("ERROR - \(__FILE__):\(__FUNCTION__) -"
+                        + " \(IOSERVICE_MODEL) service not found")
+            #endif
             return model
         }
         
@@ -1199,9 +1240,17 @@ public class SMC {
                 model.append(UnicodeScalar(UInt32(ptr[i])))
             }
         }
-        
+
+        #if DEBUG
+            // TODO: get rid of the if statement - want it to be else of above
+            if (result != kIOReturnSuccess) {
+                println("ERROR - \(__FILE__):\(__FUNCTION__) - IOReturn ="
+                        + " \(result)")
+            }
+        #endif
         
         // Cleanup
+        // TODO: destory() or dealloc()?
         ptr.dealloc(io_name_t_size)
         
         return model
@@ -1224,6 +1273,7 @@ public class SMC {
             return 0
         }
         
+        // TODO: Loop unrolling?
         for char in key.utf8 {
             ans += (Int32(char) << shift)
             shift -= 8
@@ -1244,6 +1294,7 @@ public class SMC {
         var ans = String()
         var shift : Int32 = 24
 
+        // TODO: Loop unrolling?
         for var index = 0; index < SMC_KEY_SIZE; ++index {
             // To get each char, we shift it into the lower 8 bits, and then
             // & by 255 to insolate it

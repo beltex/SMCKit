@@ -25,7 +25,7 @@
 
 /* Begin PBXFileReference section */
 		4C192CAC1992A249002D39AB /* SMC.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SMC.swift; sourceTree = "<group>"; };
-		4C2C0E171991993E00808039 /* SMCKit */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = "SMCKit"; sourceTree = BUILT_PRODUCTS_DIR; };
+		4C2C0E171991993E00808039 /* SMCKit */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = SMCKit; sourceTree = BUILT_PRODUCTS_DIR; };
 		4C9A793919B1203E00F503AB /* main.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = main.swift; path = examples/main.swift; sourceTree = SOURCE_ROOT; };
 /* End PBXFileReference section */
 
@@ -62,7 +62,7 @@
 			children = (
 				4C192CAC1992A249002D39AB /* SMC.swift */,
 			);
-			path = "SMCKit";
+			path = SMCKit;
 			sourceTree = "<group>";
 		};
 		4C9A793819B11FEE00F503AB /* examples */ = {
@@ -71,7 +71,7 @@
 				4C9A793919B1203E00F503AB /* main.swift */,
 			);
 			name = examples;
-			path = "SMCKit";
+			path = SMCKit;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -89,8 +89,8 @@
 			);
 			dependencies = (
 			);
-			name = "SMCKit";
-			productName = "SMCKit";
+			name = SMCKit;
+			productName = SMCKit;
 			productReference = 4C2C0E171991993E00808039 /* SMCKit */;
 			productType = "com.apple.product-type.tool";
 		};
@@ -216,6 +216,7 @@
 		4C2C0E1F1991993E00808039 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				OTHER_SWIFT_FLAGS = "-D DEBUG";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 			};
 			name = Debug;

@@ -25,8 +25,9 @@ import IOKit
 
 let smc = SMC()
 
-assert(smc.open() == kIOReturnSuccess, "ERROR: Connection to SMC failed")
-println("CPU 0 Diode Temperature: \(smc.getTMP(SMC.TMP.CPU_0_DIODE).tmp)°C")
-println("Fan 0 Speed: \(smc.getFanRPM(0).rpm) RPM")
+if (smc.open() == kIOReturnSuccess) {
+    println("CPU 0 Diode Temperature: \(smc.getTMP(SMC.TMP.CPU_0_DIODE).tmp)°C")
+    println("Fan 0 Speed: \(smc.getFanRPM(0).rpm) RPM")
+    smc.close()
+}
 
-smc.close()
