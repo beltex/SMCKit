@@ -176,6 +176,7 @@ public class SMC {
         */
         case BATT_INFO = "BSIn"
         
+        
         /**
         Is the machine being powered by the battery?
         */
@@ -214,7 +215,7 @@ public class SMC {
     I/O Kit Error Codes - as defined in IOReturn.h
 
     Swift can't import complex macros, thus we have to manually add them here.
-    Most of these are not revleant to us, but for the sake of completeness.
+    Most of these are not relevant to us, but for the sake of completeness.
     
     See "Accessing Hardware From Applications -> Handling Errors" Apple doc for
     more information.
