@@ -329,6 +329,7 @@
 				INFOPLIST_FILE = SMCKit/Info.plist;
 				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks @loader_path/Frameworks";
+				OTHER_SWIFT_FLAGS = "-D DEBUG";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SKIP_INSTALL = YES;
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
@@ -404,6 +405,7 @@
 				4CE566A31A00A48800787F6B /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 		4CE566A41A00A48800787F6B /* Build configuration list for PBXNativeTarget "SMCKitTests" */ = {
 			isa = XCConfigurationList;
@@ -412,6 +414,7 @@
 				4CE566A61A00A48800787F6B /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
 	};
