@@ -35,17 +35,38 @@ For more see:
 
 ### Installation
 
-_"The infrastructure and best practices for distributing Swift libraries is
-currently being developed by the developer community during this beta period of
-the language and Xcode. In the meantime, you can simply copy the smc.swift file
-into your Xcode project."_
--via [Alamofire](https://github.com/Alamofire/Alamofire)
+The quick and easy solution is to simply copy the `SMC.swift` file into your
+project. For a more proper longer term solution, see below via
+[Alamofire](https://github.com/Alamofire/Alamofire).
+
+_Due to the current lack of [proper infrastructure](http://cocoapods.org) for
+Swift dependency management, using SMCKit in your project requires the following
+steps:_
+
+1. Add SMCKit as a [submodule](http://git-scm.com/docs/git-submodule) by opening
+   the Terminal, `cd`-ing into your top-level project directory, and entering
+   the command `git submodule add https://github.com/SMCKit/SMCKit.git`
+2. Open the `SMCKit` folder, and drag `SMCKit.xcodeproj` into the file navigator
+   of your project.
+3. In Xcode, navigate to the target configuration window by clicking on the blue
+   project icon, and selecting the application target under the "Targets"
+   heading in the sidebar.
+4. Ensure that the deployment target of SMCKit.framework matches that of the
+   application target.
+5. In the tab bar at the top of that window, open the "Build Phases" panel.
+6. Expand the "Target Dependencies" group, and add `SMCKit.framework`.
+7. Click on the `+` button at the top left of the panel and select "New Copy
+   Files Phase". Rename this new phase to "Copy Frameworks", set the
+   "Destination" to "Frameworks", and add `SMCKit.framework`.
 
 
 ### Usage
 
 ```swift
+// If you using SMCKit as a framework in your project, you will only need the
+// second import statement
 import IOKit
+import SMCKit
 
 let smc = SMC()
 
