@@ -59,6 +59,13 @@ steps:_
    Files Phase". Rename this new phase to "Copy Frameworks", set the
    "Destination" to "Frameworks", and add `SMCKit.framework`.
 
+**NOTE**: If you are building an OS X command line tool, the above won't work.
+          See here for
+          [why](https://github.com/ksm/SwiftInFlux#runtime-dynamic-libraries).
+          Instead of the last two steps, do the following:
+
+> Expand the "Compile Sources" group, and add `SMC.swift`.
+
 
 ### Usage
 
