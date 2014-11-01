@@ -1,8 +1,8 @@
 SMCKit
 ======
 
-A System Management Controller (SMC) API in pure Swift from user space for Intel
-based Macs. The API works by talking to the AppleSMC.kext (kernel
+A System Management Controller (SMC) library in pure Swift from user space for
+Intel based Macs. The library works by talking to the AppleSMC.kext (kernel
 extension), the closed source driver for the SMC. Read temperature sensors,
 get and set fan speed (RPM), etc.
 
@@ -45,7 +45,7 @@ steps:_
 
 1. Add SMCKit as a [submodule](http://git-scm.com/docs/git-submodule) by opening
    the Terminal, `cd`-ing into your top-level project directory, and entering
-   the command `git submodule add https://github.com/SMCKit/SMCKit.git`
+   the command `git submodule add https://github.com/beltex/SMCKit.git`
 2. Open the `SMCKit` folder, and drag `SMCKit.xcodeproj` into the file navigator
    of your project.
 3. In Xcode, navigate to the target configuration window by clicking on the blue
@@ -83,6 +83,9 @@ if (smc.open() == kIOReturnSuccess) {
     smc.close()
 }
 ```
+
+Also, keep in mind that Swift currently offers no ABI stability. See
+[here](https://github.com/ksm/SwiftInFlux#abi-stability).
 
 
 ### References
