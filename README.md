@@ -63,7 +63,7 @@ steps:_
 ### Usage
 
 ```swift
-// If you using SMCKit as a framework in your project, you will only need the
+// If your using SMCKit as a framework in your project, you will only need the
 // second import statement
 import IOKit
 import SMCKit
