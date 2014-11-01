@@ -477,6 +477,7 @@
 				4C982BE21A040CD500F4A639 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 		4CE566851A00A48800787F6B /* Build configuration list for PBXProject "SMCKit" */ = {
 			isa = XCConfigurationList;
