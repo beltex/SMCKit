@@ -84,7 +84,9 @@ if (smc.open() == kIOReturnSuccess) {
 }
 ```
 
-Also, keep in mind that Swift currently offers no ABI stability. See
+The use of this framework will almost certainly not be allowed in the Mac App
+Store as it is essentially using a private API. Also, keep in mind that Swift
+currently offers no ABI stability. See
 [here](https://github.com/ksm/SwiftInFlux#abi-stability).
 
 
