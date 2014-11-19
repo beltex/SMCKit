@@ -1,5 +1,6 @@
 /*
-* Simple example client.
+* Simple example usage of SMCKit. Prints machine status: temperatures, fans,
+* power, misc.
 *
 * main.swift
 * SMCKit
@@ -23,11 +24,47 @@
 
 import SMCKit
 
+
 let smc = SMC()
 
-if (smc.open() == kIOReturnSuccess) {
-    println("CPU 0 Diode Temperature: \(smc.getTMP(SMC.TMP.CPU_0_DIODE).tmp)°C")
-    println("Fan 0 Speed: \(smc.getFanRPM(0).rpm) RPM")
-    smc.close()
+if (smc.open() != kIOReturnSuccess) {
+    println("ERROR: Failed to open connection to SMC")
+    exit(-1)
+}
+println("// MACHINE STATUS")
+
+
+println("\n-- TEMPERATURE --")
+let temperatureSensors = smc.getAllValidTMPKeys()
+
+
+for (key, name) in temperatureSensors {
+    let temperature = smc.getTMP(SMC.TMP.allValues[name]!).tmp
+    
+    println("\(name)\n\t\(temperature)°C")
 }
 
+
+println("\n-- FAN --")
+let numberOfFans = smc.getNumFans().numFans
+
+for var i : UInt = 0; i < numberOfFans; ++i {
+    let fanName = smc.getFanName(i).name
+    let fanRPM  = smc.getFanRPM(i).rpm
+    
+    println("\(fanName)\n\t\(fanRPM) RPM")
+}
+
+
+println("\n-- POWER --")
+println("AC Present:       \(smc.isACPresent().flag)")
+println("Battery Powered:  \(smc.isBatteryPowered().flag)")
+println("Charging:         \(smc.isCharging().flag)")
+println("Battery Ok:       \(smc.isBatteryOk().flag)")
+
+
+println("\n-- MISC --")
+println("Disc in ODD:      \(smc.isOpticalDiskDriveFull().flag)")
+
+
+smc.close()
