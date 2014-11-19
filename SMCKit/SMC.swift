@@ -60,6 +60,9 @@ public class SMC {
     - http://www.parhelia.ch/blog/statics/k3_keys.html
     */
     public enum TMP : String {
+        // TODO: Add more CPU and GPU keys. GPU is usually maxed at 2, see Mac
+        //       Pro & 15' Macbook Pro. Not sure what max CPU's is though. We
+        //       can get the value via Mach API at runtime but that won't help.
         case AMBIENT_AIR_0          = "TA0P"
         case AMBIENT_AIR_1          = "TA1P"
         case CPU_0_DIODE            = "TC0D"
@@ -94,36 +97,40 @@ public class SMC {
         /**
         For enumerating all values of the enum. Not ideal. Seems to be the
         cleanest current solution. See: http://stackoverflow.com/a/24137319
+        
+        Also, for getting the name of the enum, again, currently no way to do
+        this in Swift.
         */
-        static let allValues = ["AMBIENT_AIR_0"         : AMBIENT_AIR_0,
-                                "AMBIENT_AIR_1"         : AMBIENT_AIR_1,
-                                "CPU_0_DIODE"           : CPU_0_DIODE,
-                                "CPU_0_HEATSINK"        : CPU_0_HEATSINK,
-                                "CPU_0_PROXIMITY"       : CPU_0_PROXIMITY,
-                                "ENCLOSURE_BASE_0"      : ENCLOSURE_BASE_0,
-                                "ENCLOSURE_BASE_1"      : ENCLOSURE_BASE_1,
-                                "ENCLOSURE_BASE_2"      : ENCLOSURE_BASE_2,
-                                "ENCLOSURE_BASE_3"      : ENCLOSURE_BASE_3,
-                                "GPU_0_DIODE"           : GPU_0_DIODE,
-                                "GPU_0_HEATSINK"        : GPU_0_HEATSINK,
-                                "GPU_0_PROXIMITY"       : GPU_0_PROXIMITY,
-                                "HDD_PROXIMITY"         : HDD_PROXIMITY,
-                                "HEATSINK_0"            : HEATSINK_0,
-                                "HEATSINK_1"            : HEATSINK_1,
-                                "HEATSINK_2"            : HEATSINK_2,
-                                "LCD_PROXIMITY"         : LCD_PROXIMITY,
-                                "MEM_SLOT_0"            : MEM_SLOT_0,
-                                "MEM_SLOTS_PROXIMITY"   : MEM_SLOTS_PROXIMITY,
-                                "MISC_PROXIMITY"        : MISC_PROXIMITY,
-                                "NORTHBRIDGE"           : NORTHBRIDGE,
-                                "NORTHBRIDGE_DIODE"     : NORTHBRIDGE_DIODE,
-                                "NORTHBRIDGE_PROXIMITY" : NORTHBRIDGE_PROXIMITY,
-                                "ODD_PROXIMITY"         : ODD_PROXIMITY,
-                                "PALM_REST"             : PALM_REST,
-                                "PWR_SUPPLY_PROXIMITY"  : PWR_SUPPLY_PROXIMITY,
-                                "THUNDERBOLT_0"         : THUNDERBOLT_0,
-                                "THUNDERBOLT_1"         : THUNDERBOLT_1,
-                                "WIRELESS_MODULE"       : WIRELESS_MODULE]
+        public static let allValues =
+                               [AMBIENT_AIR_0         : "AMBIENT_AIR_0",
+                                AMBIENT_AIR_1         : "AMBIENT_AIR_1",
+                                CPU_0_DIODE           : "CPU_0_DIODE",
+                                CPU_0_HEATSINK        : "CPU_0_HEATSINK",
+                                CPU_0_PROXIMITY       : "CPU_0_PROXIMITY",
+                                ENCLOSURE_BASE_0      : "ENCLOSURE_BASE_0",
+                                ENCLOSURE_BASE_1      : "ENCLOSURE_BASE_1",
+                                ENCLOSURE_BASE_2      : "ENCLOSURE_BASE_2",
+                                ENCLOSURE_BASE_3      : "ENCLOSURE_BASE_3",
+                                GPU_0_DIODE           : "GPU_0_DIODE",
+                                GPU_0_HEATSINK        : "GPU_0_HEATSINK",
+                                GPU_0_PROXIMITY       : "GPU_0_PROXIMITY",
+                                HDD_PROXIMITY         : "HDD_PROXIMITY",
+                                HEATSINK_0            : "HEATSINK_0",
+                                HEATSINK_1            : "HEATSINK_1",
+                                HEATSINK_2            : "HEATSINK_2",
+                                LCD_PROXIMITY         : "LCD_PROXIMITY",
+                                MEM_SLOT_0            : "MEM_SLOT_0",
+                                MEM_SLOTS_PROXIMITY   : "MEM_SLOTS_PROXIMITY",
+                                MISC_PROXIMITY        : "MISC_PROXIMITY",
+                                NORTHBRIDGE           : "NORTHBRIDGE",
+                                NORTHBRIDGE_DIODE     : "NORTHBRIDGE_DIODE",
+                                NORTHBRIDGE_PROXIMITY : "NORTHBRIDGE_PROXIMITY",
+                                ODD_PROXIMITY         : "ODD_PROXIMITY",
+                                PALM_REST             : "PALM_REST",
+                                PWR_SUPPLY_PROXIMITY  : "PWR_SUPPLY_PROXIMITY",
+                                THUNDERBOLT_0         : "THUNDERBOLT_0",
+                                THUNDERBOLT_1         : "THUNDERBOLT_1",
+                                WIRELESS_MODULE       : "WIRELESS_MODULE"]
     }
     
     
@@ -529,9 +536,10 @@ public class SMC {
     public func machineProfile(path : String) -> Bool {
         var result = false
         var err  : NSError?
-        let data : [String : AnyObject] = ["Model"    : getMachineModel(),
-                                           "TMP Keys" : getAllValidTMPKeys(),
-                                           "Fan Info" : getFanInfo()]
+        let data : [String : AnyObject] =
+                                      ["Model"       : getMachineModel(),
+                                       "Temperature" : temperatureInformation(),
+                                       "Fan"         : fanInformation()]
         
         let opts         = NSJSONWritingOptions.PrettyPrinted
         let outputStream = NSOutputStream(toFileAtPath: path, append: false)
@@ -627,19 +635,20 @@ public class SMC {
     NOTE: Any sensor that reports a temperature of 0 is discounted.
           TMP.HEATSINK_0 is known to do this.
     
-    :returns: Dictionary of keys (name, TMP SMC key).
+    :returns: Array of keys. For convenience, the array is sorted based on
+              sensor names.
     */
-    public func getAllValidTMPKeys() -> [String : String] {
-        var keys = [String : String]()
+    public func getAllValidTemperatureKeys() -> [TMP] {
+        var SMCKeys = [TMP]()
         
-        for (name, SMCKey) in TMP.allValues {
+        for SMCKey in TMP.allValues.keys.array {
             if (isKeyValid(SMCKey.rawValue).valid &&
                 readSMC(SMCKey.rawValue).data[0] != 0) {
-                keys.updateValue(name, forKey: SMCKey.rawValue)
+                SMCKeys.append(SMCKey)
             }
         }
         
-        return keys
+        return sorted(SMCKeys, { TMP.allValues[$0]! < TMP.allValues[$1]! })
     }
     
     
@@ -1182,16 +1191,34 @@ public class SMC {
     
     
     //--------------------------------------------------------------------------
-    // MARK: PRIVATE METHODS - HELPERS
+    // MARK: PRIVATE METHODS - HELPERS - machineProfile()
     //--------------------------------------------------------------------------
 
 
+    /**
+    Get overall information about the temperature sensors of the machine. For
+    machineProfile().
+    
+    :returns: Dictionary of information.
+    */
+    private func temperatureInformation() -> [String : String] {
+        var dict = [String : String]()
+        let validKeys = getAllValidTemperatureKeys()
+        
+        for key in validKeys {
+            dict.updateValue(SMC.TMP.allValues[key]!, forKey: key.rawValue)
+        }
+        
+        return dict
+    }
+    
+    
     /**
     Get overall information about the fans of the machine. For machineProfile().
     
     :returns: Dictionary of information.
     */
-    private func getFanInfo() -> [String : AnyObject] {
+    private func fanInformation() -> [String : AnyObject] {
         let numFans = getNumFans().numFans
         var profile : [String : AnyObject] = ["# of fans" : numFans]
         
@@ -1266,6 +1293,11 @@ public class SMC {
         return model
     }
 
+    
+    //--------------------------------------------------------------------------
+    // MARK: PRIVATE METHODS - HELPERS
+    //--------------------------------------------------------------------------
+    
 
     /**
     Convert SMC key to UInt32. This must be done to pass it to the SMC.
@@ -1372,7 +1404,7 @@ public class SMC {
     
     
     //--------------------------------------------------------------------------
-    // MARK: PRIVATE METHODS - HELPERS - TMP CONVERSION
+    // MARK: PRIVATE METHODS - HELPERS - TEMPERATURE CONVERSION
     //--------------------------------------------------------------------------
     
     

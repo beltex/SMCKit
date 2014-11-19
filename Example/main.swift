@@ -35,13 +35,14 @@ println("// MACHINE STATUS")
 
 
 println("\n-- TEMPERATURE --")
-let temperatureSensors = smc.getAllValidTMPKeys()
+let temperatureSensors = smc.getAllValidTemperatureKeys()
 
 
-for (key, name) in temperatureSensors {
-    let temperature = smc.getTMP(SMC.TMP.allValues[name]!).tmp
+for key in temperatureSensors {
+    let temperatureSensorName = SMC.TMP.allValues[key]!
+    let temperature           = smc.getTMP(key).tmp
     
-    println("\(name)\n\t\(temperature)°C")
+    println("\(temperatureSensorName)\n\t\(temperature)°C")
 }
 
 
