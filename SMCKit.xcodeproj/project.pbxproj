@@ -113,9 +113,9 @@
 		4CE5668D1A00A48800787F6B /* SMCKit */ = {
 			isa = PBXGroup;
 			children = (
+				4CE566A71A00A49600787F6B /* SMC.swift */,
 				4CE566901A00A48800787F6B /* SMCKit.h */,
 				4CE5668E1A00A48800787F6B /* Supporting Files */,
-				4CE566A71A00A49600787F6B /* SMC.swift */,
 			);
 			path = SMCKit;
 			sourceTree = "<group>";

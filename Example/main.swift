@@ -39,8 +39,8 @@ let temperatureSensors = smc.getAllValidTemperatureKeys()
 
 
 for key in temperatureSensors {
-    let temperatureSensorName = SMC.TMP.allValues[key]!
-    let temperature           = smc.getTMP(key).tmp
+    let temperatureSensorName = SMC.Temperature.allValues[key]!
+    let temperature           = smc.getTemperature(key).tmp
     
     println("\(temperatureSensorName)\n\t\(temperature)°C")
 }

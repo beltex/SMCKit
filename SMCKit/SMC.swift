@@ -59,10 +59,11 @@ public class SMC {
     - https://github.com/jedda/OSX-Monitoring-Tools
     - http://www.parhelia.ch/blog/statics/k3_keys.html
     */
-    public enum TMP : String {
+    public enum Temperature: String {
         // TODO: Add more CPU and GPU keys. GPU is usually maxed at 2, see Mac
         //       Pro & 15' Macbook Pro. Not sure what max CPU's is though. We
         //       can get the value via Mach API at runtime but that won't help.
+        
         case AMBIENT_AIR_0          = "TA0P"
         case AMBIENT_AIR_1          = "TA1P"
         case CPU_0_DIODE            = "TC0D"
@@ -135,86 +136,12 @@ public class SMC {
     
     
     /**
-    SMC keys for fans - 4 byte multi-character constants
-    
-    Number of fans on Macs vary of course, thus not all keys will be applicable.
-    
-    Presumed letter translations:
-    
-    - F  = Fan
-    - Ac = Acutal
-    - Mn = Min
-    - Mx = Max
-    - Sf = Safe
-    - Tg = Target
-    
-    Sources: See TMP enum
+    Temperature units
     */
-    public enum FAN : String {
-        case FAN_0            = "F0Ac"
-        case FAN_0_DESC       = "F0ID"
-        case FAN_0_MIN_RPM    = "F0Mn"
-        case FAN_0_MAX_RPM    = "F0Mx"
-        case FAN_0_SAFE_RPM   = "F0Sf"
-        case FAN_0_TARGET_RPM = "F0Tg"
-        case FAN_1            = "F1Ac"
-        case FAN_1_MIN_RPM    = "F1Mn"
-        case FAN_1_MAX_RPM    = "F1Mx"
-        case FAN_1_SAFE_RPM   = "F1Sf"
-        case FAN_1_TARGET_RPM = "F1Tg"
-        case FAN_2            = "F2Ac"
-        case FAN_2_MIN_RPM    = "F2Mn"
-        case FAN_2_MAX_RPM    = "F2Mx"
-        case FAN_2_SAFE_RPM   = "F2Sf"
-        case FAN_2_TARGET_RPM = "F2Tg"
-        case NUM_FANS         = "FNum"
-        case FORCE_BITS       = "FS! "
-    }
-    
-    
-    /**
-    Misc SMC keys - 4 byte multi-character constants
-    
-    Sources: See TMP enum
-    */
-    public enum SMC_KEY : String {
-        /**
-        Battery information
-        */
-        case BATT_INFO = "BSIn"
-        
-        
-        /**
-        Is the machine being powered by the battery?
-        */
-        case BATT_PWR  = "BATP"
-        
-        
-        /**
-        How many SMC keys does this machine have?
-        */
-        case NUM_KEYS  = "#KEY"
-        
-        
-        /**
-        Is there a CD in the optical disk drive (ODD)?
-        */
-        case ODD_FULL  = "MSDI"
-    }
-    
-    
-    /**
-    SMC data types - 4 byte multi-character constants
-    
-    Sources: See TMP enum
-    
-    http://stackoverflow.com/questions/22160746/fpe2-and-sp78-data-types
-    */
-    public enum DataType : String {
-        case FLAG = "flag"
-        case FPE2 = "fpe2"
-        case SFDS = "{fds"
-        case SP78 = "sp78"
+    public enum TemperatureUnit {
+        case Celsius
+        case Fahrenheit
+        case Kelvin
     }
     
     
@@ -227,7 +154,7 @@ public class SMC {
     See "Accessing Hardware From Applications -> Handling Errors" Apple doc for
     more information.
     */
-    public enum IOReturn : kern_return_t {
+    public enum IOReturn: kern_return_t {
         case kIOReturnSuccess          = 0      // KERN_SUCCESS - OK
         case kIOReturnError            = 0x2bc  // General error
         case kIOReturnNoMemory         = 0x2bd  // Can't allocate memory
@@ -299,20 +226,10 @@ public class SMC {
     
     These are SMC specific return codes
     */
-    public enum kSMC : UInt8 {
+    public enum kSMC: UInt8 {
         case kSMCSuccess     = 0
         case kSMCError       = 1
         case kSMCKeyNotFound = 0x84
-    }
-    
-    
-    /**
-    Temperature units
-    */
-    public enum TMP_UNIT {
-        case Celsius
-        case Fahrenheit
-        case Kelvin
     }
     
     
@@ -322,11 +239,84 @@ public class SMC {
     
     
     /**
+    SMC keys for fans - 4 byte multi-character constants
+    
+    Number of fans on Macs vary of course, thus not all keys will be applicable.
+    
+    Presumed letter translations:
+    
+    - F  = Fan
+    - Ac = Acutal
+    - Mn = Min
+    - Mx = Max
+    - Sf = Safe
+    - Tg = Target
+    
+    Sources: See Temperature enum
+    */
+    private enum Fan: String {
+        case COUNT            = "FNum"
+        case FAN_0            = "F0Ac"
+        case FAN_0_DESC       = "F0ID"
+        case FAN_0_MIN_RPM    = "F0Mn"
+        case FAN_0_MAX_RPM    = "F0Mx"
+        case FAN_0_SAFE_RPM   = "F0Sf"
+        case FAN_0_TARGET_RPM = "F0Tg"
+    }
+    
+    
+    /**
+    Misc SMC keys - 4 byte multi-character constants
+    
+    Sources: See Temperature enum
+    */
+    private enum SMCKeyMisc: String {
+        /**
+        Battery information
+        */
+        case BATT_INFO = "BSIn"
+        
+        
+        /**
+        Is the machine being powered by the battery?
+        */
+        case BATT_PWR  = "BATP"
+        
+        
+        /**
+        How many SMC keys does this machine have?
+        */
+        case NUM_KEYS  = "#KEY"
+        
+        
+        /**
+        Is there a CD in the optical disk drive (ODD)?
+        */
+        case ODD_FULL  = "MSDI"
+    }
+    
+    
+    /**
+    SMC data types - 4 byte multi-character constants
+    
+    Sources: See Temperature enum
+    
+    http://stackoverflow.com/questions/22160746/fpe2-and-sp78-data-types
+    */
+    private enum DataType: String {
+        case FLAG = "flag"
+        case FPE2 = "fpe2"
+        case SFDS = "{fds"
+        case SP78 = "sp78"
+    }
+    
+    
+    /**
     Defined by AppleSMC.kext. See SMCParamStruct.
     
     Function selectors. Used to tell the SMC which function inside it to call.
     */
-    private enum Selector : UInt32 {
+    private enum Selector: UInt32 {
         case kSMCUserClientOpen  = 0
         case kSMCUserClientClose = 1
         case kSMCHandleYPCEvent  = 2
@@ -533,7 +523,7 @@ public class SMC {
     
     :returns: True if successful, false otherwise.
     */
-    public func machineProfile(path : String) -> Bool {
+    public func machineProfile(path: String) -> Bool {
         var result = false
         var err  : NSError?
         let data : [String : AnyObject] =
@@ -592,9 +582,9 @@ public class SMC {
     has particular sensor or fan for example.
     
     NOTE: While a key may be valid, it can still report no data. This is a
-          known issue with for example TMP.HEATSINK_0. Thus,
-          getAllValidTMPKeys() discounts such sensors (even though isKeyValid()
-          returns true).
+          known issue with for example Temperature.HEATSINK_0. Thus,
+          getAllValidTemperatureKeys() discounts such sensors (even though
+          isKeyValid() returns true).
     
     :param: key The SMC key to check. 4 byte multi-character constant. Must be
                 4 characters in length.
@@ -602,9 +592,9 @@ public class SMC {
     :returns: IOReturn IOKit return code
     :returns: kSMC SMC return code
     */
-    public func isKeyValid(key : String) -> (valid    : Bool,
-                                             IOReturn : kern_return_t,
-                                             kSMC     : UInt8) {
+    public func isKeyValid(key: String) -> (valid    : Bool,
+                                            IOReturn : kern_return_t,
+                                            kSMC     : UInt8) {
         var ans = false
                                                 
         if (countElements(key) != SMC_KEY_SIZE) {
@@ -629,26 +619,27 @@ public class SMC {
     
     
     /**
-    Get all valid SMC temperature keys (based on TMP enum, thus list may not
-    be complete).
+    Get all valid SMC temperature keys (based on Temperature enum, thus list
+    may not be complete).
     
     NOTE: Any sensor that reports a temperature of 0 is discounted.
-          TMP.HEATSINK_0 is known to do this.
+          Temperature.HEATSINK_0 is known to do this.
     
     :returns: Array of keys. For convenience, the array is sorted based on
               sensor names.
     */
-    public func getAllValidTemperatureKeys() -> [TMP] {
-        var SMCKeys = [TMP]()
+    public func getAllValidTemperatureKeys() -> [Temperature] {
+        var SMCKeys = [Temperature]()
         
-        for SMCKey in TMP.allValues.keys.array {
+        for SMCKey in Temperature.allValues.keys.array {
             if (isKeyValid(SMCKey.rawValue).valid &&
                 readSMC(SMCKey.rawValue).data[0] != 0) {
                 SMCKeys.append(SMCKey)
             }
         }
         
-        return sorted(SMCKeys, { TMP.allValues[$0]! < TMP.allValues[$1]! })
+        return sorted(SMCKeys, { Temperature.allValues[$0]! <
+                                 Temperature.allValues[$1]! })
     }
     
     
@@ -662,7 +653,7 @@ public class SMC {
     public func getNumSMCKeys() -> (numKeys  : UInt32,
                                     IOReturn : kern_return_t,
                                     kSMC     : UInt8) {
-        let result = readSMC(SMC_KEY.NUM_KEYS.rawValue)
+        let result = readSMC(SMCKeyMisc.NUM_KEYS.rawValue)
             
         // Type ui32 - size 4
         var numKeys = UInt32(result.data[0]) << 24
@@ -685,8 +676,9 @@ public class SMC {
     :returns: IOReturn IOKit return code
     :returns: kSMC SMC return code
     */
-    public func getTMP(key  : TMP,
-                       unit : TMP_UNIT = .Celsius) -> (tmp      : Double,
+    public func getTemperature(key  : Temperature,
+                               unit : TemperatureUnit = .Celsius) ->
+                                                      (tmp      : Double,
                                                        IOReturn : kern_return_t,
                                                        kSMC     : UInt8) {
        let result = readSMC(key.rawValue)
@@ -721,7 +713,7 @@ public class SMC {
     public func isOpticalDiskDriveFull() -> (flag     : Bool,
                                              IOReturn : kern_return_t,
                                              kSMC     : UInt8) {
-        let result = readSMC(SMC_KEY.ODD_FULL.rawValue)
+        let result = readSMC(SMCKeyMisc.ODD_FULL.rawValue)
             
         // Data type is flag - 1 bit. 1 if CD inserted, 0 otherwise
         let flag = result.data[0] == 1 ? true : false
@@ -745,7 +737,7 @@ public class SMC {
     public func isBatteryPowered() -> (flag     : Bool,
                                        IOReturn : kern_return_t,
                                        kSMC     : UInt8) {
-        let result = readSMC(SMC_KEY.BATT_PWR.rawValue)
+        let result = readSMC(SMCKeyMisc.BATT_PWR.rawValue)
             
         // Data type is flag - 1 bit. 1 if battery powered, 0 otherwise
         let flag = result.data[0] == 1 ? true : false
@@ -764,7 +756,7 @@ public class SMC {
     public func isCharging() -> (flag     : Bool,
                                  IOReturn : kern_return_t,
                                  kSMC     : UInt8) {
-        let result = readSMC(SMC_KEY.BATT_INFO.rawValue)
+        let result = readSMC(SMCKeyMisc.BATT_INFO.rawValue)
                                     
         // First bit contains the charging flag
         let flag = (result.data[0] & 1) == 1 ? true : false
@@ -783,7 +775,7 @@ public class SMC {
     public func isACPresent() -> (flag     : Bool,
                                   IOReturn : kern_return_t,
                                   kSMC     : UInt8) {
-        let result = readSMC(SMC_KEY.BATT_INFO.rawValue)
+        let result = readSMC(SMCKeyMisc.BATT_INFO.rawValue)
 
         // Second bit contains the AC present flag
         let flag = ((result.data[0] >> 1) & 1) == 1 ? true : false
@@ -803,7 +795,7 @@ public class SMC {
     public func isBatteryOk() -> (flag     : Bool,
                                   IOReturn : kern_return_t,
                                   kSMC     : UInt8) {
-        let result = readSMC(SMC_KEY.BATT_INFO.rawValue)
+        let result = readSMC(SMCKeyMisc.BATT_INFO.rawValue)
             
         // Sixth bit contains the battery ok flag
         let flag = ((result.data[0] >> 6) & 1) == 1 ? true : false
@@ -825,17 +817,17 @@ public class SMC {
     :returns: IOReturn IOKit return code
     :returns: kSMC SMC return code
     */
-    public func getFanName(fanNum : UInt) -> (name     : String,
-                                              IOReturn : kern_return_t,
-                                              kSMC     : UInt8) {
+    public func getFanName(fanNumber: UInt) -> (name     : String,
+                                                IOReturn : kern_return_t,
+                                                kSMC     : UInt8) {
         var name = String()
-        let result = readSMC("F" + String(fanNum) + "ID")
+        let result = readSMC("F" + String(fanNumber) + "ID")
         
                                                 
         /*
         We know the data size is 16 bytes and the type is "{fds", a custom
-        struct defined by the AppleSMC.kext. See TMP enum sources for the
-        struct.
+        struct defined by the AppleSMC.kext. See Temperature enum sources for
+        the struct.
         
         The last 12 bytes contain the name of the fan, an array of chars, hence
         the loop range.
@@ -868,10 +860,10 @@ public class SMC {
     :returns: IOReturn IOKit return code
     :returns: kSMC SMC return code
     */
-    public func getFanRPM(fanNum : UInt) -> (rpm      : UInt,
-                                             IOReturn : kern_return_t,
-                                             kSMC     : UInt8) {
-        let result = readSMC("F" + String(fanNum) + "Ac")
+    public func getFanRPM(fanNumber: UInt) -> (rpm      : UInt,
+                                               IOReturn : kern_return_t,
+                                               kSMC     : UInt8) {
+        let result = readSMC("F" + String(fanNumber) + "Ac")
         return (SMC.from_fpe2(result.data), result.IOReturn, result.kSMC)
     }
     
@@ -885,10 +877,10 @@ public class SMC {
     :returns: IOReturn IOKit return code
     :returns: kSMC SMC return code
     */
-    public func getFanMinRPM(fanNum : UInt) -> (rpm      : UInt,
-                                                IOReturn : kern_return_t,
-                                                kSMC     : UInt8) {
-        let result = readSMC("F" + String(fanNum) + "Mn")
+    public func getFanMinRPM(fanNumber: UInt) -> (rpm      : UInt,
+                                                  IOReturn : kern_return_t,
+                                                  kSMC     : UInt8) {
+        let result = readSMC("F" + String(fanNumber) + "Mn")
         return (SMC.from_fpe2(result.data), result.IOReturn, result.kSMC)
     }
     
@@ -902,10 +894,10 @@ public class SMC {
     :returns: IOReturn IOKit return code
     :returns: kSMC SMC return code
     */
-    public func getFanMaxRPM(fanNum : UInt) -> (rpm      : UInt,
-                                                IOReturn : kern_return_t,
-                                                kSMC     : UInt8) {
-        let result = readSMC("F" + String(fanNum) + "Mx")
+    public func getFanMaxRPM(fanNumber: UInt) -> (rpm      : UInt,
+                                                  IOReturn : kern_return_t,
+                                                  kSMC     : UInt8) {
+        let result = readSMC("F" + String(fanNumber) + "Mx")
         return (SMC.from_fpe2(result.data), result.IOReturn, result.kSMC)
     }
     
@@ -920,7 +912,7 @@ public class SMC {
     public func getNumFans() -> (numFans  : UInt,
                                  IOReturn : kern_return_t,
                                  kSMC     : UInt8) {
-        let result = readSMC(FAN.NUM_FANS.rawValue)
+        let result = readSMC(Fan.COUNT.rawValue)
         return (UInt(result.data[0]), result.IOReturn, result.kSMC)
     }
     
@@ -938,14 +930,14 @@ public class SMC {
     :returns: IOReturn IOKit return code
     :returns: kSMC SMC return code
     */
-    public func setFanMinRPM(fanNum : UInt, rpm : UInt) ->
+    public func setFanMinRPM(fanNumber: UInt, rpm: UInt) ->
                                                       (result   : Bool,
                                                        IOReturn : kern_return_t,
                                                        kSMC     : UInt8) {
         var ans = false
         
         // TODO: Cache value
-        let maxRPM = getFanMaxRPM(fanNum)
+        let maxRPM = getFanMaxRPM(fanNumber)
                                                         
         // Safety check: rpm must be within safe range of fan speed
         // TODO: Add fan safe speed (F0Sf) to this check
@@ -962,7 +954,7 @@ public class SMC {
         }
         
         // TODO: Don't use magic number for dataSize
-        let result = writeSMC("F" + String(fanNum) + "Mn",
+        let result = writeSMC("F" + String(fanNumber) + "Mn",
                               data     : SMC.to_fpe2(rpm),
                               dataType : DataType.FPE2,
                               dataSize : 2)
@@ -989,12 +981,12 @@ public class SMC {
     :returns: IOReturn IOKit return code
     :returns: kSMC SMC return code
     */
-    private func readSMC(key : String) -> (data     : [UInt8],
-                                           dataType : UInt32,
-                                           dataSize : IOByteCount,
-                                           IOReturn : kern_return_t,
-                                           kSMC     : UInt8) {
-        var result : kern_return_t
+    private func readSMC(key: String) -> (data     : [UInt8],
+                                          dataType : UInt32,
+                                          dataSize : IOByteCount,
+                                          IOReturn : kern_return_t,
+                                          kSMC     : UInt8) {
+        var result: kern_return_t
         var inputStruct  = SMCParamStruct()
         var outputStruct = SMCParamStruct()
         var data         = [UInt8](count: 32, repeatedValue: 0)
@@ -1004,7 +996,7 @@ public class SMC {
         inputStruct.key = toUInt32(key)
         inputStruct.data8 = UInt8(Selector.kSMCGetKeyInfo.rawValue)
         
-        result = callSMC(&inputStruct, outputStruct : &outputStruct)
+        result = callSMC(&inputStruct, outputStruct: &outputStruct)
         
         // Store for return - we only get this info on key info calls
         let dataType = outputStruct.keyInfo.dataType
@@ -1019,7 +1011,7 @@ public class SMC {
         inputStruct.keyInfo.dataSize = outputStruct.keyInfo.dataSize
         inputStruct.data8 = UInt8(Selector.kSMCReadKey.rawValue)
 
-        result = callSMC(&inputStruct, outputStruct : &outputStruct)
+        result = callSMC(&inputStruct, outputStruct: &outputStruct)
         
         // Set the data
         data[0]  = outputStruct.bytes_0
@@ -1070,8 +1062,7 @@ public class SMC {
                           dataType : DataType,
                           dataSize : IOByteCount) -> (IOReturn : kern_return_t,
                                                       kSMC     : UInt8) {
-                                                
-        var result : kern_return_t
+        var result: kern_return_t
         var inputStruct  = SMCParamStruct()
         var outputStruct = SMCParamStruct()
         
@@ -1079,7 +1070,7 @@ public class SMC {
         inputStruct.key = toUInt32(key)
         inputStruct.data8 = UInt8(Selector.kSMCGetKeyInfo.rawValue)
         
-        result = callSMC(&inputStruct, outputStruct : &outputStruct)
+        result = callSMC(&inputStruct, outputStruct: &outputStruct)
         
         if (result != kIOReturnSuccess ||
             outputStruct.result != kSMC.kSMCSuccess.rawValue) {
@@ -1135,7 +1126,7 @@ public class SMC {
         inputStruct.bytes_30 = data[30]
         inputStruct.bytes_31 = data[31]
         
-        result = callSMC(&inputStruct, outputStruct : &outputStruct)
+        result = callSMC(&inputStruct, outputStruct: &outputStruct)
 
         return (result, outputStruct.result)
     }
@@ -1150,7 +1141,7 @@ public class SMC {
     */
     private func callSMC(inout inputStruct  : SMCParamStruct,
                          inout outputStruct : SMCParamStruct) -> kern_return_t {
-        var result : kern_return_t
+        var result: kern_return_t
         
         // When the structs are cast to SMCParamStruct on the C side (AppleSMC)
         // there expected to be 80 bytes. This may not be the case on the Swift
@@ -1206,7 +1197,8 @@ public class SMC {
         let validKeys = getAllValidTemperatureKeys()
         
         for key in validKeys {
-            dict.updateValue(SMC.TMP.allValues[key]!, forKey: key.rawValue)
+            dict.updateValue(SMC.Temperature.allValues[key]!,
+                             forKey: key.rawValue)
         }
         
         return dict
@@ -1306,7 +1298,7 @@ public class SMC {
     :returns: UInt32 translation of it with little-endian representation.
               Returns zero if key is not 4 characters in length.
     */
-    private func toUInt32(key : String) -> UInt32 {
+    private func toUInt32(key: String) -> UInt32 {
         var ans   : Int32 = 0
         var shift : Int32 = 24
 
@@ -1332,7 +1324,7 @@ public class SMC {
     :param: dataType The data type as returned from a SMC read key info call
     :returns: 4-byte multi-character constant representation
     */
-    private func toString(dataType : UInt32) -> String {
+    private func toString(dataType: UInt32) -> String {
         var ans = String()
         var shift : Int32 = 24
 
@@ -1356,7 +1348,7 @@ public class SMC {
     :param: data Data from the SMC to be converted. Assumed data size of 2.
     :returns: Converted data
     */
-    private class func from_fpe2(data : [UInt8]) -> UInt {
+    private class func from_fpe2(data: [UInt8]) -> UInt {
         var ans : UInt = 0
         
         // Data type for fan calls - fpe2
@@ -1375,7 +1367,7 @@ public class SMC {
     :param: val Value to convert
     :return: Converted data in SMCParamStruct data format
     */
-    private class func to_fpe2(val : UInt) -> [UInt8] {
+    private class func to_fpe2(val: UInt) -> [UInt8] {
         // TODO: check val size for overflow
         var data = [UInt8](count: 32, repeatedValue: 0)
         data[0] = UInt8(val >> 6)
@@ -1394,7 +1386,7 @@ public class SMC {
     :param: err The raw error code
     :returns: The IOReturn error code. If not found, returns the original error.
     */
-    private class func getErrorCode(err : kern_return_t) -> kern_return_t {
+    private class func getErrorCode(err: kern_return_t) -> kern_return_t {
         // kern_return_t is an Int32. The final 14 bits specify the error code
         // itself, hence the &
         let lookup : kern_return_t? = IOReturn(rawValue: err & 0x3fff)?.rawValue
@@ -1411,17 +1403,17 @@ public class SMC {
     /**
     Celsius to Fahrenheit
     */
-    private class func toFahrenheit(tmp : Double) -> Double {
+    private class func toFahrenheit(temperature: Double) -> Double {
         // http://en.wikipedia.org/wiki/Fahrenheit#Definition_and_conversions
-        return (tmp * 1.8) + 32
+        return (temperature * 1.8) + 32
     }
     
     
     /**
     Celsius to Kelvin
     */
-    private class func toKelvin(tmp : Double) -> Double {
+    private class func toKelvin(temperature: Double) -> Double {
         // http://en.wikipedia.org/wiki/Kelvin
-        return tmp + 273.15
+        return temperature + 273.15
     }
 }
