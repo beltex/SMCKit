@@ -4,7 +4,7 @@ SMCKit
 A System Management Controller (SMC) library in pure Swift from user space for
 Intel based Macs. The library works by talking to the AppleSMC.kext (kernel
 extension), the closed source driver for the SMC. Read temperature sensors,
-get and set fan speed (RPM), etc.
+get and set fan speed (RPM), and more.
 
 For a C based version see [libsmc](https://github.com/beltex/libsmc).
 
@@ -84,10 +84,53 @@ if (smc.open() == kIOReturnSuccess) {
 }
 ```
 
+A more detailed example can be seen
+[here](https://github.com/beltex/SMCKit/blob/master/Example/main.swift). The
+following is sample output from it:
+
+```
+// MACHINE STATUS
+
+-- TEMPERATURE --
+CPU_0_DIODE
+  70.0°C
+CPU_0_PROXIMITY
+  58.0°C
+ENCLOSURE_BASE_0
+  35.0°C
+ENCLOSURE_BASE_1
+  35.0°C
+ENCLOSURE_BASE_2
+  34.0°C
+ENCLOSURE_BASE_3
+  38.0°C
+HEATSINK_1
+  58.0°C
+NORTHBRIDGE_DIODE
+  65.0°C
+NORTHBRIDGE_PROXIMITY
+  53.0°C
+PALM_REST
+  34.0°C
+
+-- FAN --
+Exhaust
+  1998 RPM
+
+-- POWER --
+AC Present:       true
+Battery Powered:  false
+Charging:         false
+Battery Ok:       true
+
+-- MISC --
+Disc in ODD:      false
+```
+
 The use of this framework will almost certainly not be allowed in the Mac App
 Store as it is essentially using a private API. Also, keep in mind that Swift
-currently offers no ABI stability. See
-[here](https://github.com/ksm/SwiftInFlux#abi-stability).
+currently offers no
+[ABI stability](https://github.com/ksm/SwiftInFlux#abi-stability).
 
 
 ### References
