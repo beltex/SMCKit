@@ -47,7 +47,7 @@ class SMCKitTests: XCTestCase {
         
         // Put setup code here. This method is called before the invocation of
         // each test method in the class.
-        smc.open()
+        smc.open() // TODO: If this fails no test should run
     }
 
     override func tearDown() {
@@ -60,6 +60,21 @@ class SMCKitTests: XCTestCase {
     
     func testOpenConnectionTwice() {
         XCTAssertNotEqual(smc.open(), kIOReturnSuccess)
+    }
+    
+    func testTemperatureValues() {
+        let temperatureSensors = smc.getAllValidTemperatureKeys()
+        
+        for sensor in temperatureSensors {
+            let temperature = smc.getTemperature(sensor).tmp
+            
+            // Absolute zero - laws of physics will be broken if this fails :)
+            // TODO: Get a better low bound for min comp operating temperature
+            XCTAssertGreaterThan(temperature, -273.15)
+            
+            // TODO: This should be lower, be we'll give it slack for now
+            XCTAssertLessThan(temperature, 120)
+        }
     }
     
     func testGetNumberFans() {
