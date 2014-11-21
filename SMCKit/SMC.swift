@@ -278,6 +278,12 @@ public class SMC {
         
         
         /**
+        Max number of batteries
+        */
+        case BATT_MAX_NUM = "BNum"
+        
+        
+        /**
         Is the machine being powered by the battery?
         */
         case BATT_PWR  = "BATP"
@@ -736,6 +742,24 @@ public class SMC {
     //--------------------------------------------------------------------------
     // MARK: PUBLIC METHODS - BATTERY/POWER
     //--------------------------------------------------------------------------
+    
+    
+    /**
+    Max number of batteries supported by the machine. For desktops, this should
+    be 0, and 1 for laptops.
+    
+    :returns: count Max number of batteries supported by the machine
+    :returns: IOReturn IOKit return code
+    :returns: kSMC SMC return code
+    */
+    public func maxNumberBatteries() -> (count    : UInt,
+                                         IOReturn : kern_return_t,
+                                         kSMC     : UInt8) {
+        let result = readSMC(SMCKeyMisc.BATT_MAX_NUM.rawValue)
+
+        // TODO: return -1 on error and get rid of return codes. See issue #8.
+        return (UInt(result.data[0]), result.IOReturn, result.kSMC)
+    }
     
     
     /**

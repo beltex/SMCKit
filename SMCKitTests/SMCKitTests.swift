@@ -126,8 +126,11 @@ class SMCKitTests: XCTestCase {
         let batteryOk      = smc.isBatteryOk().flag
         let ACPresent      = smc.isACPresent().flag
         let charging       = smc.isCharging().flag
+        let numBatteries   = smc.maxNumberBatteries().count
         
         if (isLaptop) {
+            // Is there any Mac that supports more then 1?
+            XCTAssertEqual(numBatteries, UInt(1))
             XCTAssertTrue(ACPresent ^ batteryPowered)
             if (charging) {
                 XCTAssertTrue(ACPresent)
@@ -140,6 +143,7 @@ class SMCKitTests: XCTestCase {
             XCTAssertFalse(batteryPowered)
             XCTAssertFalse(charging)
             XCTAssertTrue(ACPresent)
+            XCTAssertEqual(numBatteries, UInt(0))
         }
         
         

@@ -56,11 +56,12 @@ for var i: UInt = 0; i < numberOfFans; ++i {
 }
 
 
-println("\n-- POWER --")
-println("AC Present:       \(smc.isACPresent().flag)")
-println("Battery Powered:  \(smc.isBatteryPowered().flag)")
-println("Charging:         \(smc.isCharging().flag)")
-println("Battery Ok:       \(smc.isBatteryOk().flag)")
+println("\n-- BATTERY & POWER --")
+println("AC Present:          \(smc.isACPresent().flag)")
+println("Battery Powered:     \(smc.isBatteryPowered().flag)")
+println("Charging:            \(smc.isCharging().flag)")
+println("Battery Ok:          \(smc.isBatteryOk().flag)")
+println("Max # of Batteries:  \(smc.maxNumberBatteries().count)")
 
 
 println("\n-- MISC --")
