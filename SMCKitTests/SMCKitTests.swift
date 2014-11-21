@@ -23,7 +23,6 @@ import Cocoa
 import XCTest
 import SMCKit
 
-
 /*
 TODO: What do we test exactly? We can't check for return values, like
       temperature or fan RPM as we can't validate them. We also don't have a
@@ -84,6 +83,8 @@ class SMCKitTests: XCTestCase {
     func testODD() {
         // Test that isOpticalDiskDriveFull() returns false when there is no 
         // ODD. We can do this by cross checking the I/O Reg
+        // IOAHCISerialATAPI
+        // TODO: What if its an Apple USB SuperDrive?
     }
     
     
@@ -93,7 +94,7 @@ class SMCKitTests: XCTestCase {
     
     
     func testBatteryPowerMethods() {
-        var isLaptop = true
+        var isLaptop    = false
         var ASPCharging = false
         var ASPCharged  = false
         
@@ -102,10 +103,9 @@ class SMCKitTests: XCTestCase {
         // TODO: Simplify I/O Kit calls here - can do it in a single call
         var service = IOServiceGetMatchingService(kIOMasterPortDefault,
                IOServiceNameMatching("AppleSmartBattery").takeUnretainedValue())
-        if (service == 0) {
-            isLaptop = false
-        }
-        else {
+        if (service != 0) {
+            isLaptop = true
+            
             // Getting these values to cross ref
             var prop = IORegistryEntryCreateCFProperty(service, "IsCharging",
                                                        kCFAllocatorDefault,

@@ -714,6 +714,9 @@ public class SMC {
     /**
     Is there a CD in the optical disk drive (ODD)?
     
+    NOTE: This almost certainly does not apply to an external ODD, like an Apple
+          USB SuperDrive. This is yet to be tested.
+    
     :returns: flag True if there is, false otherwise
     :returns: IOReturn IOKit return code
     :returns: kSMC SMC return code
