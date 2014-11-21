@@ -42,6 +42,7 @@ class SMCKitTests: XCTestCase {
     
     let smc = SMC()
     
+    // TODO: Setup once?
     override func setUp() {
         super.setUp()
         
@@ -56,6 +57,10 @@ class SMCKitTests: XCTestCase {
         smc.close()
         
         super.tearDown()
+    }
+    
+    func testOpenConnectionTwice() {
+        XCTAssertNotEqual(smc.open(), kIOReturnSuccess)
     }
     
     func testGetNumberFans() {
@@ -74,5 +79,71 @@ class SMCKitTests: XCTestCase {
         XCTAssertFalse(smc.isKeyValid("Vi").valid)
         XCTAssertFalse(smc.isKeyValid("Vim").valid)
         XCTAssertFalse(smc.isKeyValid("What is this new devilry?").valid)
+    }
+    
+    func testODD() {
+        // Test that isOpticalDiskDriveFull() returns false when there is no 
+        // ODD. We can do this by cross checking the I/O Reg
+    }
+    
+    
+    //--------------------------------------------------------------------------
+    // MARK: TESTS - BATTERY/POWER
+    //--------------------------------------------------------------------------
+    
+    
+    func testBatteryPowerMethods() {
+        var isLaptop = true
+        var ASPCharging = false
+        var ASPCharged  = false
+        
+        // Check if machine is a laptop - if it is, we use the service to cross
+        // check our values
+        // TODO: Simplify I/O Kit calls here - can do it in a single call
+        var service = IOServiceGetMatchingService(kIOMasterPortDefault,
+               IOServiceNameMatching("AppleSmartBattery").takeUnretainedValue())
+        if (service == 0) {
+            isLaptop = false
+        }
+        else {
+            // Getting these values to cross ref
+            var prop = IORegistryEntryCreateCFProperty(service, "IsCharging",
+                                                       kCFAllocatorDefault,
+                                                       UInt32(kNilOptions))
+            
+            ASPCharging = prop.takeUnretainedValue() as Int == 1 ? true : false
+            
+            
+            prop = IORegistryEntryCreateCFProperty(service, "FullyCharged",
+                                                   kCFAllocatorDefault,
+                                                   UInt32(kNilOptions))
+            
+            ASPCharged = prop.takeUnretainedValue() as Int == 1 ? true : false
+        }
+        
+        
+        let batteryPowered = smc.isBatteryPowered().flag
+        let batteryOk      = smc.isBatteryOk().flag
+        let ACPresent      = smc.isACPresent().flag
+        let charging       = smc.isCharging().flag
+        
+        if (isLaptop) {
+            XCTAssertTrue(ACPresent ^ batteryPowered)
+            if (charging) {
+                XCTAssertTrue(ACPresent)
+                XCTAssertTrue(ASPCharging)
+                XCTAssertFalse(ASPCharged)
+            }
+        }
+        else {
+            XCTAssertFalse(batteryOk)
+            XCTAssertFalse(batteryPowered)
+            XCTAssertFalse(charging)
+            XCTAssertTrue(ACPresent)
+        }
+        
+        
+        // TODO: Make sure this is called, even if tests above fail
+        IOObjectRelease(service)
     }
 }
