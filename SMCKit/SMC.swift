@@ -441,10 +441,9 @@ public class SMC {
     
     
     /**
-    Our connection to the SMC. Must init before passing it to IOServiceOpen()
-    (hence zero value) and must close it when done.
+    Our connection to the SMC
     */
-    private var conn : io_connect_t = 0
+    private var conn: io_connect_t = 0
     
     
     /**
@@ -487,6 +486,15 @@ public class SMC {
     :returns: kIOReturnSuccess on successful connection to the SMC.
     */
     public func open() -> kern_return_t {
+        if (conn != 0) {
+            #if DEBUG
+                println("WARNING - \(__FILE__):\(__FUNCTION__) - "
+                        + "\(IOSERVICE_SMC) connection already open")
+            #endif
+            return IOReturn.kIOReturnStillOpen.rawValue
+        }
+        
+        
         let service = IOServiceGetMatchingService(kIOMasterPortDefault,
                       IOServiceMatching(IOSERVICE_SMC).takeUnretainedValue())
         
@@ -1214,7 +1222,7 @@ public class SMC {
         let numFans = getNumFans().numFans
         var profile : [String : AnyObject] = ["# of fans" : numFans]
         
-        for var i : UInt = 0; i < numFans; ++i {
+        for var i: UInt = 0; i < numFans; ++i {
             // TODO: Add safe RPM
             let vals = ["Name"    : getFanName(i).name,
                         "Min RPM" : getFanMinRPM(i).rpm,

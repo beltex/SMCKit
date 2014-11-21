@@ -37,7 +37,6 @@ println("// MACHINE STATUS")
 println("\n-- TEMPERATURE --")
 let temperatureSensors = smc.getAllValidTemperatureKeys()
 
-
 for key in temperatureSensors {
     let temperatureSensorName = SMC.Temperature.allValues[key]!
     let temperature           = smc.getTemperature(key).tmp
@@ -49,7 +48,7 @@ for key in temperatureSensors {
 println("\n-- FAN --")
 let numberOfFans = smc.getNumFans().numFans
 
-for var i : UInt = 0; i < numberOfFans; ++i {
+for var i: UInt = 0; i < numberOfFans; ++i {
     let fanName = smc.getFanName(i).name
     let fanRPM  = smc.getFanRPM(i).rpm
     
