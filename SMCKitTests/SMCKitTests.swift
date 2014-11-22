@@ -47,7 +47,8 @@ class SMCKitTests: XCTestCase {
         
         // Put setup code here. This method is called before the invocation of
         // each test method in the class.
-        smc.open() // TODO: If this fails no test should run
+        // TODO: If this fails no test should run
+        smc.open()
     }
 
     override func tearDown() {
@@ -116,6 +117,7 @@ class SMCKitTests: XCTestCase {
         // Check if machine is a laptop - if it is, we use the service to cross
         // check our values
         // TODO: Simplify I/O Kit calls here - can do it in a single call
+        // TODO: What if its a MacBook with a removable battery and its out?
         var service = IOServiceGetMatchingService(kIOMasterPortDefault,
                IOServiceNameMatching("AppleSmartBattery").takeUnretainedValue())
         if (service != 0) {
@@ -144,14 +146,34 @@ class SMCKitTests: XCTestCase {
         let numBatteries   = smc.maxNumberBatteries().count
         
         if (isLaptop) {
-            // Is there any Mac that supports more then 1?
+            // TODO: Is there any Mac that supports more then 1?
             XCTAssertEqual(numBatteries, UInt(1))
-            XCTAssertTrue(ACPresent ^ batteryPowered)
-            if (charging) {
-                XCTAssertTrue(ACPresent)
-                XCTAssertTrue(ASPCharging)
-                XCTAssertFalse(ASPCharged)
-            }
+            
+            /*
+            Yeah, truth tables!... :)
+            
+            Note two specific cases we allow. First is to be battery powered and
+            be fully charged. This could be true for a short period of time so
+            we allow it. Second, much rarer occurrence, is AC powered and not
+            charging or charged. This could be the case if the battery is pulled
+            out.
+            TODO: Though if the battery is out, AppleSmartBattery may not
+                  show up...
+            
+            Can query WolframAlpha with "truth table" prefix to see it.
+            
+            Origin: (A ^ B) && ((B && !C) ^ (B <=> C)) && ((C ^ D) ^ (!C && !D))    
+
+            CNF:    (!A || !B) && (A || B) && (B || !C) && (!C || !D)
+            
+            http://www.wolframalpha.com
+            */
+            let A = batteryPowered
+            let B = ACPresent
+            let C = charging && ASPCharging
+            let D = ASPCharged
+            
+            XCTAssertTrue((!A || !B) && (A || B) && (B || !C) && (!C || !D))
         }
         else {
             XCTAssertFalse(batteryOk)
