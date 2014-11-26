@@ -65,7 +65,7 @@ println("Max # of Batteries:  \(smc.maxNumberBatteries().count)")
 
 
 println("\n-- MISC --")
-println("Disc in ODD:      \(smc.isOpticalDiskDriveFull().flag)")
+println("Disc in ODD:         \(smc.isOpticalDiskDriveFull().flag)")
 
 
 smc.close()

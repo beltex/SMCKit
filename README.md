@@ -117,14 +117,15 @@ PALM_REST
 Exhaust
   1998 RPM
 
--- POWER --
-AC Present:       true
-Battery Powered:  false
-Charging:         false
-Battery Ok:       true
+-- BATTERY & POWER --
+AC Present:          true
+Battery Powered:     false
+Charging:            false
+Battery Ok:          true
+Max # of Batteries:  1
 
 -- MISC --
-Disc in ODD:      false
+Disc in ODD:         false
 ```
 
 The use of this framework will almost certainly not be allowed in the Mac App
