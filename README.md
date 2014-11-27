@@ -59,26 +59,29 @@ steps:_
    Files Phase". Rename this new phase to "Copy Frameworks", set the
    "Destination" to "Frameworks", and add `SMCKit.framework`.
 
-**NOTE**: If you are building an OS X command line tool, the above won't work.
-          See here for
+**NOTE**: If you are building an OS X command line tool, the above won't quite
+          work. See here for
           [why](https://github.com/ksm/SwiftInFlux#runtime-dynamic-libraries).
           Instead of the last two steps, do the following:
 
 > Expand the "Compile Sources" group, and add `SMC.swift`.
 
+In additon, you will have to turn on debug logging manually. This can be done by
+adding `-D DEBUG` to the **Other Swift Flags** setting in your
+**Build Settings**.
+
 
 ### Usage
 
 ```swift
-// If your using SMCKit as a framework in your project, you will only need the
-// second import statement
-import IOKit
+// If your not using SMCKit as a framework in your project, you should instead
+// import IOKit
 import SMCKit
 
 let smc = SMC()
 
 if (smc.open() == kIOReturnSuccess) {
-    println("CPU 0 Diode Temperature: \(smc.getTMP(SMC.TMP.CPU_0_DIODE).tmp)°C")
+    println("CPU 0 Diode Temperature: \(smc.getTemperature(SMC.Temperature.CPU_0_DIODE).tmp)°C")
     println("Fan 0 Speed: \(smc.getFanRPM(0).rpm) RPM")
     smc.close()
 }
@@ -157,9 +160,13 @@ This project is under the **GNU General Public License v2.0**.
 
 ### Fun
 
-In the very same
+While the SMC driver is closed source, the definition of certain structs needed
+to interact with it (see private `SMCParamStruct`) happened to appear in the
+Apple **PowerManagement** project at around version 211, and soon after disappeared.
+They can be seen in the
 [PrivateLib.c](http://www.opensource.apple.com/source/PowerManagement/PowerManagement-211/pmconfigd/PrivateLib.c)
-file, the following snippet can be found:
+file under `pmconfigd`. In the very same source file, the following snippet can be
+found:
 
 ```c
 // And simply AppleSMC with kCFBooleanTrue to let them know time is changed.
