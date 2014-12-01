@@ -679,6 +679,7 @@ public class SMC {
     :returns: kIOReturnSuccess on successful connection to the SMC.
     */
     public func open() -> kern_return_t {
+        // TODO: Why does calling open() twice (without below) return success?
         if (conn != 0) {
             #if DEBUG
                 println("WARNING - \(__FILE__):\(__FUNCTION__) - "
@@ -713,7 +714,11 @@ public class SMC {
     :returns: kIOReturnSuccess on successful close of connection to the SMC.
     */
     public func close() -> kern_return_t {
-        return IOServiceClose(conn)
+        // Calling close twice or if connection not open returns the Mach IPC
+        // error - MACH_SEND_INVALID_DEST
+        let result = IOServiceClose(conn)
+        conn = 0    // Reset this incase open() is called again
+        return result
     }
     
     

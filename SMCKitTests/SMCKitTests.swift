@@ -63,6 +63,16 @@ class SMCKitTests: XCTestCase {
         XCTAssertNotEqual(smc.open(), kIOReturnSuccess)
     }
     
+    func testCloseConnectionTwice() {
+        XCTAssertEqual(smc.close(), kIOReturnSuccess)
+        XCTAssertNotEqual(smc.close(), kIOReturnSuccess)
+        
+        // Test that we can reopen and things still work
+        smc.open()
+        XCTAssertGreaterThanOrEqual(smc.getNumFans().numFans, UInt(1))
+        XCTAssertEqual(smc.close(), kIOReturnSuccess)
+    }
+    
     func testTemperatureValues() {
         let temperatureSensors = smc.getAllValidTemperatureKeys()
         
