@@ -22,10 +22,273 @@
 import IOKit
 import Foundation
 
+
+//------------------------------------------------------------------------------
+// MARK: GLOBAL PUBLIC PROPERTIES
+//------------------------------------------------------------------------------
+
+
+/*
+I/O Kit common error codes - as defined in <IOKit/IOReturn.h>
+
+Swift can't import complex macros, thus we have to manually add them here.
+Most of these are not relevant to us, but for the sake of completeness. See
+"Accessing Hardware From Applications -> Handling Errors" Apple document for
+more information.
+
+NOTE: kIOReturnSuccess is the only return code already defined in IOKit module
+      for us.
+
+https://developer.apple.com/library/mac/qa/qa1075/_index.html
+*/
+
+
+/**
+General error
+*/
+public let kIOReturnError            = iokit_common_err(0x2bc)
+/**
+Can't allocate memory
+*/
+public let kIOReturnNoMemory         = iokit_common_err(0x2bd)
+/**
+Resource shortage
+*/
+public let kIOReturnNoResources      = iokit_common_err(0x2be)
+/**
+Error during IPC
+*/
+public let kIOReturnIPCError         = iokit_common_err(0x2bf)
+/**
+No such device
+*/
+public let kIOReturnNoDevice         = iokit_common_err(0x2c0)
+/**
+Privilege violation
+*/
+public let kIOReturnNotPrivileged    = iokit_common_err(0x2c1)
+/**
+Invalid argument
+*/
+public let kIOReturnBadArgument      = iokit_common_err(0x2c2)
+/**
+Device read locked
+*/
+public let kIOReturnLockedRead       = iokit_common_err(0x2c3)
+/**
+Exclusive access and device already open
+*/
+public let kIOReturnExclusiveAccess  = iokit_common_err(0x2c5)
+/**
+Sent/received messages had different msg_id
+*/
+public let kIOReturnBadMessageID     = iokit_common_err(0x2c6)
+/**
+Unsupported function
+*/
+public let kIOReturnUnsupported      = iokit_common_err(0x2c7)
+/**
+Misc. VM failure
+*/
+public let kIOReturnVMError          = iokit_common_err(0x2c8)
+/**
+Internal error
+*/
+public let kIOReturnInternalError    = iokit_common_err(0x2c9)
+/**
+General I/O error
+*/
+public let kIOReturnIOError          = iokit_common_err(0x2ca)
+/**
+Can't acquire lock
+*/
+public let kIOReturnCannotLock       = iokit_common_err(0x2cc)
+/**
+Device not open
+*/
+public let kIOReturnNotOpen          = iokit_common_err(0x2cd)
+/**
+Read not supported
+*/
+public let kIOReturnNotReadable      = iokit_common_err(0x2ce)
+/**
+Write not supported
+*/
+public let kIOReturnNotWritable      = iokit_common_err(0x2cf)
+/**
+Alignment error
+*/
+public let kIOReturnNotAligned       = iokit_common_err(0x2d0)
+/**
+Media Error
+*/
+public let kIOReturnBadMedia         = iokit_common_err(0x2d1)
+/**
+Device(s) still open
+*/
+public let kIOReturnStillOpen        = iokit_common_err(0x2d2)
+/**
+RLD failure
+*/
+public let kIOReturnRLDError         = iokit_common_err(0x2d3)
+/**
+DMA failure
+*/
+public let kIOReturnDMAError         = iokit_common_err(0x2d4)
+/**
+Device Busy
+*/
+public let kIOReturnBusy             = iokit_common_err(0x2d5)
+/**
+I/O Timeout
+*/
+public let kIOReturnTimeout          = iokit_common_err(0x2d6)
+/**
+Device offline
+*/
+public let kIOReturnOffline          = iokit_common_err(0x2d7)
+/**
+Not ready
+*/
+public let kIOReturnNotReady         = iokit_common_err(0x2d8)
+/**
+Device not attached
+*/
+public let kIOReturnNotAttached      = iokit_common_err(0x2d9)
+/**
+No DMA channels left
+*/
+public let kIOReturnNoChannels       = iokit_common_err(0x2da)
+/**
+No space for data
+*/
+public let kIOReturnNoSpace          = iokit_common_err(0x2db)
+/**
+Port already exists
+*/
+public let kIOReturnPortExists       = iokit_common_err(0x2dd)
+/**
+Can't wire down physical memory
+*/
+public let kIOReturnCannotWire       = iokit_common_err(0x2de)
+/**
+No interrupt attached
+*/
+public let kIOReturnNoInterrupt      = iokit_common_err(0x2df)
+/**
+No DMA frames enqueued
+*/
+public let kIOReturnNoFrames         = iokit_common_err(0x2e0)
+/**
+Oversized msg received on interrupt port
+*/
+public let kIOReturnMessageTooLarge  = iokit_common_err(0x2e1)
+/**
+Not permitted
+*/
+public let kIOReturnNotPermitted     = iokit_common_err(0x2e2)
+/**
+No power to device
+*/
+public let kIOReturnNoPower          = iokit_common_err(0x2e3)
+/**
+Media not present
+*/
+public let kIOReturnNoMedia          = iokit_common_err(0x2e4)
+/**
+Media not formatted
+*/
+public let kIOReturnUnformattedMedia = iokit_common_err(0x2e5)
+/**
+No such mode
+*/
+public let kIOReturnUnsupportedMode  = iokit_common_err(0x2e6)
+/**
+Data underrun
+*/
+public let kIOReturnUnderrun         = iokit_common_err(0x2e7)
+/**
+Data overrun
+*/
+public let kIOReturnOverrun          = iokit_common_err(0x2e8)
+/**
+The device is not working properly!
+*/
+public let kIOReturnDeviceError      = iokit_common_err(0x2e9)
+/**
+A completion routine is required
+*/
+public let kIOReturnNoCompletion     = iokit_common_err(0x2ea)
+/**
+Operation aborted
+*/
+public let kIOReturnAborted          = iokit_common_err(0x2eb)
+/**
+Bus bandwidth would be exceeded
+*/
+public let kIOReturnNoBandwidth      = iokit_common_err(0x2ec)
+/**
+Device not responding
+*/
+public let kIOReturnNotResponding    = iokit_common_err(0x2ed)
+/**
+Isochronous I/O request for distant past!
+*/
+public let kIOReturnIsoTooOld        = iokit_common_err(0x2ee)
+/**
+Isochronous I/O request for distant future
+*/
+public let kIOReturnIsoTooNew        = iokit_common_err(0x2ef)
+/**
+Data was not found
+*/
+public let kIOReturnNotFound         = iokit_common_err(0x2f0)
+/**
+Should never be seen
+*/
+public let kIOReturnInvalid          = iokit_common_err(0x1)
+
+
+//------------------------------------------------------------------------------
+// MARK: GLOBAL PRIVATE PROPERTIES
+//------------------------------------------------------------------------------
+
+
+/**
+I/O Kit system code is 0x38. First 6 bits of error code. Passed to err_system()
+macro as defined in <mach/error.h>.
+*/
+private let SYS_IOKIT: UInt32 = (0x38 & 0x3f) << 26
+
+
+/**
+I/O Kit subsystem code is 0. Middle 12 bits of error code. Passed to err_sub()
+macro as defined in <mach/error.h>.
+*/
+private let SUB_IOKIT_COMMON: UInt32 = (0 & 0xfff) << 14
+
+
+//------------------------------------------------------------------------------
+// MARK: GLOBAL PRIVATE FUNCTIONS
+//------------------------------------------------------------------------------
+
+
+/**
+Based on macro of the same name in <IOKit/IOReturn.h>. Generates the error code.
+
+:param: code The specific I/O Kit error code. Last 14 bits.
+:returns: Full 32 bit error code.
+*/
+private func iokit_common_err(code: UInt32) -> kern_return_t {
+    // Overflow otherwise
+    return Int32(bitPattern: SYS_IOKIT | SUB_IOKIT_COMMON | code)
+}
+
+
 /**
 System Management Controller (SMC) API from user space for Intel based Macs.
-Works by talking to the AppleSMC.kext (kernel extension), the driver for the
-SMC.
+Works by talking to the AppleSMC.kext (kernel extension), the closed source
+driver for the SMC.
 */
 public class SMC {
     
@@ -144,82 +407,6 @@ public class SMC {
         case Kelvin
     }
     
-    
-    /**
-    I/O Kit Error Codes - as defined in IOReturn.h
-
-    Swift can't import complex macros, thus we have to manually add them here.
-    Most of these are not relevant to us, but for the sake of completeness.
-    
-    See "Accessing Hardware From Applications -> Handling Errors" Apple doc for
-    more information.
-    */
-    public enum IOReturn: kern_return_t {
-        case kIOReturnSuccess          = 0      // KERN_SUCCESS - OK
-        case kIOReturnError            = 0x2bc  // General error
-        case kIOReturnNoMemory         = 0x2bd  // Can't allocate memory
-        case kIOReturnNoResources      = 0x2be  // Resource shortage
-        case kIOReturnIPCError         = 0x2bf  // Error during IPC
-        case kIOReturnNoDevice         = 0x2c0  // No such device
-        case kIOReturnNotPrivileged    = 0x2c1  // Privilege violation
-        case kIOReturnBadArgument      = 0x2c2  // Invalid argument
-        case kIOReturnLockedRead       = 0x2c3  // Device read locked
-        case kIOReturnExclusiveAccess  = 0x2c5  // Exclusive access and device
-                                                // already open
-        case kIOReturnBadMessageID     = 0x2c6  // Sent/received messages had
-                                                // different msg_id
-        case kIOReturnUnsupported      = 0x2c7  // Unsupported function
-        case kIOReturnVMError          = 0x2c8  // Misc. VM failure
-        case kIOReturnInternalError    = 0x2c9  // Internal error
-        case kIOReturnIOError          = 0x2ca  // General I/O error
-        case kIOReturnQM1Error         = 0x2cb  // ??? - kIOReturn???Error
-        case kIOReturnCannotLock       = 0x2cc  // Can't acquire lock
-        case kIOReturnNotOpen          = 0x2cd  // Device not open
-        case kIOReturnNotReadable      = 0x2ce  // Read not supported
-        case kIOReturnNotWritable      = 0x2cf  // Write not supported
-        case kIOReturnNotAligned       = 0x2d0  // Alignment error
-        case kIOReturnBadMedia         = 0x2d1  // Media Error
-        case kIOReturnStillOpen        = 0x2d2  // Device(s) still open
-        case kIOReturnRLDError         = 0x2d3  // RLD failure
-        case kIOReturnDMAError         = 0x2d4  // DMA failure
-        case kIOReturnBusy             = 0x2d5  // Device Busy
-        case kIOReturnTimeout          = 0x2d6  // I/O Timeout
-        case kIOReturnOffline          = 0x2d7  // Device offline
-        case kIOReturnNotReady         = 0x2d8  // Not ready
-        case kIOReturnNotAttached      = 0x2d9  // Device not attached
-        case kIOReturnNoChannels       = 0x2da  // No DMA channels left
-        case kIOReturnNoSpace          = 0x2db  // No space for data
-        case kIOReturnQM2Error         = 0x2dc  // ??? - kIOReturn???Error
-        case kIOReturnPortExists       = 0x2dd  // Port already exists
-        case kIOReturnCannotWire       = 0x2de  // Can't wire down physical
-                                                // memory
-        case kIOReturnNoInterrupt      = 0x2df  // No interrupt attached
-        case kIOReturnNoFrames         = 0x2e0  // No DMA frames enqueued
-        case kIOReturnMessageTooLarge  = 0x2e1  // Oversized msg received on
-                                                // interrupt port
-        case kIOReturnNotPermitted     = 0x2e2  // Not permitted
-        case kIOReturnNoPower          = 0x2e3  // No power to device
-        case kIOReturnNoMedia          = 0x2e4  // Media not present
-        case kIOReturnUnformattedMedia = 0x2e5  // media not formatted
-        case kIOReturnUnsupportedMode  = 0x2e6  // No such mode
-        case kIOReturnUnderrun         = 0x2e7  // Data underrun
-        case kIOReturnOverrun          = 0x2e8  // Data overrun
-        case kIOReturnDeviceError      = 0x2e9  // The device is not working
-                                                // properly!
-        case kIOReturnNoCompletion     = 0x2ea  // A completion routine is
-                                                // required
-        case kIOReturnAborted          = 0x2eb  // Operation aborted
-        case kIOReturnNoBandwidth      = 0x2ec  // Bus bandwidth would be
-                                                // exceeded
-        case kIOReturnNotResponding    = 0x2ed  // Device not responding
-        case kIOReturnIsoTooOld        = 0x2ee  // Isochronous I/O request for
-                                                // distant past!
-        case kIOReturnIsoTooNew        = 0x2ef  // Isochronous I/O request for
-                                                // distant future
-        case kIOReturnNotFound         = 0x2f0  // Data was not found
-        case kIOReturnInvalid          = 0x1    // Should never be seen
-    }
-
     
     /**
     Defined by AppleSMC.kext. See SMCParamStruct.
@@ -497,7 +684,7 @@ public class SMC {
                 println("WARNING - \(__FILE__):\(__FUNCTION__) - "
                         + "\(IOSERVICE_SMC) connection already open")
             #endif
-            return IOReturn.kIOReturnStillOpen.rawValue
+            return kIOReturnStillOpen
         }
         
         
@@ -510,12 +697,12 @@ public class SMC {
                         + " service not found")
             #endif
             
-            return IOReturn.kIOReturnError.rawValue
+            return kIOReturnError
         }
         
         let result = IOServiceOpen(service, mach_task_self_, 0, &conn)
         IOObjectRelease(service)
-        
+
         return result
     }
     
@@ -616,8 +803,7 @@ public class SMC {
                 println("ERROR - \(__FILE__):\(__FUNCTION__) - INVALID KEY"
                         + " SIZE")
             #endif
-            return (ans, IOReturn.kIOReturnBadArgument.rawValue,
-                         kSMC.kSMCError.rawValue)
+            return (ans, kIOReturnBadArgument, kSMC.kSMCError.rawValue)
         }
 
         // Try a read and see if it succeeds
@@ -984,8 +1170,7 @@ public class SMC {
                         + " Max \(maxRPM.rpm) RPM")
             #endif
             
-            return (ans, IOReturn.kIOReturnBadArgument.rawValue,
-                         kSMC.kSMCError.rawValue)
+            return (ans, kIOReturnBadArgument, kSMC.kSMCError.rawValue)
         }
         
         // TODO: Don't use magic number for dataSize
@@ -1119,8 +1304,7 @@ public class SMC {
                 println("ERROR - \(__FILE__):\(__FUNCTION__) - INVALID DATA -"
                         + " Expected input = \(outputStruct.keyInfo)")
             #endif
-            return (IOReturn.kIOReturnBadArgument.rawValue,
-                    kSMC.kSMCError.rawValue)
+            return (kIOReturnBadArgument, kSMC.kSMCError.rawValue)
         }
                                                         
         // Second call to AppleSMC - now we can write the data
@@ -1191,7 +1375,7 @@ public class SMC {
                 println("WARNING - \(__FILE__):\(__FUNCTION__) - SMCParamStruct"
                         + " size is \(inputStructCnt) bytes")
             #endif
-            return IOReturn.kIOReturnBadArgument.rawValue
+            return kIOReturnBadArgument
         }
         
         result = IOConnectCallStructMethod(conn,
@@ -1202,10 +1386,6 @@ public class SMC {
                                            &outputStructCnt)
         
         if (result != kIOReturnSuccess) {
-            // Determine the exact error
-            // TODO: Get system and subsystem codes too?
-            // https://developer.apple.com/library/mac/qa/qa1075/_index.html
-            result = SMC.getErrorCode(result)
             #if DEBUG
                 println("ERROR - \(__FILE__):\(__FUNCTION__) - IOReturn ="
                         + " \(result) - kSMC = \(outputStruct.result)")
@@ -1409,24 +1589,6 @@ public class SMC {
         data[1] = UInt8((val << 2) ^ (UInt(data[0]) << 8))
         
         return data
-    }
-    
-    
-    /**
-    IOReturn error code lookup
-    
-    See "Accessing Hardware From Applications -> Handling Errors" Apple doc for
-    more information.
-    
-    :param: err The raw error code
-    :returns: The IOReturn error code. If not found, returns the original error.
-    */
-    private class func getErrorCode(err: kern_return_t) -> kern_return_t {
-        // kern_return_t is an Int32. The final 14 bits specify the error code
-        // itself, hence the &
-        let lookup : kern_return_t? = IOReturn(rawValue: err & 0x3fff)?.rawValue
-        
-        return (lookup ?? err)
     }
     
     
