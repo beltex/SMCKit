@@ -268,6 +268,29 @@ macro as defined in <mach/error.h>.
 private let SUB_IOKIT_COMMON: UInt32 = (0 & 0xfff) << 14
 
 
+// TODO: Below should all be type properties once supported by Swift. Issue #6.
+
+
+/**
+Name of the SMC IOService as seen in the IORegistry. You can view it either
+via command line with ioreg or through the IORegistryExplorer app (found on
+Apple's developer site - Hardware IO Tools for Xcode)
+*/
+private let IOSERVICE_SMC = "AppleSMC"
+
+
+/**
+IOService for getMachineModel()
+*/
+private let IOSERVICE_MODEL = "IOPlatformExpertDevice"
+
+
+/**
+Number of characters in an SMC key
+*/
+private let SMC_KEY_SIZE = 4
+
+
 //------------------------------------------------------------------------------
 // MARK: GLOBAL PRIVATE FUNCTIONS
 //------------------------------------------------------------------------------
@@ -639,26 +662,6 @@ public class SMC {
     private var conn: io_connect_t = 0
     
     
-    /**
-    Name of the SMC IOService as seen in the IORegistry. You can view it either
-    via command line with ioreg or through the IORegistryExplorer app (found on
-    Apple's developer site - Hardware IO Tools for Xcode)
-    */
-    private let IOSERVICE_SMC = "AppleSMC"
-    
-    
-    /**
-    IOService for get machine model name
-    */
-    private let IOSERVICE_MODEL = "IOPlatformExpertDevice"
-    
-    
-    /**
-    Number of characters in an SMC key
-    */
-    private let SMC_KEY_SIZE = 4
-    
-    
     //--------------------------------------------------------------------------
     // MARK: PUBLIC INITIALIZERS
     //--------------------------------------------------------------------------
@@ -733,7 +736,7 @@ public class SMC {
         var result = false
         var err  : NSError?
         let data : [String : AnyObject] =
-                                      ["Model"       : getMachineModel(),
+                                      ["Model"       : SMC.getMachineModel(),
                                        "Temperature" : temperatureInformation(),
                                        "Fan"         : fanInformation()]
         
@@ -1218,7 +1221,7 @@ public class SMC {
                                             
         
         // First call to AppleSMC - get key info
-        inputStruct.key = toUInt32(key)
+        inputStruct.key = SMC.toUInt32(key)
         inputStruct.data8 = UInt8(Selector.kSMCGetKeyInfo.rawValue)
         
         result = callSMC(&inputStruct, outputStruct: &outputStruct)
@@ -1292,7 +1295,7 @@ public class SMC {
         var outputStruct = SMCParamStruct()
         
         // First call to AppleSMC - get key info
-        inputStruct.key = toUInt32(key)
+        inputStruct.key = SMC.toUInt32(key)
         inputStruct.data8 = UInt8(Selector.kSMCGetKeyInfo.rawValue)
         
         result = callSMC(&inputStruct, outputStruct: &outputStruct)
@@ -1451,9 +1454,8 @@ public class SMC {
     
     :returns: The model name.
     */
-    private func getMachineModel() -> String {
+    private class func getMachineModel() -> String {
         // This could be done using sysctl() as well
-
         var model = String()
                                         
         // Find the service
@@ -1518,7 +1520,7 @@ public class SMC {
     :returns: UInt32 translation of it with little-endian representation.
               Returns zero if key is not 4 characters in length.
     */
-    private func toUInt32(key: String) -> UInt32 {
+    private class func toUInt32(key: String) -> UInt32 {
         var ans   : Int32 = 0
         var shift : Int32 = 24
 
@@ -1544,7 +1546,7 @@ public class SMC {
     :param: dataType The data type as returned from a SMC read key info call
     :returns: 4-byte multi-character constant representation
     */
-    private func toString(dataType: UInt32) -> String {
+    private class func toString(dataType: UInt32) -> String {
         var ans = String()
         var shift : Int32 = 24
 

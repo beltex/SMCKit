@@ -1,6 +1,6 @@
 /*
 * Simple example usage of SMCKit. Prints machine status: temperatures, fans,
-* power, misc.
+* battery, power, misc.
 *
 * main.swift
 * SMCKit
@@ -23,7 +23,6 @@
 */
 
 import SMCKit
-
 
 let smc = SMC()
 
