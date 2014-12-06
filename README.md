@@ -161,9 +161,9 @@ This project is under the **GNU General Public License v2.0**.
 ### Fun
 
 While the SMC driver is closed source, the definition of certain structs needed
-to interact with it (see private `SMCParamStruct`) happened to appear in the
-Apple **PowerManagement** project at around version 211, and soon after disappeared.
-They can be seen in the
+to interact with it (see `SMCParamStruct`) happened to appear in the open source
+Apple **PowerManagement** project at around version 211, and soon after
+disappeared. They can be seen in the
 [PrivateLib.c](http://www.opensource.apple.com/source/PowerManagement/PowerManagement-211/pmconfigd/PrivateLib.c)
 file under `pmconfigd`. In the very same source file, the following snippet can be
 found:
@@ -177,5 +177,5 @@ IORegistryEntrySetCFProperty( _smc,
 ```
 
 Almost certainly a reference to Bob Dylan's
-<a href="http://en.wikipedia.org/wiki/The_Times_They_Are_a-Changin%27_(song)">The Times They Are a-Changin'</a>
+<a href="https://en.wikipedia.org/wiki/The_Times_They_Are_a-Changin%27_(song)">The Times They Are a-Changin'</a>
 . [Enjoy](http://hypem.com/track/5zf9/Bob+Dylan+-+The+Times+They+Are+A-Changin') :)

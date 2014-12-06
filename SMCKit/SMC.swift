@@ -22,7 +22,6 @@
 import IOKit
 import Foundation
 
-
 //------------------------------------------------------------------------------
 // MARK: GLOBAL PUBLIC PROPERTIES
 //------------------------------------------------------------------------------
@@ -43,209 +42,107 @@ https://developer.apple.com/library/mac/qa/qa1075/_index.html
 */
 
 
-/**
-General error
-*/
+/** General error */
 public let kIOReturnError            = iokit_common_err(0x2bc)
-/**
-Can't allocate memory
-*/
+/** Can't allocate memory */
 public let kIOReturnNoMemory         = iokit_common_err(0x2bd)
-/**
-Resource shortage
-*/
+/** Resource shortage */
 public let kIOReturnNoResources      = iokit_common_err(0x2be)
-/**
-Error during IPC
-*/
+/** Error during IPC */
 public let kIOReturnIPCError         = iokit_common_err(0x2bf)
-/**
-No such device
-*/
+/** No such device */
 public let kIOReturnNoDevice         = iokit_common_err(0x2c0)
-/**
-Privilege violation
-*/
+/** Privilege violation */
 public let kIOReturnNotPrivileged    = iokit_common_err(0x2c1)
-/**
-Invalid argument
-*/
+/** Invalid argument */
 public let kIOReturnBadArgument      = iokit_common_err(0x2c2)
-/**
-Device read locked
-*/
+/** Device read locked */
 public let kIOReturnLockedRead       = iokit_common_err(0x2c3)
-/**
-Exclusive access and device already open
-*/
+/** Exclusive access and device already open */
 public let kIOReturnExclusiveAccess  = iokit_common_err(0x2c5)
-/**
-Sent/received messages had different msg_id
-*/
+/** Sent/received messages had different msg_id */
 public let kIOReturnBadMessageID     = iokit_common_err(0x2c6)
-/**
-Unsupported function
-*/
+/** Unsupported function */
 public let kIOReturnUnsupported      = iokit_common_err(0x2c7)
-/**
-Misc. VM failure
-*/
+/** Misc. VM failure */
 public let kIOReturnVMError          = iokit_common_err(0x2c8)
-/**
-Internal error
-*/
+/** Internal error */
 public let kIOReturnInternalError    = iokit_common_err(0x2c9)
-/**
-General I/O error
-*/
+/** General I/O error */
 public let kIOReturnIOError          = iokit_common_err(0x2ca)
-/**
-Can't acquire lock
-*/
+/** Can't acquire lock */
 public let kIOReturnCannotLock       = iokit_common_err(0x2cc)
-/**
-Device not open
-*/
+/** Device not open */
 public let kIOReturnNotOpen          = iokit_common_err(0x2cd)
-/**
-Read not supported
-*/
+/** Read not supported */
 public let kIOReturnNotReadable      = iokit_common_err(0x2ce)
-/**
-Write not supported
-*/
+/** Write not supported */
 public let kIOReturnNotWritable      = iokit_common_err(0x2cf)
-/**
-Alignment error
-*/
+/** Alignment error */
 public let kIOReturnNotAligned       = iokit_common_err(0x2d0)
-/**
-Media Error
-*/
+/** Media Error */
 public let kIOReturnBadMedia         = iokit_common_err(0x2d1)
-/**
-Device(s) still open
-*/
+/** Device(s) still open */
 public let kIOReturnStillOpen        = iokit_common_err(0x2d2)
-/**
-RLD failure
-*/
+/** RLD failure */
 public let kIOReturnRLDError         = iokit_common_err(0x2d3)
-/**
-DMA failure
-*/
+/** DMA failure */
 public let kIOReturnDMAError         = iokit_common_err(0x2d4)
-/**
-Device Busy
-*/
+/** Device Busy */
 public let kIOReturnBusy             = iokit_common_err(0x2d5)
-/**
-I/O Timeout
-*/
+/** I/O Timeout */
 public let kIOReturnTimeout          = iokit_common_err(0x2d6)
-/**
-Device offline
-*/
+/** Device offline */
 public let kIOReturnOffline          = iokit_common_err(0x2d7)
-/**
-Not ready
-*/
+/** Not ready */
 public let kIOReturnNotReady         = iokit_common_err(0x2d8)
-/**
-Device not attached
-*/
+/** Device not attached */
 public let kIOReturnNotAttached      = iokit_common_err(0x2d9)
-/**
-No DMA channels left
-*/
+/** No DMA channels left */
 public let kIOReturnNoChannels       = iokit_common_err(0x2da)
-/**
-No space for data
-*/
+/** No space for data */
 public let kIOReturnNoSpace          = iokit_common_err(0x2db)
-/**
-Port already exists
-*/
+/** Port already exists */
 public let kIOReturnPortExists       = iokit_common_err(0x2dd)
-/**
-Can't wire down physical memory
-*/
+/** Can't wire down physical memory */
 public let kIOReturnCannotWire       = iokit_common_err(0x2de)
-/**
-No interrupt attached
-*/
+/** No interrupt attached */
 public let kIOReturnNoInterrupt      = iokit_common_err(0x2df)
-/**
-No DMA frames enqueued
-*/
+/** No DMA frames enqueued */
 public let kIOReturnNoFrames         = iokit_common_err(0x2e0)
-/**
-Oversized msg received on interrupt port
-*/
+/** Oversized msg received on interrupt port */
 public let kIOReturnMessageTooLarge  = iokit_common_err(0x2e1)
-/**
-Not permitted
-*/
+/** Not permitted */
 public let kIOReturnNotPermitted     = iokit_common_err(0x2e2)
-/**
-No power to device
-*/
+/** No power to device */
 public let kIOReturnNoPower          = iokit_common_err(0x2e3)
-/**
-Media not present
-*/
+/** Media not present */
 public let kIOReturnNoMedia          = iokit_common_err(0x2e4)
-/**
-Media not formatted
-*/
+/** Media not formatted */
 public let kIOReturnUnformattedMedia = iokit_common_err(0x2e5)
-/**
-No such mode
-*/
+/** No such mode */
 public let kIOReturnUnsupportedMode  = iokit_common_err(0x2e6)
-/**
-Data underrun
-*/
+/** Data underrun */
 public let kIOReturnUnderrun         = iokit_common_err(0x2e7)
-/**
-Data overrun
-*/
+/** Data overrun */
 public let kIOReturnOverrun          = iokit_common_err(0x2e8)
-/**
-The device is not working properly!
-*/
+/** The device is not working properly! */
 public let kIOReturnDeviceError      = iokit_common_err(0x2e9)
-/**
-A completion routine is required
-*/
+/** A completion routine is required */
 public let kIOReturnNoCompletion     = iokit_common_err(0x2ea)
-/**
-Operation aborted
-*/
+/** Operation aborted */
 public let kIOReturnAborted          = iokit_common_err(0x2eb)
-/**
-Bus bandwidth would be exceeded
-*/
+/** Bus bandwidth would be exceeded */
 public let kIOReturnNoBandwidth      = iokit_common_err(0x2ec)
-/**
-Device not responding
-*/
+/** Device not responding */
 public let kIOReturnNotResponding    = iokit_common_err(0x2ed)
-/**
-Isochronous I/O request for distant past!
-*/
+/** Isochronous I/O request for distant past! */
 public let kIOReturnIsoTooOld        = iokit_common_err(0x2ee)
-/**
-Isochronous I/O request for distant future
-*/
+/** Isochronous I/O request for distant future */
 public let kIOReturnIsoTooNew        = iokit_common_err(0x2ef)
-/**
-Data was not found
-*/
+/** Data was not found */
 public let kIOReturnNotFound         = iokit_common_err(0x2f0)
-/**
-Should never be seen
-*/
+/** Should never be seen */
 public let kIOReturnInvalid          = iokit_common_err(0x1)
 
 
@@ -1608,7 +1505,7 @@ public class SMC {
     Celsius to Fahrenheit
     */
     private class func toFahrenheit(temperature: Double) -> Double {
-        // http://en.wikipedia.org/wiki/Fahrenheit#Definition_and_conversions
+        // https://en.wikipedia.org/wiki/Fahrenheit#Definition_and_conversions
         return (temperature * 1.8) + 32
     }
     
@@ -1617,7 +1514,7 @@ public class SMC {
     Celsius to Kelvin
     */
     private class func toKelvin(temperature: Double) -> Double {
-        // http://en.wikipedia.org/wiki/Kelvin
+        // https://en.wikipedia.org/wiki/Kelvin
         return temperature + 273.15
     }
 }
