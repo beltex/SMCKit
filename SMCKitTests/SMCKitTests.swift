@@ -79,12 +79,8 @@ class SMCKitTests: XCTestCase {
         for sensor in temperatureSensors {
             let temperature = smc.getTemperature(sensor).tmp
             
-            // Absolute zero - laws of physics will be broken if this fails :)
-            // TODO: Get a better low bound for min comp operating temperature
-            XCTAssertGreaterThan(temperature, -273.15)
-            
-            // TODO: This should be lower, be we'll give it slack for now
-            XCTAssertLessThan(temperature, 120)
+            XCTAssertGreaterThan(temperature, -128.0)
+            XCTAssertLessThan(temperature, 128.0)
         }
     }
     
