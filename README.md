@@ -31,7 +31,7 @@ For more see:
 
 - [Xcode 6.1](https://developer.apple.com/xcode/downloads/)
 - OS X 10.9+
-
+    - This is due to Swift
 
 ### Installation
 
