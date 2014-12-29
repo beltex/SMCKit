@@ -160,10 +160,10 @@ This project is under the **GNU General Public License v2.0**.
 
 ### Fun
 
-While the SMC driver is closed source, the definition of certain structs needed
-to interact with it (see `SMCParamStruct`) happened to appear in the open source
-Apple **PowerManagement** project at around version 211, and soon after
-disappeared. They can be seen in the
+While the SMC driver is closed source, the call strucutre and definition of
+certain structs needed to interact with it (see `SMCParamStruct`) happened to
+appear in the open source Apple **PowerManagement** project at around version
+211, and soon after disappeared. They can be seen in the
 [PrivateLib.c](http://www.opensource.apple.com/source/PowerManagement/PowerManagement-211/pmconfigd/PrivateLib.c)
 file under `pmconfigd`. In the very same source file, the following snippet can be
 found:

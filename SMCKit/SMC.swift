@@ -1477,6 +1477,9 @@ public class SMC {
     
     /**
     Celsius to Fahrenheit
+    
+    :param: temperature Temperature in Celsius
+    :returns: Temperature in Fahrenheit
     */
     private class func toFahrenheit(temperature: Double) -> Double {
         // https://en.wikipedia.org/wiki/Fahrenheit#Definition_and_conversions
@@ -1486,6 +1489,9 @@ public class SMC {
     
     /**
     Celsius to Kelvin
+    
+    :param: temperature Temperature in Celsius
+    :returns: Temperature in Kelvin
     */
     private class func toKelvin(temperature: Double) -> Double {
         // https://en.wikipedia.org/wiki/Kelvin
