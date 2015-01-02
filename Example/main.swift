@@ -24,7 +24,7 @@
 
 import SMCKit
 
-let smc = SMC()
+var smc = SMC()
 
 if (smc.open() != kIOReturnSuccess) {
     println("ERROR: Failed to open connection to SMC")

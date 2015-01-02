@@ -39,7 +39,7 @@ TODO: What do we test exactly? We can't check for return values, like
 */
 class SMCKitTests: XCTestCase {
     
-    let smc = SMC()
+    var smc = SMC()
     
     // TODO: Setup once?
     override func setUp() {

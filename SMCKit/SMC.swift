@@ -165,25 +165,6 @@ macro as defined in <mach/error.h>.
 private let SUB_IOKIT_COMMON: UInt32 = (0 & 0xfff) << 14
 
 
-// TODO: Below should all be type properties once supported by Swift. Issue #6.
-
-
-/**
-Name of the SMC IOService as seen in the IORegistry. You can view it either
-via command line with ioreg or through the IORegistryExplorer app (found on
-Apple's developer site - Hardware IO Tools for Xcode)
-*/
-private let IOSERVICE_SMC = "AppleSMC"
-
-
-/// IOService for getMachineModel()
-private let IOSERVICE_MODEL = "IOPlatformExpertDevice"
-
-
-/// Number of characters in an SMC key
-private let SMC_KEY_SIZE = 4
-
-
 //------------------------------------------------------------------------------
 // MARK: GLOBAL PRIVATE FUNCTIONS
 //------------------------------------------------------------------------------
@@ -206,7 +187,7 @@ System Management Controller (SMC) API from user space for Intel based Macs.
 Works by talking to the AppleSMC.kext (kernel extension), the closed source
 driver for the SMC.
 */
-public class SMC {
+public struct SMC {
     
     
     //--------------------------------------------------------------------------
@@ -533,6 +514,22 @@ public class SMC {
     private var conn: io_connect_t = 0
     
     
+    /**
+    Name of the SMC IOService as seen in the IORegistry. You can view it either
+    via command line with ioreg or through the IORegistryExplorer app (found on
+    Apple's developer site - Hardware IO Tools for Xcode)
+    */
+    private static let IOSERVICE_SMC = "AppleSMC"
+    
+    
+    /// IOService for getMachineModel()
+    private static let IOSERVICE_MODEL = "IOPlatformExpertDevice"
+    
+    
+    /// Number of characters in an SMC key
+    private static let SMC_KEY_SIZE = 4
+    
+    
     //--------------------------------------------------------------------------
     // MARK: PUBLIC INITIALIZERS
     //--------------------------------------------------------------------------
@@ -552,23 +549,23 @@ public class SMC {
     
     :returns: kIOReturnSuccess on successful connection to the SMC.
     */
-    public func open() -> kern_return_t {
+    public mutating func open() -> kern_return_t {
         // TODO: Why does calling open() twice (without below) return success?
         if (conn != 0) {
             #if DEBUG
                 println("WARNING - \(__FILE__):\(__FUNCTION__) - "
-                        + "\(IOSERVICE_SMC) connection already open")
+                        + "\(SMC.IOSERVICE_SMC) connection already open")
             #endif
             return kIOReturnStillOpen
         }
         
         
         let service = IOServiceGetMatchingService(kIOMasterPortDefault,
-                      IOServiceMatching(IOSERVICE_SMC).takeUnretainedValue())
+                      IOServiceMatching(SMC.IOSERVICE_SMC).takeUnretainedValue())
         
         if (service == 0) {
             #if DEBUG
-                println("ERROR - \(__FILE__):\(__FUNCTION__) - \(IOSERVICE_SMC)"
+                println("ERROR - \(__FILE__):\(__FUNCTION__) - \(SMC.IOSERVICE_SMC)"
                         + " service not found")
             #endif
             
@@ -587,7 +584,7 @@ public class SMC {
     
     :returns: kIOReturnSuccess on successful close of connection to the SMC.
     */
-    public func close() -> kern_return_t {
+    public mutating func close() -> kern_return_t {
         // Calling close twice or if connection not open returns the Mach IPC
         // error - MACH_SEND_INVALID_DEST
         let result = IOServiceClose(conn)
@@ -677,7 +674,7 @@ public class SMC {
                                             kSMC     : UInt8) {
         var ans = false
                                                 
-        if (countElements(key) != SMC_KEY_SIZE) {
+        if (countElements(key) != SMC.SMC_KEY_SIZE) {
             #if DEBUG
                 println("ERROR - \(__FILE__):\(__FUNCTION__) - INVALID KEY"
                         + " SIZE")
@@ -1325,13 +1322,13 @@ public class SMC {
     
     :returns: The model name.
     */
-    private class func getMachineModel() -> String {
+    private static func getMachineModel() -> String {
         // This could be done using sysctl() as well
         var model = String()
                                         
         // Find the service
         let service = IOServiceGetMatchingService(kIOMasterPortDefault,
-                      IOServiceMatching(IOSERVICE_MODEL).takeUnretainedValue())
+                      IOServiceMatching(SMC.IOSERVICE_MODEL).takeUnretainedValue())
 
         if (service == 0) {
             #if DEBUG
@@ -1391,7 +1388,7 @@ public class SMC {
     :returns: UInt32 translation of it with little-endian representation.
               Returns zero if key is not 4 characters in length.
     */
-    private class func toUInt32(key: String) -> UInt32 {
+    private static func toUInt32(key: String) -> UInt32 {
         var ans   : Int32 = 0
         var shift : Int32 = 24
 
@@ -1417,7 +1414,7 @@ public class SMC {
     :param: dataType The data type as returned from a SMC read key info call
     :returns: 4-byte multi-character constant representation
     */
-    private class func toString(dataType: UInt32) -> String {
+    private static func toString(dataType: UInt32) -> String {
         var ans = String()
         var shift : Int32 = 24
 
@@ -1441,7 +1438,7 @@ public class SMC {
     :param: data Data from the SMC to be converted. Assumed data size of 2.
     :returns: Converted data
     */
-    private class func from_fpe2(data: [UInt8]) -> UInt {
+    private static func from_fpe2(data: [UInt8]) -> UInt {
         var ans : UInt = 0
         
         // Data type for fan calls - fpe2
@@ -1460,7 +1457,7 @@ public class SMC {
     :param: val Value to convert
     :return: Converted data in SMCParamStruct data format
     */
-    private class func to_fpe2(val: UInt) -> [UInt8] {
+    private static func to_fpe2(val: UInt) -> [UInt8] {
         // TODO: check val size for overflow
         var data = [UInt8](count: 32, repeatedValue: 0)
         data[0] = UInt8(val >> 6)
@@ -1481,7 +1478,7 @@ public class SMC {
     :param: temperature Temperature in Celsius
     :returns: Temperature in Fahrenheit
     */
-    private class func toFahrenheit(temperature: Double) -> Double {
+    private static func toFahrenheit(temperature: Double) -> Double {
         // https://en.wikipedia.org/wiki/Fahrenheit#Definition_and_conversions
         return (temperature * 1.8) + 32
     }
@@ -1493,7 +1490,7 @@ public class SMC {
     :param: temperature Temperature in Celsius
     :returns: Temperature in Kelvin
     */
-    private class func toKelvin(temperature: Double) -> Double {
+    private static func toKelvin(temperature: Double) -> Double {
         // https://en.wikipedia.org/wiki/Kelvin
         return temperature + 273.15
     }

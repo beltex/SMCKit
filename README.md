@@ -78,9 +78,9 @@ adding `-D DEBUG` to the **Other Swift Flags** setting in your
 // import IOKit
 import SMCKit
 
-let smc = SMC()
+var smc = SMC()
 
-if (smc.open() == kIOReturnSuccess) {
+if smc.open() == kIOReturnSuccess {
     println("CPU 0 Diode Temperature: \(smc.getTemperature(SMC.Temperature.CPU_0_DIODE).tmp)°C")
     println("Fan 0 Speed: \(smc.getFanRPM(0).rpm) RPM")
     smc.close()
