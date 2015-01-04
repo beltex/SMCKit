@@ -100,13 +100,32 @@ class SMCKitTests: XCTestCase {
         XCTAssertFalse(smc.isKeyValid("Vi").valid)
         XCTAssertFalse(smc.isKeyValid("Vim").valid)
         XCTAssertFalse(smc.isKeyValid("What is this new devilry?").valid)
+        
+        // We should be apply to rely on always having these keys
+        XCTAssertTrue(smc.isKeyValid("FNum").valid)     // Number of fans
+        XCTAssertTrue(smc.isKeyValid("#KEY").valid)     // Number of keys
     }
     
     func testODD() {
         // Test that isOpticalDiskDriveFull() returns false when there is no 
         // ODD. We can do this by cross checking the I/O Reg
-        // IOAHCISerialATAPI
         // TODO: What if its an Apple USB SuperDrive?
+        
+        let ODD = smc.isOpticalDiskDriveFull()
+        
+        // TODO: Does this service cover all disk drives?
+        var service = IOServiceGetMatchingService(kIOMasterPortDefault,
+               IOServiceNameMatching("IOAHCISerialATAPI").takeUnretainedValue())
+        
+        if (service == 0) {
+            // No ODD on this machine
+            XCTAssertFalse(ODD.flag)
+        }
+        else {
+            // TODO: Check if ODD full
+        }
+        
+        IOObjectRelease(service)
     }
     
     
