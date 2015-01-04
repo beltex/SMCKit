@@ -553,20 +553,20 @@ public struct SMC {
         // TODO: Why does calling open() twice (without below) return success?
         if (conn != 0) {
             #if DEBUG
-                println("WARNING - \(__FILE__):\(__FUNCTION__) - "
-                        + "\(SMC.IOSERVICE_SMC) connection already open")
+                println("WARNING - \(__FILE__):\(__FUNCTION__) - " +
+                        "\(SMC.IOSERVICE_SMC) connection already open")
             #endif
             return kIOReturnStillOpen
         }
         
         
         let service = IOServiceGetMatchingService(kIOMasterPortDefault,
-                      IOServiceMatching(SMC.IOSERVICE_SMC).takeUnretainedValue())
+                     IOServiceMatching(SMC.IOSERVICE_SMC).takeUnretainedValue())
         
         if (service == 0) {
             #if DEBUG
-                println("ERROR - \(__FILE__):\(__FUNCTION__) - \(SMC.IOSERVICE_SMC)"
-                        + " service not found")
+                println("ERROR - \(__FILE__):\(__FUNCTION__) - " +
+                        "\(SMC.IOSERVICE_SMC) service not found")
             #endif
             
             return kIOReturnError
@@ -589,6 +589,13 @@ public struct SMC {
         // error - MACH_SEND_INVALID_DEST
         let result = IOServiceClose(conn)
         conn = 0    // Reset this incase open() is called again
+        
+        #if DEBUG
+            if (result != kIOReturnSuccess) {
+                println("ERROR - \(__FILE__):\(__FUNCTION__) - Failed to close")
+            }
+        #endif
+        
         return result
     }
     
@@ -602,8 +609,8 @@ public struct SMC {
     */
     public func machineProfile(path: String) -> Bool {
         var result = false
-        var err  : NSError?
-        let data : [String : AnyObject] =
+        var error : NSError?
+        let data  : [String : AnyObject] =
                                       ["Model"       : SMC.getMachineModel(),
                                        "Temperature" : temperatureInformation(),
                                        "Fan"         : fanInformation()]
@@ -625,8 +632,8 @@ public struct SMC {
         // Catch bad path - only once stream open
         if (outputStream?.streamStatus == NSStreamStatus.Error) {
             #if DEBUG
-                println("ERROR - \(__FILE__):\(__FUNCTION__) - BAD PATH -"
-                        + " \"\(path)\"")
+                println("ERROR - \(__FILE__):\(__FUNCTION__) - BAD PATH - " +
+                        "\"\(path)\"")
             #endif
             return result
         }
@@ -635,15 +642,15 @@ public struct SMC {
         if (NSJSONSerialization.writeJSONObject(data,
                                                 toStream : outputStream!,
                                                 options  : opts,
-                                                error    : &err) != 0) {
+                                                error    : &error) != 0) {
             result = true
         }
         
         
         #if DEBUG
-            if (err != nil) {
-                println("ERROR - \(__FILE__):\(__FUNCTION__) - WRITE FAILED -"
-                        + " \(err)")
+            if (error != nil) {
+                println("ERROR - \(__FILE__):\(__FUNCTION__) - WRITE FAILED - "
+                        + "\(error)")
             }
         #endif
         
@@ -676,8 +683,8 @@ public struct SMC {
                                                 
         if (countElements(key) != SMC.SMC_KEY_SIZE) {
             #if DEBUG
-                println("ERROR - \(__FILE__):\(__FUNCTION__) - INVALID KEY"
-                        + " SIZE")
+                println("ERROR - \(__FILE__):\(__FUNCTION__) - INVALID KEY" +
+                        "SIZE")
             #endif
             return (ans, kIOReturnBadArgument, kSMC.kSMCError.rawValue)
         }
@@ -1042,8 +1049,8 @@ public struct SMC {
               maxRPM.kSMC == kSMC.kSMCSuccess.rawValue &&
               rpm <= maxRPM.rpm)) {
             #if DEBUG
-                println("ERROR - \(__FILE__):\(__FUNCTION__) - UNSAFE RPM -"
-                        + " Max \(maxRPM.rpm) RPM")
+                println("ERROR - \(__FILE__):\(__FUNCTION__) - UNSAFE RPM - " +
+                        "Max \(maxRPM.rpm) RPM")
             #endif
             
             return (ans, kIOReturnBadArgument, kSMC.kSMCError.rawValue)
@@ -1177,8 +1184,8 @@ public struct SMC {
         if (dataSize != outputStruct.keyInfo.dataSize ||
             dataType.rawValue != toString(outputStruct.keyInfo.dataType)) {
             #if DEBUG
-                println("ERROR - \(__FILE__):\(__FUNCTION__) - INVALID DATA -"
-                        + " Expected input = \(outputStruct.keyInfo)")
+                println("ERROR - \(__FILE__):\(__FUNCTION__) - INVALID DATA - "
+                        + "Expected input = \(outputStruct.keyInfo)")
             #endif
             return (kIOReturnBadArgument, kSMC.kSMCError.rawValue)
         }
@@ -1263,8 +1270,8 @@ public struct SMC {
         
         if (result != kIOReturnSuccess) {
             #if DEBUG
-                println("ERROR - \(__FILE__):\(__FUNCTION__) - IOReturn ="
-                        + " \(result) - kSMC = \(outputStruct.result)")
+                println("ERROR - \(__FILE__):\(__FUNCTION__) - IOReturn = " +
+                        "\(result) - kSMC = \(outputStruct.result)")
             #endif
         }
 
@@ -1328,12 +1335,12 @@ public struct SMC {
                                         
         // Find the service
         let service = IOServiceGetMatchingService(kIOMasterPortDefault,
-                      IOServiceMatching(SMC.IOSERVICE_MODEL).takeUnretainedValue())
+                      IOServiceMatching(IOSERVICE_MODEL).takeUnretainedValue())
 
         if (service == 0) {
             #if DEBUG
-                println("ERROR - \(__FILE__):\(__FUNCTION__) -"
-                        + " \(IOSERVICE_MODEL) service not found")
+                println("ERROR - \(__FILE__):\(__FUNCTION__) - " +
+                        "\(IOSERVICE_MODEL) service not found")
             #endif
             return model
         }
@@ -1363,8 +1370,8 @@ public struct SMC {
         #if DEBUG
             // TODO: get rid of the if statement - want it to be else of above
             if (result != kIOReturnSuccess) {
-                println("ERROR - \(__FILE__):\(__FUNCTION__) - IOReturn ="
-                        + " \(result)")
+                println("ERROR - \(__FILE__):\(__FUNCTION__) - IOReturn = " +
+                        "\(result)")
             }
         #endif
         
