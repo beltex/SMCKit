@@ -22,6 +22,7 @@
 import Cocoa
 import XCTest
 import SMCKit
+import DiscRecording
 
 /*
 TODO: What do we test exactly? We can't check for return values, like
@@ -40,6 +41,10 @@ TODO: What do we test exactly? We can't check for return values, like
 class SMCKitTests: XCTestCase {
     
     var smc = SMC()
+    
+    /// List of internal ODD devices
+    var internalODD = [DRDevice]()
+    
     
     // TODO: Setup once?
     override func setUp() {
@@ -101,38 +106,66 @@ class SMCKitTests: XCTestCase {
         XCTAssertFalse(smc.isKeyValid("Vim").valid)
         XCTAssertFalse(smc.isKeyValid("What is this new devilry?").valid)
         
-        // We should be apply to rely on always having these keys
+        // We should be able to rely on always having these keys for now
         XCTAssertTrue(smc.isKeyValid("FNum").valid)     // Number of fans
         XCTAssertTrue(smc.isKeyValid("#KEY").valid)     // Number of keys
     }
     
     func testODD() {
-        // Test that isOpticalDiskDriveFull() returns false when there is no 
-        // ODD. We can do this by cross checking the I/O Reg
-        // TODO: What if its an Apple USB SuperDrive?
+        // Cross check via DiscRecording framework
+        //
+        // Handy Refs:
+        // http://stackoverflow.com/questions/8770048/objective-c-drdevice-h
+        // https://developer.apple.com/legacy/library/samplecode/DeviceListener/
+        // http://stackoverflow.com/a/24049111
         
-        let ODD = smc.isOpticalDiskDriveFull()
+        let ODDStatusSMC = smc.isOpticalDiskDriveFull().flag
+        let devicesCount = DRDevice.devices().count
         
-        // TODO: Does this service cover all disk drives?
-        var service = IOServiceGetMatchingService(kIOMasterPortDefault,
-               IOServiceNameMatching("IOAHCISerialATAPI").takeUnretainedValue())
-        
-        if (service == 0) {
-            // No ODD on this machine
-            XCTAssertFalse(ODD.flag)
+        if (devicesCount == 0) {
+            // TODO: This means that there are no ODD that have burn capability?
+            //       Should be fine, as all Apple drives should have it
+            println("No ODD devices")
+            return
         }
-        else {
-            // TODO: Check if ODD full
+        
+        // To get the ODD object, need to reg for notification and wait. Since,
+        // were looking for an internel device, should be instant.
+        // See deviceAppeared() helper.
+        DRNotificationCenter.currentRunLoopCenter().addObserver(self,
+                                             selector: "deviceAppeared:",
+                                             name: DRDeviceAppearedNotification,
+                                             object: nil)
+        
+        // TODO: sleep here just incase for notification to be sent?
+
+        
+        // TODO: Ignoring the Mac Pro case for now, with 2 drives
+        if (internalODD.count == 1) {
+            let ODDStatus = internalODD[0].status()[DRDeviceMediaStateKey]
+                                                                     as NSString
+            
+            switch ODDStatus {
+                case DRDeviceMediaStateMediaPresent:
+                    XCTAssertTrue(ODDStatusSMC)
+                case DRDeviceMediaStateInTransition:
+                    // TODO: Should sleep and wait for state to become "stable",
+                    //       DRDeviceStatusChangedNotification
+                    // TODO: Throw a fail here?
+                    break
+                case DRDeviceMediaStateNone:
+                    XCTAssertFalse(ODDStatusSMC)
+                default:
+                    // Unknown state - this should never happen. Only here to
+                    // make compiler happy
+                    break
+            }
         }
         
-        IOObjectRelease(service)
+        DRNotificationCenter.currentRunLoopCenter().removeObserver(self,
+                                             name: DRDeviceAppearedNotification,
+                                             object: nil)
     }
-    
-    
-    //--------------------------------------------------------------------------
-    // MARK: TESTS - BATTERY/POWER
-    //--------------------------------------------------------------------------
-    
     
     func testBatteryPowerMethods() {
         var isLaptop    = false
@@ -211,5 +244,38 @@ class SMCKitTests: XCTestCase {
         
         // TODO: Make sure this is called, even if tests above fail
         IOObjectRelease(service)
+    }
+    
+    func testMachineProfile() {
+        // TODO: Test bad path, test output is valid JSON, test prop fields are
+        //       are listed, etc.
+    }
+    
+    
+    //--------------------------------------------------------------------------
+    // MARK: HELPERS
+    //--------------------------------------------------------------------------
+    
+    
+    /**
+    Callback on disc recording device (ODD) being found.
+    
+    NOTE: Must not be private ACL, otherwise selector can't be reached
+    */
+    func deviceAppeared(aNotification: NSNotification) {
+        let newDevice  = aNotification.object as DRDevice
+        let deviceInfo = newDevice.info()
+        
+        let supportLevel = deviceInfo[DRDeviceSupportLevelKey] as NSString
+        let interconnect = deviceInfo[DRDevicePhysicalInterconnectLocationKey]
+                                                                     as NSString
+        
+        if (interconnect == DRDevicePhysicalInterconnectLocationInternal &&
+            supportLevel == DRDeviceSupportLevelAppleShipping) {
+            // The supposition here is that the SMC will only know about
+            // internal Apple "made" ODD, and not a 3rd party one that someone
+            // swapped in
+            internalODD.append(newDevice)
+        }
     }
 }

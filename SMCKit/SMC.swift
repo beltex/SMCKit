@@ -791,6 +791,8 @@ public struct SMC {
     
     NOTE: This almost certainly does not apply to an external ODD, like an Apple
           USB SuperDrive. This is yet to be tested.
+    TODO: What if its a 3rd party ODD that was swapped internally?
+    TODO: What about the old Mac Pro that can have 2 ODD?
     
     :returns: flag True if there is, false otherwise
     :returns: IOReturn IOKit return code

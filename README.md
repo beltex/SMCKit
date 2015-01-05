@@ -142,7 +142,7 @@ currently offers no
 There are many projects that interface with the SMC for one purpose or another. Credit is most
 certainly due to them for the reference code. Such projects as:
 
-- [iStat Pro](https://www.apple.com/downloads/dashboard/status/istatpro.html)
+- iStat Pro
 - [osx-cpu-temp](https://github.com/lavoiesl/osx-cpu-temp)
 - [smcFanControl](https://github.com/hholtmann/smcFanControl)
 
