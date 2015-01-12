@@ -6,7 +6,9 @@ Intel based Macs. The library works by talking to the AppleSMC.kext (kernel
 extension), the closed source driver for the SMC. Read temperature sensors,
 get and set fan speed (RPM), and more.
 
-For a C based version see [libsmc](https://github.com/beltex/libsmc).
+- For a C based version, see [libsmc](https://github.com/beltex/libsmc)
+- For other system related statistics in Swift for OS X, see
+  [SystemKit](https://github.com/beltex/SystemKit)
 
 
 ### System Management Controller
