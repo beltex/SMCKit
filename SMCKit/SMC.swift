@@ -773,9 +773,8 @@ public struct SMC {
                                                         
        switch unit {
            case .Celsius:
-               // Do nothing - in Celsius by default
-               // Must have complete switch though with executed command
-               tmp = tmp + 0
+               // Do nothing, in Celsius by default
+               break
            case .Fahrenheit:
                tmp = SMC.toFahrenheit(tmp)
            case .Kelvin:

@@ -144,6 +144,7 @@ certainly due to them for the reference code. Such projects as:
 
 - iStat Pro
 - [osx-cpu-temp](https://github.com/lavoiesl/osx-cpu-temp)
+- [PowerManagement](http://www.opensource.apple.com/source/PowerManagement/)
 - [smcFanControl](https://github.com/hholtmann/smcFanControl)
 
 Handy I/O Kit references:
