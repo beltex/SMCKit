@@ -156,7 +156,7 @@ Handy I/O Kit references:
 
 ### License
 
-This project is under the **GNU General Public License v2.0**.
+This project is under the **MIT License**.
 
 
 ### Fun
