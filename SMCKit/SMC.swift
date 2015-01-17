@@ -1361,17 +1361,7 @@ public struct SMC {
         let result = IORegistryEntryGetName(service, ptr)
         IOObjectRelease(service)
         
-        if (result == kIOReturnSuccess) {
-            // Iterate through the array to get all the chars
-            for var i = 0; i < io_name_t_size; ++i {
-                // Check if at the end
-                if (ptr[i] <= 0) {
-                    break
-                }
-                
-                model.append(UnicodeScalar(UInt32(ptr[i])))
-            }
-        }
+        if result == kIOReturnSuccess { model = String.fromCString(ptr)! }
 
         #if DEBUG
             // TODO: get rid of the if statement - want it to be else of above
