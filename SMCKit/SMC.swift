@@ -1352,28 +1352,26 @@ public struct SMC {
         }
         
         
-        // Create a pointer for the name (io_name_t - array of Int8)
-        let io_name_t_size = sizeof(io_name_t)
-        let ptr            = UnsafeMutablePointer<Int8>.alloc(io_name_t_size)
-        ptr.initialize(0)
+        // Create a pointer for the name
+        let ptr = UnsafeMutablePointer<io_name_t>.alloc(1)
         
         // Get the model name
-        let result = IORegistryEntryGetName(service, ptr)
+        let result = IORegistryEntryGetName(service, UnsafeMutablePointer(ptr))
         IOObjectRelease(service)
         
-        if result == kIOReturnSuccess { model = String.fromCString(ptr)! }
+        if result == kIOReturnSuccess {
+            model = String.fromCString(UnsafePointer(ptr))!
+        }
+
+        ptr.dealloc(1)
+
 
         #if DEBUG
-            // TODO: get rid of the if statement - want it to be else of above
             if (result != kIOReturnSuccess) {
                 println("ERROR - \(__FILE__):\(__FUNCTION__) - IOReturn = " +
                         "\(result)")
             }
         #endif
-        
-        // Cleanup
-        // TODO: destory() or dealloc()?
-        ptr.dealloc(io_name_t_size)
         
         return model
     }
