@@ -148,7 +148,7 @@ class SMCKitTests: XCTestCase {
         // TODO: Ignoring the Mac Pro case for now, with 2 drives
         if (internalODD.count == 1) {
             let ODDStatus = internalODD[0].status()[DRDeviceMediaStateKey]
-                                                                     as NSString
+                                                                    as! NSString
             
             switch ODDStatus {
                 case DRDeviceMediaStateMediaPresent:
@@ -188,17 +188,15 @@ class SMCKitTests: XCTestCase {
             
             // Getting these values to cross ref
             var prop = IORegistryEntryCreateCFProperty(service, "IsCharging",
-                                                       kCFAllocatorDefault,
-                                                       UInt32(kNilOptions))
+                                                       kCFAllocatorDefault, 0)
             
-            ASPCharging = prop.takeUnretainedValue() as Int == 1 ? true : false
+            ASPCharging = prop.takeUnretainedValue() as! Int == 1 ? true : false
             
             
             prop = IORegistryEntryCreateCFProperty(service, "FullyCharged",
-                                                   kCFAllocatorDefault,
-                                                   UInt32(kNilOptions))
+                                                   kCFAllocatorDefault, 0)
             
-            ASPCharged = prop.takeUnretainedValue() as Int == 1 ? true : false
+            ASPCharged = prop.takeUnretainedValue() as! Int == 1 ? true : false
         }
         
         
@@ -268,12 +266,12 @@ class SMCKitTests: XCTestCase {
     NOTE: Must not be private ACL, otherwise selector can't be reached
     */
     func deviceAppeared(aNotification: NSNotification) {
-        let newDevice  = aNotification.object as DRDevice
+        let newDevice  = aNotification.object as! DRDevice
         let deviceInfo = newDevice.info()
         
-        let supportLevel = deviceInfo[DRDeviceSupportLevelKey] as NSString
+        let supportLevel = deviceInfo[DRDeviceSupportLevelKey] as! NSString
         let interconnect = deviceInfo[DRDevicePhysicalInterconnectLocationKey]
-                                                                     as NSString
+                                                                    as! NSString
         
         if (interconnect == DRDevicePhysicalInterconnectLocationInternal &&
             supportLevel == DRDeviceSupportLevelAppleShipping) {

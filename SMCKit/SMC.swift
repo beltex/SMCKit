@@ -686,7 +686,7 @@ public struct SMC {
                                             kSMC     : UInt8) {
         var ans = false
                                                 
-        if (countElements(key) != SMC.SMC_KEY_SIZE) {
+        if (count(key) != SMC.SMC_KEY_SIZE) {
             #if DEBUG
                 println("ERROR - \(__FILE__):\(__FUNCTION__) - INVALID KEY" +
                         "SIZE")
@@ -1394,7 +1394,7 @@ public struct SMC {
         var shift : Int32 = 24
 
         // SMC key is expected to be 4 bytes - thus 4 chars
-        if (countElements(key) != SMC_KEY_SIZE) {
+        if (count(key) != SMC_KEY_SIZE) {
             return 0
         }
         
