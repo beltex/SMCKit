@@ -1254,8 +1254,8 @@ public struct SMC {
         // When the structs are cast to SMCParamStruct on the C side (AppleSMC)
         // there expected to be 80 bytes. This may not be the case on the Swift
         // side. One hack is to simply hardcode this to 80.
-        var inputStructCnt  : size_t = UInt(sizeof(SMCParamStruct))
-        var outputStructCnt : size_t = inputStructCnt
+        var inputStructCnt  = sizeof(SMCParamStruct)
+        var outputStructCnt = inputStructCnt
                             
         if (inputStructCnt != 80) {
             // Houston, we have a problem. Depending how far off this is from
