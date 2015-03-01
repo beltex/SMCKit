@@ -257,7 +257,8 @@ public struct SMC {
         case PWR_SUPPLY_PROXIMITY   = "Tp0P"
         case THUNDERBOLT_0          = "TI0P"
         case THUNDERBOLT_1          = "TI1P"
-        case WIRELESS_MODULE        = "TW0P"
+        // See https://github.com/beltex/SMCKit/issues/15
+        //case WIRELESS_MODULE        = "TW0P"
         
         
         /**
@@ -295,8 +296,8 @@ public struct SMC {
                                 PALM_REST             : "PALM_REST",
                                 PWR_SUPPLY_PROXIMITY  : "PWR_SUPPLY_PROXIMITY",
                                 THUNDERBOLT_0         : "THUNDERBOLT_0",
-                                THUNDERBOLT_1         : "THUNDERBOLT_1",
-                                WIRELESS_MODULE       : "WIRELESS_MODULE"]
+                                THUNDERBOLT_1         : "THUNDERBOLT_1"]
+                                //WIRELESS_MODULE       : "WIRELESS_MODULE"]
     }
     
     
