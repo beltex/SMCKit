@@ -26,14 +26,14 @@ makes the changes, slowing down or speeding up fans as necessary."_
 
 For more see:
 
-- [System Management Controller](http://en.wikipedia.org/wiki/System_Management_Controller)
-- [System Management Unit](http://en.wikipedia.org/wiki/System_Management_Unit)
-- [Power Management Unit](http://en.wikipedia.org/wiki/Power_Management_Unit)
+- [System Management Controller](https://en.wikipedia.org/wiki/System_Management_Controller)
+- [System Management Unit](https://en.wikipedia.org/wiki/System_Management_Unit)
+- [Power Management Unit](https://en.wikipedia.org/wiki/Power_Management_Unit)
 
 
 ### Requirements
 
-- [Xcode 6.3 Beta 2](https://developer.apple.com/xcode/downloads/)
+- [Xcode 6.3 Beta 3](https://developer.apple.com/xcode/downloads/)
 - OS X 10.9+
     - This is due to Swift
 
