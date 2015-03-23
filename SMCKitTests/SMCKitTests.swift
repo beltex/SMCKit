@@ -98,11 +98,13 @@ class SMCKitTests: XCTestCase {
         // All Macs until now have atleast 1 fan
         
         let result = smc.getNumFans()
-        
+
+        // TODO: Check for new fanless MacBook via model number
         XCTAssertGreaterThanOrEqual(result.numFans, UInt(1))
         
-        // This is a loose value on purpose
-        XCTAssertLessThanOrEqual(result.numFans, UInt(20))
+        // Don't know the max number of fans, probably no more than 2, put we'll
+        // give it some slack incase
+        XCTAssertLessThanOrEqual(result.numFans, UInt(5))
     }
     
     func testIsKeyValid() {
