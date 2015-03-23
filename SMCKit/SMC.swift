@@ -1338,7 +1338,7 @@ public struct SMC {
     */
     private static func getMachineModel() -> String {
         // This could be done using sysctl() as well
-        var model = String()
+        let model: String
                                         
         // Find the service
         let service = IOServiceGetMatchingService(kIOMasterPortDefault,
@@ -1349,7 +1349,8 @@ public struct SMC {
                 println("ERROR - \(__FILE__):\(__FUNCTION__) - " +
                         "\(IOSERVICE_MODEL) service not found")
             #endif
-            return model
+
+            return String()
         }
         
         
@@ -1362,6 +1363,9 @@ public struct SMC {
         
         if result == kIOReturnSuccess {
             model = String.fromCString(UnsafePointer(ptr))!
+        }
+        else {
+            model = String()
         }
 
         ptr.dealloc(1)
