@@ -53,10 +53,15 @@ println("\n-- FAN --")
 let numberOfFans = smc.getNumFans().numFans
 
 for var i: UInt = 0; i < numberOfFans; ++i {
-    let fanName = smc.getFanName(i).name
-    let fanRPM  = smc.getFanRPM(i).rpm
-    
-    println("\(fanName)\n\t\(fanRPM) RPM")
+    let name    = smc.getFanName(i).name
+    let current = smc.getFanRPM(i).rpm
+    let min     = smc.getFanMinRPM(i).rpm
+    let max     = smc.getFanMaxRPM(i).rpm
+
+    println(name)
+    println("\tCurrent:  \(current) RPM")
+    println("\tMin:      \(min) RPM")
+    println("\tMax:      \(max) RPM")
 }
 
 

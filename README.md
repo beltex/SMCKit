@@ -122,7 +122,9 @@ PALM_REST
 
 -- FAN --
 Exhaust
-  1998 RPM
+  Current:  1324 RPM
+  Min:      1299 RPM
+  Max:      6199 RPM
 
 -- BATTERY & POWER --
 AC Present:          true
