@@ -95,16 +95,21 @@ class SMCKitTests: XCTestCase {
     }
     
     func testGetNumberFans() {
-        // All Macs until now have atleast 1 fan
-        
+        // All Macs until now have at least 1 fan, except for the new 2015
+        // MacBook (8,1)
         let result = smc.getNumFans()
 
-        // TODO: Check for new fanless MacBook via model number
-        XCTAssertGreaterThanOrEqual(result.numFans, UInt(1))
-        
-        // Don't know the max number of fans, probably no more than 2, put we'll
-        // give it some slack incase
-        XCTAssertLessThanOrEqual(result.numFans, UInt(5))
+        if modelName() == "MacBook8,1" {
+            // Fanless
+            XCTAssertEqual(result.numFans, 0)
+        }
+        else {
+            XCTAssertGreaterThanOrEqual(result.numFans, 1)
+
+            // Don't know the max number of fans, probably no more than 2 or 3,
+            // but we'll give it some slack incase
+            XCTAssertLessThanOrEqual(result.numFans, 4)
+        }
     }
     
     func testIsKeyValid() {
@@ -282,5 +287,29 @@ class SMCKitTests: XCTestCase {
             // swapped in
             internalODD.append(newDevice)
         }
+    }
+
+
+    /// Get the model name of this machine. Same as "sysctl hw.model". Via
+    /// SystemKit
+    func modelName() -> String {
+        let name: String
+        var mib = [CTL_HW, HW_MODEL]
+
+        // Max model name size not defined by sysctl. Instead we use io_name_t
+        // via I/O Kit which can also get the model name
+        var size = sizeof(io_name_t)
+
+        var ptr    = UnsafeMutablePointer<io_name_t>.alloc(1)
+        let result = sysctl(&mib, u_int(mib.count), ptr, &size, nil, 0)
+
+
+        if result == 0 { name = String.fromCString(UnsafePointer(ptr))! }
+        else           { name = String() }
+
+
+        ptr.dealloc(1)
+
+        return name
     }
 }
