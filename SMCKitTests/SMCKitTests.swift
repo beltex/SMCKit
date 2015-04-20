@@ -256,11 +256,6 @@ class SMCKitTests: XCTestCase {
         IOObjectRelease(service)
     }
     
-    func testMachineProfile() {
-        // TODO: Test bad path, test output is valid JSON, test prop fields are
-        //       are listed, etc.
-    }
-    
     
     //--------------------------------------------------------------------------
     // MARK: HELPERS

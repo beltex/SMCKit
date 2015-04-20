@@ -528,10 +528,6 @@ public struct SMC {
     private static let IOSERVICE_SMC = "AppleSMC"
 
 
-    /// IOService for getMachineModel()
-    private static let IOSERVICE_MODEL = "IOPlatformExpertDevice"
-
-
     /// Number of characters in an SMC key
     private static let SMC_KEY_SIZE = 4
 
@@ -601,67 +597,6 @@ public struct SMC {
                 println("ERROR - \(__FILE__):\(__FUNCTION__) - Failed to close")
             }
         #endif
-
-        return result
-    }
-
-
-    /**
-    Get overall profile of the machine ("system information"), that is SMC
-    related data and write to disk as JSON. Includes model number, valid
-    temperature sensors (keys), and fan information.
-
-    :returns: True if successful, false otherwise.
-    */
-    public func machineProfile(path: String) -> Bool {
-        var result = false
-        var error : NSError?
-        let data  : [String : AnyObject] =
-                                      ["Model"       : SMC.getMachineModel(),
-                                       "Temperature" : temperatureInformation(),
-                                       "Fan"         : fanInformation()]
-
-        let opts         = NSJSONWritingOptions.PrettyPrinted
-        let outputStream = NSOutputStream(toFileAtPath: path, append: false)
-
-
-        if (outputStream == nil) {
-            #if DEBUG
-                println("ERROR - \(__FILE__):\(__FUNCTION__) - EMPTY PATH")
-            #endif
-            return result
-        }
-
-
-        outputStream?.open()
-
-        // Catch bad path - only once stream open
-        if (outputStream?.streamStatus == NSStreamStatus.Error) {
-            #if DEBUG
-                println("ERROR - \(__FILE__):\(__FUNCTION__) - BAD PATH - " +
-                        "\"\(path)\"")
-            #endif
-            return result
-        }
-
-        // Check if write was successful
-        if (NSJSONSerialization.writeJSONObject(data,
-                                                toStream : outputStream!,
-                                                options  : opts,
-                                                error    : &error) != 0) {
-            result = true
-        }
-
-
-        #if DEBUG
-            if (error != nil) {
-                println("ERROR - \(__FILE__):\(__FUNCTION__) - WRITE FAILED - "
-                        + "\(error)")
-            }
-        #endif
-
-
-        outputStream?.close()
 
         return result
     }
@@ -1283,102 +1218,6 @@ public struct SMC {
         }
 
         return result
-    }
-
-
-    //--------------------------------------------------------------------------
-    // MARK: PRIVATE METHODS - HELPERS - machineProfile()
-    //--------------------------------------------------------------------------
-
-
-    /**
-    Get overall information about the temperature sensors of the machine. For
-    machineProfile().
-
-    :returns: Dictionary of information.
-    */
-    private func temperatureInformation() -> [String : String] {
-        var dict = [String : String]()
-        let validKeys = getAllValidTemperatureKeys()
-
-        for key in validKeys {
-            dict.updateValue(SMC.Temperature.allValues[key]!,
-                             forKey: key.rawValue)
-        }
-
-        return dict
-    }
-
-
-    /**
-    Get overall information about the fans of the machine. For machineProfile().
-
-    :returns: Dictionary of information.
-    */
-    private func fanInformation() -> [String : AnyObject] {
-        let numFans = getNumFans().numFans
-        var profile : [String : AnyObject] = ["# of fans" : numFans]
-
-        for var i: UInt = 0; i < numFans; ++i {
-            // TODO: Add safe RPM
-            let vals = ["Name"    : getFanName(i).name,
-                        "Min RPM" : getFanMinRPM(i).rpm,
-                        "Max RPM" : getFanMaxRPM(i).rpm]
-            profile.updateValue(vals, forKey: "Fan \(i)")
-        }
-
-        return profile
-    }
-
-
-    /**
-    Get the model name of the machine.
-
-    :returns: The model name.
-    */
-    private static func getMachineModel() -> String {
-        // This could be done using sysctl() as well
-        let model: String
-
-        // Find the service
-        let service = IOServiceGetMatchingService(kIOMasterPortDefault,
-                      IOServiceMatching(IOSERVICE_MODEL).takeUnretainedValue())
-
-        if (service == 0) {
-            #if DEBUG
-                println("ERROR - \(__FILE__):\(__FUNCTION__) - " +
-                        "\(IOSERVICE_MODEL) service not found")
-            #endif
-
-            return String()
-        }
-
-
-        // Create a pointer for the name
-        let ptr = UnsafeMutablePointer<io_name_t>.alloc(1)
-
-        // Get the model name
-        let result = IORegistryEntryGetName(service, UnsafeMutablePointer(ptr))
-        IOObjectRelease(service)
-
-        if result == kIOReturnSuccess {
-            model = String.fromCString(UnsafePointer(ptr))!
-        }
-        else {
-            model = String()
-        }
-
-        ptr.dealloc(1)
-
-
-        #if DEBUG
-            if (result != kIOReturnSuccess) {
-                println("ERROR - \(__FILE__):\(__FUNCTION__) - IOReturn = " +
-                        "\(result)")
-            }
-        #endif
-
-        return model
     }
 
 
