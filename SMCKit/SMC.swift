@@ -1183,39 +1183,38 @@ public struct SMC {
     :param: outputStruct Struct holding the SMC's response
     :returns: IOKit return code
     */
-    private func callSMC(inout inputStruct  : SMCParamStruct,
-                         inout outputStruct : SMCParamStruct) -> kern_return_t {
-        var result: kern_return_t
+    private func callSMC(inout inputStruct : SMCParamStruct,
+                         inout outputStruct: SMCParamStruct) -> kern_return_t {
+        let inputStructSize  = strideof(SMCParamStruct)
+        var outputStructSize = strideof(SMCParamStruct)
 
-        // When the structs are cast to SMCParamStruct on the C side (AppleSMC)
-        // there expected to be 80 bytes. This may not be the case on the Swift
-        // side. One hack is to simply hardcode this to 80.
-        var inputStructCnt  = sizeof(SMCParamStruct)
-        var outputStructCnt = inputStructCnt
 
-        if (inputStructCnt != 80) {
-            // Houston, we have a problem. Depending how far off this is from
-            // 80, call may or may not work.
-            #if DEBUG
+        #if DEBUG
+            // Depending how far off this is from 80, call may or may not
+            // work
+            if inputStructSize != 80 {
                 println("WARNING - \(__FILE__):\(__FUNCTION__) - SMCParamStruct"
-                        + " size is \(inputStructCnt) bytes")
-            #endif
-            return kIOReturnBadArgument
-        }
+                        + " size is \(inputStructSize) bytes. Expected 80")
 
-        result = IOConnectCallStructMethod(conn,
+                return kIOReturnBadArgument
+            }
+        #endif
+
+
+        let result = IOConnectCallStructMethod(conn,
                                            Selector.kSMCHandleYPCEvent.rawValue,
                                            &inputStruct,
-                                           inputStructCnt,
+                                           inputStructSize,
                                            &outputStruct,
-                                           &outputStructCnt)
+                                           &outputStructSize)
 
-        if (result != kIOReturnSuccess) {
-            #if DEBUG
+
+        #if DEBUG
+            if result != kIOReturnSuccess {
                 println("ERROR - \(__FILE__):\(__FUNCTION__) - IOReturn = " +
                         "\(result) - kSMC = \(outputStruct.result)")
-            #endif
-        }
+            }
+        #endif
 
         return result
     }
