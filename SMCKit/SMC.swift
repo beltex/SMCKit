@@ -1267,21 +1267,17 @@ public struct SMC {
 
 
     /**
-    Convert data from SMC of fpe2 type to human readable
+    Convert data from SMC of fpe2 type to human readable. For example, fan RPM
+    is of this data type. This is assumend to mean floating point, with 2
+    exponent bits.
+
+    https://stackoverflow.com/questions/22160746/fpe2-and-sp78-data-types
 
     :param: data Data from the SMC to be converted. Assumed data size of 2.
     :returns: Converted data
     */
     private static func from_fpe2(data: [UInt8]) -> UInt {
-        var ans : UInt = 0
-
-        // Data type for fan calls - fpe2
-        // This is assumend to mean floating point, with 2 exponent bits
-        // http://stackoverflow.com/questions/22160746/fpe2-and-sp78-data-types
-        ans += UInt(data[0]) << 6
-        ans += UInt(data[1]) >> 2
-
-        return ans
+        return (UInt(data[0]) << 6) + (UInt(data[1]) >> 2)
     }
 
 
