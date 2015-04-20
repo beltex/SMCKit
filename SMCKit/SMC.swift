@@ -1253,27 +1253,16 @@ public struct SMC {
 
 
     /**
-    For converting the dataType return from the SMC to human readable
-    4 byte multi-character constant.
-
-    :param: dataType The data type as returned from a SMC read key info call
-    :returns: 4-byte multi-character constant representation
+    Convert UInt32 value to 4 character String. For decoding SMCParamStruct.key,
+    SMCKeyInfoData.dataType, etc.
     */
-    private static func toString(dataType: UInt32) -> String {
-        var ans = String()
-        var shift : Int32 = 24
-
-        // TODO: Loop unrolling?
-        for var index = 0; index < SMC_KEY_SIZE; ++index {
-            // To get each char, we shift it into the lower 8 bits, and then
-            // & by 255 to insolate it
-            var char = (Int32(dataType) >> shift) & 0xff
-
-            ans.append(UnicodeScalar(UInt32(char)))
-            shift -= 8
-        }
-
-        return ans
+    private static func UInt32toString(value: UInt32) -> String {
+        // To get each char, we shift it into the lower 8 bits, and then
+        // & by 255 to insolate it
+        return String(UnicodeScalar(value >> 24 & 0xff)) +
+               String(UnicodeScalar(value >> 16 & 0xff)) +
+               String(UnicodeScalar(value >> 8  & 0xff)) +
+               String(UnicodeScalar(value       & 0xff))
     }
 
 
