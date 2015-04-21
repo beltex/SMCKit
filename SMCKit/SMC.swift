@@ -973,43 +973,44 @@ public struct SMC {
     :param: fanNum The number of the fan to set
     :param: rpm The speed you would like to set the fan to.
     :returns: result True if successful, false otherwise.
-    :returns: IOReturn IOKit return code
-    :returns: kSMC SMC return code
     */
-    public func setFanMinRPM(fanNumber: UInt, rpm: UInt) ->
-                                                      (result   : Bool,
-                                                       IOReturn : kern_return_t,
-                                                       kSMC     : UInt8) {
-        var ans = false
-
+    public func setFanMinRPM(fanNumber: UInt, RPM: UInt) ->
+                                                      (result  : Bool,
+                                                       IOReturn: kern_return_t,
+                                                       kSMC    : UInt8) {
         // TODO: Cache value
         let maxRPM = getFanMaxRPM(fanNumber)
 
-        // Safety check: rpm must be within safe range of fan speed
-        // TODO: Add fan safe speed (F0Sf) to this check
-        if (!(maxRPM.IOReturn == kIOReturnSuccess &&
-              maxRPM.kSMC == kSMC.kSMCSuccess.rawValue &&
-              rpm <= maxRPM.rpm)) {
+        // Safety check. RPM must be within safe range of fan speed
+        if !(maxRPM.IOReturn == kIOReturnSuccess &&
+             maxRPM.kSMC == kSMC.kSMCSuccess.rawValue &&
+             RPM <= maxRPM.rpm) {
             #if DEBUG
                 println("ERROR - \(__FILE__):\(__FUNCTION__) - UNSAFE RPM - " +
                         "Max \(maxRPM.rpm) RPM")
             #endif
 
-            return (ans, kIOReturnBadArgument, kSMC.kSMCError.rawValue)
+            return (false, kIOReturnBadArgument, kSMC.kSMCError.rawValue)
         }
+
+        // Prep data
+        let encodedRPM = SMC.encodeFPE2(UInt16(RPM))
+        var data = [UInt8](count: 32, repeatedValue: 0)
+        data[0] = encodedRPM.0
+        data[1] = encodedRPM.1
 
         // TODO: Don't use magic number for dataSize
-        let result = writeSMC("F" + String(fanNumber) + "Mn",
-                              data     : SMC.to_fpe2(rpm),
-                              dataType : DataType.FPE2,
-                              dataSize : 2)
+        let result = writeSMC("F" + String(fanNumber) + "Mn", data: data,
+                              dataType: DataType.FPE2,
+                              dataSize: 2)
 
-        if (result.IOReturn == kIOReturnSuccess &&
-            result.kSMC == kSMC.kSMCSuccess.rawValue) {
-            ans = true
+        var answer = false
+        if result.IOReturn == kIOReturnSuccess &&
+           result.kSMC     == kSMC.kSMCSuccess.rawValue {
+            answer = true
         }
 
-        return (ans, result.IOReturn, result.kSMC)
+        return (answer, result.IOReturn, result.kSMC)
     }
 
 
@@ -1281,18 +1282,12 @@ public struct SMC {
 
 
     /**
-    Convert to fpe2 data type to be passed to SMC.
-
-    :param: val Value to convert
-    :return: Converted data in SMCParamStruct data format
+    Convert value to fpe2 data type. For passing to SMC, used for fan RPM for
+    example.
     */
-    private static func to_fpe2(val: UInt) -> [UInt8] {
-        // TODO: check val size for overflow
-        var data = [UInt8](count: 32, repeatedValue: 0)
-        data[0] = UInt8(val >> 6)
-        data[1] = UInt8((val << 2) ^ (UInt(data[0]) << 8))
-
-        return data
+    public static func encodeFPE2(value: UInt16) -> (UInt8, UInt8) {
+        return (UInt8(value >> 6),
+                UInt8((value << 2) ^ ((value >> 6) << 8)))
     }
 
 
