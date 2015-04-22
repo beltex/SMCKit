@@ -1125,7 +1125,7 @@ public struct SMC {
 
         // Check if given data matches expected input
         if (dataSize != outputStruct.keyInfo.dataSize ||
-            dataType.rawValue != toString(outputStruct.keyInfo.dataType)) {
+            dataType.rawValue != SMC.UInt32toString(outputStruct.keyInfo.dataType)) {
             #if DEBUG
                 println("ERROR - \(__FILE__):\(__FUNCTION__) - INVALID DATA - "
                         + "Expected input = \(outputStruct.keyInfo)")
