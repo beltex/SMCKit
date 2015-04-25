@@ -231,6 +231,8 @@ public struct SMC {
 
         case AMBIENT_AIR_0          = "TA0P"
         case AMBIENT_AIR_1          = "TA1P"
+        /// This key was found via Apple's own powermetrics tool
+        case CPU_0_DIE              = "TC0F"
         case CPU_0_DIODE            = "TC0D"
         case CPU_0_HEATSINK         = "TC0H"
         case CPU_0_PROXIMITY        = "TC0P"
@@ -271,6 +273,7 @@ public struct SMC {
         public static let allValues =
                                [AMBIENT_AIR_0         : "AMBIENT_AIR_0",
                                 AMBIENT_AIR_1         : "AMBIENT_AIR_1",
+                                CPU_0_DIE             : "CPU_0_DIE",
                                 CPU_0_DIODE           : "CPU_0_DIODE",
                                 CPU_0_HEATSINK        : "CPU_0_HEATSINK",
                                 CPU_0_PROXIMITY       : "CPU_0_PROXIMITY",
