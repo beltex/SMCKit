@@ -1,7 +1,7 @@
 SMCKit
 ======
 
-A System Management Controller (SMC) library in pure Swift from user space for
+A System Management Controller (SMC) user-space client library in pure Swift for
 Intel based Macs. The library works by talking to the AppleSMC.kext (kernel
 extension), the closed source driver for the SMC. Read temperature sensors,
 get and set fan speed (RPM), and more.
@@ -37,63 +37,11 @@ For more see:
 - OS X 10.9+
     - This is due to Swift
 
-### Installation
 
-The quick and easy solution is to simply copy the `SMC.swift` file into your
-project. For a more proper longer term solution, see below via
-[Alamofire](https://github.com/Alamofire/Alamofire).
+### Example
 
-_Due to the current lack of [proper infrastructure](http://cocoapods.org) for
-Swift dependency management, using SMCKit in your project requires the following
-steps:_
-
-1. Add SMCKit as a [submodule](http://git-scm.com/docs/git-submodule) by opening
-   the Terminal, `cd`-ing into your top-level project directory, and entering
-   the command `git submodule add https://github.com/beltex/SMCKit.git`
-2. Open the `SMCKit` folder, and drag `SMCKit.xcodeproj` into the file navigator
-   of your project.
-3. In Xcode, navigate to the target configuration window by clicking on the blue
-   project icon, and selecting the application target under the "Targets"
-   heading in the sidebar.
-4. Ensure that the deployment target of SMCKit.framework matches that of the
-   application target.
-5. In the tab bar at the top of that window, open the "Build Phases" panel.
-6. Expand the "Target Dependencies" group, and add `SMCKit.framework`.
-7. Click on the `+` button at the top left of the panel and select "New Copy
-   Files Phase". Rename this new phase to "Copy Frameworks", set the
-   "Destination" to "Frameworks", and add `SMCKit.framework`.
-
-**NOTE**: If you are building an OS X command line tool, the above won't quite
-          work. See here for
-          [why](https://github.com/ksm/SwiftInFlux#runtime-dynamic-libraries).
-          Instead of the last two steps, do the following:
-
-> Expand the "Compile Sources" group, and add `SMC.swift`.
-
-In additon, you will have to turn on debug logging manually. This can be done by
-adding `-D DEBUG` to the **Other Swift Flags** setting in your
-**Build Settings**.
-
-
-### Usage
-
-```swift
-// If your not using SMCKit as a framework in your project, you should instead
-// import IOKit
-import SMCKit
-
-var smc = SMC()
-
-if smc.open() == kIOReturnSuccess {
-    println("CPU 0 Diode Temperature: \(smc.getTemperature(SMC.Temperature.CPU_0_DIODE).tmp)°C")
-    println("Fan 0 Speed: \(smc.getFanRPM(0).rpm) RPM")
-    smc.close()
-}
-```
-
-A more detailed example can be seen
-[here](https://github.com/beltex/SMCKit/blob/master/Example/main.swift). The
-following is sample output from it:
+Sample output from
+[example](https://github.com/beltex/SMCKit/blob/master/Example/main.swift) code.
 
 ```
 // MACHINE STATUS
@@ -137,10 +85,18 @@ Max # of Batteries:  1
 Disc in ODD:         false
 ```
 
-The use of this framework will almost certainly not be allowed in the Mac App
-Store as it is essentially using a private API. Also, keep in mind that Swift
-currently offers no
-[ABI stability](https://github.com/ksm/SwiftInFlux#abi-stability).
+
+### Usage Notes
+
+- The use of this framework will almost certainly not be allowed in the
+  Mac App Store as it is essentially using a private API
+- If you are creating an OS X command line tool, you cannot use SMCKit as a
+  framework as Swift does not currently support static libraries. In such a
+  case, the `SMC.swift` file must simply be included in your project as another
+  source file. See
+  [SwiftInFlux/Runtime Dynamic Libraries](https://github.com/ksm/SwiftInFlux#runtime-dynamic-libraries)
+  for more information & [dshb](https://github.com/beltex/dshb) as an example
+  of such a case.
 
 
 ### References
