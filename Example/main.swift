@@ -2,12 +2,12 @@
 // Simple example usage of SMCKit. Prints machine status: temperatures, fans,
 // battery, power, misc.
 //
-// main.swift
+// Example/main.swift
 // SMCKit
 //
 // The MIT License
 //
-// Copyright (C) 2014, 2015  beltex <https://github.com/beltex>
+// Copyright (C) 2015  beltex <http://beltex.github.io>
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
@@ -31,9 +31,9 @@ import SMCKit
 
 var smc = SMC()
 
-if (smc.open() != kIOReturnSuccess) {
+if smc.open() != kIOReturnSuccess {
     println("ERROR: Failed to open connection to SMC")
-    exit(-1)
+    exit(EX_UNAVAILABLE)
 }
 println("// MACHINE STATUS")
 
@@ -45,23 +45,27 @@ for key in temperatureSensors {
     let temperatureSensorName = SMC.Temperature.allValues[key]!
     let temperature           = smc.getTemperature(key).tmp
     
-    println("\(temperatureSensorName)\n\t\(temperature)°C")
+    println("\(temperatureSensorName)")
+    println("\t\(temperature)°C")
 }
 
 
 println("\n-- FAN --")
-let numberOfFans = smc.getNumFans().numFans
+let fanCount = smc.getNumFans().numFans
 
-for var i: UInt = 0; i < numberOfFans; ++i {
-    let name    = smc.getFanName(i).name
-    let current = smc.getFanRPM(i).rpm
-    let min     = smc.getFanMinRPM(i).rpm
-    let max     = smc.getFanMaxRPM(i).rpm
+if fanCount == 0 { println("** Fanless **") }
+else {
+    for var i: UInt = 0; i < fanCount; ++i {
+        let name    = smc.getFanName(i).name
+        let current = smc.getFanRPM(i).rpm
+        let min     = smc.getFanMinRPM(i).rpm
+        let max     = smc.getFanMaxRPM(i).rpm
 
-    println(name)
-    println("\tCurrent:  \(current) RPM")
-    println("\tMin:      \(min) RPM")
-    println("\tMax:      \(max) RPM")
+        println(name)
+        println("\tCurrent:  \(current) RPM")
+        println("\tMin:      \(min) RPM")
+        println("\tMax:      \(max) RPM")
+    }
 }
 
 
