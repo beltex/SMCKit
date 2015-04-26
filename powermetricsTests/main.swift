@@ -1,0 +1,109 @@
+//
+// Test SMCKit by cross-referencing with Apple's powermetrics(1) tool. This is
+// not a pretty test by any means, were running a command line tool and parsing
+// it's output. However, at this point in time, powermetrics is the only
+// publicly available tool that displays SMC data from Apple, so it's our only
+// "official" reference. Requires root privileges due to powermetrics.
+//
+// References:
+//
+// http://practicalswift.com/2014/06/25/how-to-execute-shell-commands-from-swift/
+//
+// powermetricsTests/main.swift
+// SMCKit
+//
+// The MIT License
+//
+// Copyright (C) 2015  beltex <http://beltex.github.io>
+//
+// Permission is hereby granted, free of charge, to any person obtaining a copy
+// of this software and associated documentation files (the "Software"), to deal
+// in the Software without restriction, including without limitation the rights
+// to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+// copies of the Software, and to permit persons to whom the Software is
+// furnished to do so, subject to the following conditions:
+//
+// The above copyright notice and this permission notice shall be included in
+// all copies or substantial portions of the Software.
+//
+// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+// THE SOFTWARE.
+
+import Foundation
+
+
+// powermetrics added the SMC sampler in 10.10
+let processInfo = NSProcessInfo()
+let Yosemite    = NSOperatingSystemVersion(majorVersion: 10,
+                                           minorVersion: 0,
+                                           patchVersion: 0)
+
+if !processInfo.isOperatingSystemAtLeastVersion(Yosemite) {
+    println("ERROR: powermetrics requires OS X 10.10 (Yosemite) or greater")
+    exit(EX_USAGE)
+}
+
+
+// Setup SMC
+var smc = SMC()
+if smc.open() != kIOReturnSuccess {
+    println("ERROR: Failed to open connection to SMC")
+    exit(EX_UNAVAILABLE)
+}
+
+
+// Setup command to run powermetrics
+let powermetrics = NSTask()
+powermetrics.launchPath = "/usr/bin/powermetrics"
+powermetrics.arguments  = ["-s", "smc", "-n", "1"]
+
+let pipe = NSPipe()
+powermetrics.standardOutput = pipe
+powermetrics.launch()
+let data = pipe.fileHandleForReading.readDataToEndOfFile()
+
+
+// Get SMC data right after powermetrics has run. This is because it first
+// prints out some general information about the machine, and then seems to
+// sleep for 1 second to "line up" its sampling window
+let smcFanCount          = smc.getNumFans().numFans
+let smcRPM               = smc.getFanRPM(0).rpm
+let smcCPUDieTemperature = smc.getTemperature(SMC.Temperature.CPU_0_DIE).tmp
+
+
+// Parse the output from powermetrics
+// TODO: Unknown format of various cases - multiple fans, no fans, 2 CPUs
+//       (Mac Pro)
+if let output = NSString(data: data, encoding: NSUTF8StringEncoding) as String? {
+    // Break it down into lines
+    let lines = output.componentsSeparatedByString("\n")
+
+    for line in lines {
+        let tokens = line.componentsSeparatedByString(" ")
+
+        if line.hasPrefix("Fan:") && line.hasSuffix("rpm") {
+            let powermetricsRPM = tokens[1].toInt()!
+            let diff = abs(Int(smcRPM) - powermetricsRPM)
+
+            println("SMCKit fan 0 RPM:     \(smcRPM)")
+            println("powermetrics fan RPM: \(powermetricsRPM)")
+            assert(diff >= 0 && diff <= 5, "RPM differs by more than +/- 5")
+
+        }
+        else if line.hasPrefix("CPU die temperature:") && line.hasSuffix("C") {
+            let powermetricsCPUDieTemperature = (tokens[3] as NSString).doubleValue
+            let diff = abs(smcCPUDieTemperature - powermetricsCPUDieTemperature)
+
+            println("SMCKit CPU_0_DIE:                 \(smcCPUDieTemperature)")
+            println("powermetrics CPU die temperature: \(powermetricsCPUDieTemperature)")
+            assert(diff >= 0 && diff <= 1, "Temperature differs by more than +/- 1")
+        }
+    }
+}
+
+smc.close()

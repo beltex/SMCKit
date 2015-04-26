@@ -9,6 +9,8 @@
 /* Begin PBXBuildFile section */
 		4C982BE01A040CD500F4A639 /* main.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C982BDF1A040CD500F4A639 /* main.swift */; };
 		4C982BE41A040CE200F4A639 /* SMC.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4CE566A71A00A49600787F6B /* SMC.swift */; };
+		4CDDA6A01AEC0D010037CE7B /* main.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4CDDA69F1AEC0D010037CE7B /* main.swift */; };
+		4CDDA6A41AEC0D580037CE7B /* SMC.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4CE566A71A00A49600787F6B /* SMC.swift */; };
 		4CE566911A00A48800787F6B /* SMCKit.h in Headers */ = {isa = PBXBuildFile; fileRef = 4CE566901A00A48800787F6B /* SMCKit.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		4CE566971A00A48800787F6B /* SMCKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 4CE5668B1A00A48800787F6B /* SMCKit.framework */; };
 		4CE5669E1A00A48800787F6B /* SMCKitTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4CE5669D1A00A48800787F6B /* SMCKitTests.swift */; };
@@ -42,11 +44,22 @@
 			);
 			runOnlyForDeploymentPostprocessing = 1;
 		};
+		4CDDA69B1AEC0D010037CE7B /* CopyFiles */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = /usr/share/man/man1/;
+			dstSubfolderSpec = 0;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 1;
+		};
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
 		4C982BDD1A040CD500F4A639 /* Example */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = Example; sourceTree = BUILT_PRODUCTS_DIR; };
 		4C982BDF1A040CD500F4A639 /* main.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = main.swift; sourceTree = "<group>"; };
+		4CDDA69D1AEC0D010037CE7B /* powermetricsTests */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = powermetricsTests; sourceTree = BUILT_PRODUCTS_DIR; };
+		4CDDA69F1AEC0D010037CE7B /* main.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = main.swift; sourceTree = "<group>"; };
 		4CE5668B1A00A48800787F6B /* SMCKit.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = SMCKit.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		4CE5668F1A00A48800787F6B /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		4CE566901A00A48800787F6B /* SMCKit.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = SMCKit.h; sourceTree = "<group>"; };
@@ -58,6 +71,13 @@
 
 /* Begin PBXFrameworksBuildPhase section */
 		4C982BDA1A040CD500F4A639 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		4CDDA69A1AEC0D010037CE7B /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -90,11 +110,20 @@
 			path = Example;
 			sourceTree = "<group>";
 		};
+		4CDDA69E1AEC0D010037CE7B /* powermetricsTests */ = {
+			isa = PBXGroup;
+			children = (
+				4CDDA69F1AEC0D010037CE7B /* main.swift */,
+			);
+			path = powermetricsTests;
+			sourceTree = "<group>";
+		};
 		4CE566811A00A48800787F6B = {
 			isa = PBXGroup;
 			children = (
 				4CE5668D1A00A48800787F6B /* SMCKit */,
 				4CE5669A1A00A48800787F6B /* SMCKitTests */,
+				4CDDA69E1AEC0D010037CE7B /* powermetricsTests */,
 				4C982BDE1A040CD500F4A639 /* Example */,
 				4CE5668C1A00A48800787F6B /* Products */,
 			);
@@ -106,6 +135,7 @@
 				4CE5668B1A00A48800787F6B /* SMCKit.framework */,
 				4CE566961A00A48800787F6B /* SMCKitTests.xctest */,
 				4C982BDD1A040CD500F4A639 /* Example */,
+				4CDDA69D1AEC0D010037CE7B /* powermetricsTests */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -177,6 +207,23 @@
 			productReference = 4C982BDD1A040CD500F4A639 /* Example */;
 			productType = "com.apple.product-type.tool";
 		};
+		4CDDA69C1AEC0D010037CE7B /* powermetricsTests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 4CDDA6A31AEC0D010037CE7B /* Build configuration list for PBXNativeTarget "powermetricsTests" */;
+			buildPhases = (
+				4CDDA6991AEC0D010037CE7B /* Sources */,
+				4CDDA69A1AEC0D010037CE7B /* Frameworks */,
+				4CDDA69B1AEC0D010037CE7B /* CopyFiles */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = powermetricsTests;
+			productName = powermetricsTests;
+			productReference = 4CDDA69D1AEC0D010037CE7B /* powermetricsTests */;
+			productType = "com.apple.product-type.tool";
+		};
 		4CE5668A1A00A48800787F6B /* SMCKit */ = {
 			isa = PBXNativeTarget;
 			buildConfigurationList = 4CE566A11A00A48800787F6B /* Build configuration list for PBXNativeTarget "SMCKit" */;
@@ -225,6 +272,9 @@
 					4C982BDC1A040CD500F4A639 = {
 						CreatedOnToolsVersion = 6.1;
 					};
+					4CDDA69C1AEC0D010037CE7B = {
+						CreatedOnToolsVersion = 6.3.1;
+					};
 					4CE5668A1A00A48800787F6B = {
 						CreatedOnToolsVersion = 6.1;
 					};
@@ -247,6 +297,7 @@
 			targets = (
 				4CE5668A1A00A48800787F6B /* SMCKit */,
 				4CE566951A00A48800787F6B /* SMCKitTests */,
+				4CDDA69C1AEC0D010037CE7B /* powermetricsTests */,
 				4C982BDC1A040CD500F4A639 /* Example */,
 			);
 		};
@@ -276,6 +327,15 @@
 			files = (
 				4C982BE41A040CE200F4A639 /* SMC.swift in Sources */,
 				4C982BE01A040CD500F4A639 /* main.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		4CDDA6991AEC0D010037CE7B /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				4CDDA6A41AEC0D580037CE7B /* SMC.swift in Sources */,
+				4CDDA6A01AEC0D010037CE7B /* main.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -327,6 +387,30 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				OTHER_SWIFT_FLAGS = "";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+			};
+			name = Release;
+		};
+		4CDDA6A11AEC0D010037CE7B /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+				);
+				MACOSX_DEPLOYMENT_TARGET = 10.10;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+			};
+			name = Debug;
+		};
+		4CDDA6A21AEC0D010037CE7B /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				COPY_PHASE_STRIP = NO;
+				GCC_NO_COMMON_BLOCKS = YES;
+				MACOSX_DEPLOYMENT_TARGET = 10.10;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 			};
 			name = Release;
@@ -493,6 +577,14 @@
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
+		};
+		4CDDA6A31AEC0D010037CE7B /* Build configuration list for PBXNativeTarget "powermetricsTests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				4CDDA6A11AEC0D010037CE7B /* Debug */,
+				4CDDA6A21AEC0D010037CE7B /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
 		};
 		4CE566851A00A48800787F6B /* Build configuration list for PBXProject "SMCKit" */ = {
 			isa = XCConfigurationList;
