@@ -4,7 +4,7 @@
 //
 // The MIT License
 //
-// Copyright (C) 2014, 2015  beltex <https://github.com/beltex>
+// Copyright (C) 2015  beltex <http://beltex.github.io>
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
@@ -29,19 +29,26 @@ import XCTest
 import SMCKit
 import DiscRecording
 
-/*
-TODO: What do we test exactly? We can't check for return values, like
-      temperature or fan RPM as we can't validate them. We also don't have a
-      master list of what each Mac has (which fans, sensors, etc.) to check
-      against.
+/**
+Notes
 
-      - Could have tests that are model specific?
-      - We can test that the calls don't fail, but not if the return values are
-        correct
-      - Some methods can be cross checked through I/O Kit calls, for example
-        battery/power related methods (AppleSmartBattery :))
-      - Don't want to have any tests that could intermittently fail, like TMP
-        checks with a tolerance? That 0 K is not returned for example :).
+- Don't have a master list of what each Mac has (which fans, sensors, etc.) to
+  check against
+- Hard to validate return values, we can test that the calls don't fail, but not
+  if the return values are correct necessarily. In some cases, can cross-check
+  them via other APIs and tools (battery, powermetrics, etc.)
+- See also powermetricsTests which cross-checks fan and CPU temperature
+
+
+TODO
+
+- Model specific tests?
+- Could use the Intel Power Gadget API as a cross-check for CPU temperature.
+  Problem is, requires installing a driver (kext) + framework. The need for a
+  kext seems to be due to the rdmsr instruction, which can only be executed in
+  kernel-space (temperature seems to be stored in a Model Specific Register -
+  MSR). Could bundle it with SMCKit possibly to make that easier. Also, only
+  works on second generation Intel Core 2 Duo chips and on.
 */
 class SMCKitTests: XCTestCase {
     
