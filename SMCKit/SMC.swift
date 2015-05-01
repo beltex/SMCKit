@@ -913,7 +913,7 @@ public struct SMC {
                                                IOReturn : kern_return_t,
                                                kSMC     : UInt8) {
         let result = readSMC("F" + String(fanNumber) + "Ac")
-        return (SMC.from_fpe2(result.data), result.IOReturn, result.kSMC)
+        return (SMC.decodeFPE2(result.data[0], result.data[1]), result.IOReturn, result.kSMC)
     }
 
 
@@ -930,7 +930,7 @@ public struct SMC {
                                                   IOReturn : kern_return_t,
                                                   kSMC     : UInt8) {
         let result = readSMC("F" + String(fanNumber) + "Mn")
-        return (SMC.from_fpe2(result.data), result.IOReturn, result.kSMC)
+        return (SMC.decodeFPE2(result.data[0], result.data[1]), result.IOReturn, result.kSMC)
     }
 
 
@@ -947,7 +947,7 @@ public struct SMC {
                                                   IOReturn : kern_return_t,
                                                   kSMC     : UInt8) {
         let result = readSMC("F" + String(fanNumber) + "Mx")
-        return (SMC.from_fpe2(result.data), result.IOReturn, result.kSMC)
+        return (SMC.decodeFPE2(result.data[0], result.data[1]), result.IOReturn, result.kSMC)
     }
 
 
@@ -1279,8 +1279,8 @@ public struct SMC {
     :param: data Data from the SMC to be converted. Assumed data size of 2.
     :returns: Converted data
     */
-    private static func from_fpe2(data: [UInt8]) -> UInt {
-        return (UInt(data[0]) << 6) + (UInt(data[1]) >> 2)
+    public static func decodeFPE2(data: (UInt8, UInt8)) -> UInt {
+        return (UInt(data.0) << 6) + (UInt(data.1) >> 2)
     }
 
 
