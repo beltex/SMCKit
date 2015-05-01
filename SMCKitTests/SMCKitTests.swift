@@ -51,7 +51,7 @@ TODO
   works on second generation Intel Core 2 Duo chips and on.
 */
 class SMCKitTests: XCTestCase {
-    
+
     var smc = SMC()
     
     /// List of internal ODD devices
@@ -262,8 +262,36 @@ class SMCKitTests: XCTestCase {
         // TODO: Make sure this is called, even if tests above fail
         IOObjectRelease(service)
     }
-    
-    
+
+    func testEncodeDecodeSMCKey() {
+        let data: [(UInt32, String)] = [(1177567587, "F0Ac"),
+                                        (1413689414, "TC0F")]
+
+        for (encoded, decoded) in data {
+            XCTAssertEqual(encoded, SMC.encodeSMCKey(decoded))
+            XCTAssertEqual(decoded, SMC.decodeSMCKey(encoded))
+        }
+    }
+
+    func testEncodeDecodeFPE2() {
+        let data: [((UInt8, UInt8), UInt16)] = [((31, 64),  2000),
+                                                ((56, 244), 3645),
+                                                ((96, 220), 6199)]
+
+        // NOTE: Compiler crash if for-in loop is used
+        for var i = 0; i < data.count; ++i {
+            let encoded = data[i].0
+            let decoded = data[i].1
+
+            // Surprisingly can't check equivalence for tuple as a whole
+            let encodedTest = SMC.encodeFPE2(decoded)
+            XCTAssert(encoded.0 == encodedTest.0 && encoded.1 == encodedTest.1)
+
+            XCTAssertEqual(UInt(decoded), SMC.decodeFPE2(encoded))
+        }
+    }
+
+
     //--------------------------------------------------------------------------
     // MARK: HELPERS
     //--------------------------------------------------------------------------

@@ -1042,7 +1042,7 @@ public struct SMC {
 
 
         // First call to AppleSMC - get key info
-        inputStruct.key = SMC.toUInt32(key)
+        inputStruct.key = SMC.encodeSMCKey(key)
         inputStruct.data8 = UInt8(Selector.kSMCGetKeyInfo.rawValue)
 
         result = callSMC(&inputStruct, outputStruct: &outputStruct)
@@ -1116,7 +1116,7 @@ public struct SMC {
         var outputStruct = SMCParamStruct()
 
         // First call to AppleSMC - get key info
-        inputStruct.key = SMC.toUInt32(key)
+        inputStruct.key = SMC.encodeSMCKey(key)
         inputStruct.data8 = UInt8(Selector.kSMCGetKeyInfo.rawValue)
 
         result = callSMC(&inputStruct, outputStruct: &outputStruct)
@@ -1128,7 +1128,7 @@ public struct SMC {
 
         // Check if given data matches expected input
         if (dataSize != outputStruct.keyInfo.dataSize ||
-            dataType.rawValue != SMC.UInt32toString(outputStruct.keyInfo.dataType)) {
+            dataType.rawValue != SMC.decodeSMCKey(outputStruct.keyInfo.dataType)) {
             #if DEBUG
                 println("ERROR - \(__FILE__):\(__FUNCTION__) - INVALID DATA - "
                         + "Expected input = \(outputStruct.keyInfo)")
@@ -1225,7 +1225,7 @@ public struct SMC {
 
 
     //--------------------------------------------------------------------------
-    // MARK: PRIVATE METHODS - HELPERS
+    // MARK: PUBLIC TYPE METHODS - EN/DE-CODERS
     //--------------------------------------------------------------------------
 
 
@@ -1236,14 +1236,11 @@ public struct SMC {
     :returns: UInt32 translation of it with little-endian representation.
               Returns zero if key is not 4 characters in length.
     */
-    private static func toUInt32(key: String) -> UInt32 {
-        var ans   : Int32 = 0
-        var shift : Int32 = 24
+    public static func encodeSMCKey(key: String) -> UInt32 {
+        var ans  : Int32 = 0
+        var shift: Int32 = 24
 
-        // SMC key is expected to be 4 bytes - thus 4 chars
-        if (count(key) != SMC_KEY_SIZE) {
-            return 0
-        }
+        if count(key) != SMC_KEY_SIZE { return 0 }
 
         // TODO: Loop unrolling?
         for char in key.utf8 {
@@ -1259,7 +1256,7 @@ public struct SMC {
     Convert UInt32 value to 4 character String. For decoding SMCParamStruct.key,
     SMCKeyInfoData.dataType, etc.
     */
-    private static func UInt32toString(value: UInt32) -> String {
+    public static func decodeSMCKey(value: UInt32) -> String {
         // To get each char, we shift it into the lower 8 bits, and then
         // & by 255 to insolate it
         return String(UnicodeScalar(value >> 24 & 0xff)) +
