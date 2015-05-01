@@ -60,6 +60,13 @@ if smc.open() != kIOReturnSuccess {
 // Setup command to run powermetrics
 let powermetrics = NSTask()
 powermetrics.launchPath = "/usr/bin/powermetrics"
+
+/*
+TODO: Taking only 1 sample right now. In the future, could change this to take
+      many, and average it out to compare with SMCKit. However, would need to in
+      parallel run the SMCKit samples (need a serial GCD queue that fires at 1
+      second intervals)
+*/
 powermetrics.arguments  = ["-s", "smc", "-n", "1"]
 
 let pipe = NSPipe()
@@ -73,6 +80,9 @@ let data = pipe.fileHandleForReading.readDataToEndOfFile()
 // sleep for 1 second to "line up" its sampling window
 let smcFanCount          = smc.getNumFans().numFans
 let smcRPM               = smc.getFanRPM(0).rpm
+
+// The key used by powermetrics was determined via DTrace script below
+// https://gist.github.com/beltex/acbbeef815a7be938abf
 let smcCPUDieTemperature = smc.getTemperature(SMC.Temperature.CPU_0_DIE).tmp
 
 
