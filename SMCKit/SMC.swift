@@ -1229,26 +1229,28 @@ public struct SMC {
     //--------------------------------------------------------------------------
 
 
-    /**
-    Convert SMC key to UInt32. This must be done to pass it to the SMC.
-
-    :param: key The SMC key to convert
-    :returns: UInt32 translation of it with little-endian representation.
-              Returns zero if key is not 4 characters in length.
-    */
+    /// Encode SMC key to UInt32 format. Must be 4 characters.
     public static func encodeSMCKey(key: String) -> UInt32 {
-        var ans  : Int32 = 0
-        var shift: Int32 = 24
+        // Have to account for null-character
+        let CStringCount = SMC_KEY_SIZE + 1
+        var buffer = [CChar](count: CStringCount, repeatedValue: 0)
 
-        if count(key) != SMC_KEY_SIZE { return 0 }
+        #if DEBUG
+            if count(key) != SMC_KEY_SIZE {
+                println("WARN - \(__FILE__):\(__FUNCTION__) - Invalid key size")
+            }
+        #endif
 
-        // TODO: Loop unrolling?
-        for char in key.utf8 {
-            ans += (Int32(char) << shift)
-            shift -= 8
-        }
+        // Swift Strings cannot be indexed since Character type can be variable
+        // size, have to iterate. Thus, if we want to do loop unrolling, have
+        // to get CString
+        key.getCString(&buffer, maxLength: CStringCount,
+                                encoding: String.defaultCStringEncoding())
 
-        return UInt32(ans).littleEndian
+        return UInt32(buffer[0]) << 24 +
+               UInt32(buffer[1]) << 16 +
+               UInt32(buffer[2]) << 8  +
+               UInt32(buffer[3])
     }
 
 
