@@ -56,7 +56,7 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
-		4C982BDD1A040CD500F4A639 /* Example */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = Example; sourceTree = BUILT_PRODUCTS_DIR; };
+		4C982BDD1A040CD500F4A639 /* SMCKitTool */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = SMCKitTool; sourceTree = BUILT_PRODUCTS_DIR; };
 		4C982BDF1A040CD500F4A639 /* main.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = main.swift; sourceTree = "<group>"; };
 		4CDDA69D1AEC0D010037CE7B /* powermetricsTests */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = powermetricsTests; sourceTree = BUILT_PRODUCTS_DIR; };
 		4CDDA69F1AEC0D010037CE7B /* main.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = main.swift; sourceTree = "<group>"; };
@@ -102,12 +102,12 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
-		4C982BDE1A040CD500F4A639 /* Example */ = {
+		4C982BDE1A040CD500F4A639 /* SMCKitTool */ = {
 			isa = PBXGroup;
 			children = (
 				4C982BDF1A040CD500F4A639 /* main.swift */,
 			);
-			path = Example;
+			path = SMCKitTool;
 			sourceTree = "<group>";
 		};
 		4CDDA69E1AEC0D010037CE7B /* powermetricsTests */ = {
@@ -122,9 +122,9 @@
 			isa = PBXGroup;
 			children = (
 				4CE5668D1A00A48800787F6B /* SMCKit */,
+				4C982BDE1A040CD500F4A639 /* SMCKitTool */,
 				4CE5669A1A00A48800787F6B /* SMCKitTests */,
 				4CDDA69E1AEC0D010037CE7B /* powermetricsTests */,
-				4C982BDE1A040CD500F4A639 /* Example */,
 				4CE5668C1A00A48800787F6B /* Products */,
 			);
 			sourceTree = "<group>";
@@ -134,7 +134,7 @@
 			children = (
 				4CE5668B1A00A48800787F6B /* SMCKit.framework */,
 				4CE566961A00A48800787F6B /* SMCKitTests.xctest */,
-				4C982BDD1A040CD500F4A639 /* Example */,
+				4C982BDD1A040CD500F4A639 /* SMCKitTool */,
 				4CDDA69D1AEC0D010037CE7B /* powermetricsTests */,
 			);
 			name = Products;
@@ -189,9 +189,9 @@
 /* End PBXHeadersBuildPhase section */
 
 /* Begin PBXNativeTarget section */
-		4C982BDC1A040CD500F4A639 /* Example */ = {
+		4C982BDC1A040CD500F4A639 /* SMCKitTool */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = 4C982BE31A040CD500F4A639 /* Build configuration list for PBXNativeTarget "Example" */;
+			buildConfigurationList = 4C982BE31A040CD500F4A639 /* Build configuration list for PBXNativeTarget "SMCKitTool" */;
 			buildPhases = (
 				4C982BD91A040CD500F4A639 /* Sources */,
 				4C982BDA1A040CD500F4A639 /* Frameworks */,
@@ -202,9 +202,9 @@
 			dependencies = (
 				4CEDAE3E1A1C472C003098EA /* PBXTargetDependency */,
 			);
-			name = Example;
-			productName = Example;
-			productReference = 4C982BDD1A040CD500F4A639 /* Example */;
+			name = SMCKitTool;
+			productName = SMCKitTool;
+			productReference = 4C982BDD1A040CD500F4A639 /* SMCKitTool */;
 			productType = "com.apple.product-type.tool";
 		};
 		4CDDA69C1AEC0D010037CE7B /* powermetricsTests */ = {
@@ -298,7 +298,7 @@
 				4CE5668A1A00A48800787F6B /* SMCKit */,
 				4CE566951A00A48800787F6B /* SMCKitTests */,
 				4CDDA69C1AEC0D010037CE7B /* powermetricsTests */,
-				4C982BDC1A040CD500F4A639 /* Example */,
+				4C982BDC1A040CD500F4A639 /* SMCKitTool */,
 			);
 		};
 /* End PBXProject section */
@@ -569,7 +569,7 @@
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
-		4C982BE31A040CD500F4A639 /* Build configuration list for PBXNativeTarget "Example" */ = {
+		4C982BE31A040CD500F4A639 /* Build configuration list for PBXNativeTarget "SMCKitTool" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				4C982BE11A040CD500F4A639 /* Debug */,
@@ -585,6 +585,7 @@
 				4CDDA6A21AEC0D010037CE7B /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 		4CE566851A00A48800787F6B /* Build configuration list for PBXProject "SMCKit" */ = {
 			isa = XCConfigurationList;
