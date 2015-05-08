@@ -25,13 +25,6 @@
 			remoteGlobalIDString = 4CE5668A1A00A48800787F6B;
 			remoteInfo = SMCKit;
 		};
-		4CEDAE3D1A1C472C003098EA /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = 4CE566821A00A48800787F6B /* Project object */;
-			proxyType = 1;
-			remoteGlobalIDString = 4CE5668A1A00A48800787F6B;
-			remoteInfo = SMCKit;
-		};
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -200,7 +193,6 @@
 			buildRules = (
 			);
 			dependencies = (
-				4CEDAE3E1A1C472C003098EA /* PBXTargetDependency */,
 			);
 			name = SMCKitTool;
 			productName = SMCKitTool;
@@ -363,11 +355,6 @@
 			target = 4CE5668A1A00A48800787F6B /* SMCKit */;
 			targetProxy = 4CE566981A00A48800787F6B /* PBXContainerItemProxy */;
 		};
-		4CEDAE3E1A1C472C003098EA /* PBXTargetDependency */ = {
-			isa = PBXTargetDependency;
-			target = 4CE5668A1A00A48800787F6B /* SMCKit */;
-			targetProxy = 4CEDAE3D1A1C472C003098EA /* PBXContainerItemProxy */;
-		};
 /* End PBXTargetDependency section */
 
 /* Begin XCBuildConfiguration section */
@@ -380,6 +367,7 @@
 				);
 				OTHER_SWIFT_FLAGS = "-D DEBUG";
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_WHOLE_MODULE_OPTIMIZATION = YES;
 			};
 			name = Debug;
 		};
@@ -388,6 +376,7 @@
 			buildSettings = {
 				OTHER_SWIFT_FLAGS = "";
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_WHOLE_MODULE_OPTIMIZATION = YES;
 			};
 			name = Release;
 		};
