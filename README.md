@@ -38,14 +38,12 @@ For more see:
     - This is due to Swift
 
 
-### Example
+### SMCKitTool
 
-Sample output from
-[example](https://github.com/beltex/SMCKit/blob/master/Example/main.swift) code.
+Sample output from SMCKitTool.
 
-```
-// MACHINE STATUS
-
+```bash
+$ smckit
 -- TEMPERATURE --
 CPU_0_DIODE
   70.0°C
@@ -140,5 +138,4 @@ IORegistryEntrySetCFProperty( _smc,
 ```
 
 Almost certainly a reference to Bob Dylan's
-<a href="https://en.wikipedia.org/wiki/The_Times_They_Are_a-Changin%27_(song)">The Times They Are a-Changin'</a>
-. [Enjoy](http://hypem.com/track/5zf9/Bob+Dylan+-+The+Times+They+Are+A-Changin') :)
+<a href="https://en.wikipedia.org/wiki/The_Times_They_Are_a-Changin%27_(song)">The Times They Are a-Changin'</a> :)
