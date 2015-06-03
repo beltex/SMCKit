@@ -1,6 +1,5 @@
 //
-// Simple example usage of SMCKit. Prints machine status: temperatures, fans,
-// battery, power, misc.
+// OS X SMC Tool
 //
 // SMCKitTool/main.swift
 // SMCKit
@@ -29,56 +28,129 @@
 
 import IOKit
 
-var smc = SMC()
+// Not using the following as frameworks, but as source files. See README.md for
+// more
+//import CommandLine
+//import SMCKit
 
+//------------------------------------------------------------------------------
+// MARK: GLOBALS
+//------------------------------------------------------------------------------
+
+let SMCKitToolVersion = "0.0.1"
+
+//------------------------------------------------------------------------------
+// MARK: COMMAND LINE INTERFACE
+//------------------------------------------------------------------------------
+
+let CLITemperatureFlag = BoolOption(shortFlag: "t", longFlag: "temperature",
+                                    helpMessage: "Show temperature sensors.")
+let CLIFanFlag         = BoolOption(shortFlag: "f", longFlag: "fan",
+                                    helpMessage: "Show fan speeds.")
+let CLIPowerFlag       = BoolOption(shortFlag: "p", longFlag: "power",
+                                    helpMessage: "Show power information.")
+let CLIMiscFlag        = BoolOption(shortFlag: "m", longFlag: "misc",
+                                    helpMessage: "Show misc. information.")
+let CLIHelpFlag        = BoolOption(shortFlag: "h", longFlag: "help",
+               helpMessage: "Show the help message (list of options) and exit.")
+let CLIVersionFlag     = BoolOption(shortFlag: "v", longFlag: "version",
+                                   helpMessage: "Show smckit version and exit.")
+
+
+let CLI = CommandLine()
+CLI.addOptions(CLITemperatureFlag, CLIFanFlag, CLIPowerFlag, CLIMiscFlag,
+                                                             CLIHelpFlag,
+                                                             CLIVersionFlag)
+let (success, error) = CLI.parse()
+if !success {
+    println(error!)
+    CLI.printUsage()
+    exit(EX_USAGE)
+}
+
+// Give precedence to help flag
+if CLIHelpFlag.value {
+    CLI.printUsage()
+    exit(EX_USAGE)
+}
+else if CLIVersionFlag.value {
+    println(SMCKitToolVersion)
+    exit(EX_USAGE)
+}
+
+//------------------------------------------------------------------------------
+// MARK: FUNCTIONS
+//------------------------------------------------------------------------------
+
+func printTemperatureInformation() {
+    println("-- TEMPERATURE --")
+    let temperatureSensors = smc.getAllValidTemperatureKeys()
+
+    for key in temperatureSensors {
+        let temperatureSensorName = SMC.Temperature.allValues[key]!
+        let temperature           = smc.getTemperature(key).tmp
+
+        println("\(temperatureSensorName)")
+        println("\t\(temperature)°C")
+    }
+}
+
+func printFanInformation() {
+    println("-- FAN --")
+    let fanCount = smc.getNumFans().numFans
+
+    if fanCount == 0 { println("** Fanless **") }
+    else {
+        for var i: UInt = 0; i < fanCount; ++i {
+            let name    = smc.getFanName(i).name
+            let current = smc.getFanRPM(i).rpm
+            let min     = smc.getFanMinRPM(i).rpm
+            let max     = smc.getFanMaxRPM(i).rpm
+
+            println("[\(i)] \(name)")
+            println("\tCurrent:  \(current) RPM")
+            println("\tMin:      \(min) RPM")
+            println("\tMax:      \(max) RPM")
+        }
+    }
+}
+
+func printPowerInformation() {
+    println("-- POWER --")
+    println("AC Present:          \(smc.isACPresent().flag)")
+    println("Battery Powered:     \(smc.isBatteryPowered().flag)")
+    println("Charging:            \(smc.isCharging().flag)")
+    println("Battery Ok:          \(smc.isBatteryOk().flag)")
+    println("Max Batteries:       \(smc.maxNumberBatteries().count)")
+}
+
+func printMiscInformation() {
+    println("-- MISC --")
+    println("Disc in ODD:         \(smc.isOpticalDiskDriveFull().flag)")
+}
+
+func printAll() {
+    printTemperatureInformation()
+    printFanInformation()
+    printPowerInformation()
+    printMiscInformation()
+}
+
+//------------------------------------------------------------------------------
+// MARK: MAIN
+//------------------------------------------------------------------------------
+
+var smc = SMC()
 if smc.open() != kIOReturnSuccess {
     println("ERROR: Failed to open connection to SMC")
     exit(EX_UNAVAILABLE)
 }
-println("// MACHINE STATUS")
 
+if Process.arguments.count == 1 { printAll() }
 
-println("\n-- TEMPERATURE --")
-let temperatureSensors = smc.getAllValidTemperatureKeys()
-
-for key in temperatureSensors {
-    let temperatureSensorName = SMC.Temperature.allValues[key]!
-    let temperature           = smc.getTemperature(key).tmp
-    
-    println("\(temperatureSensorName)")
-    println("\t\(temperature)°C")
-}
-
-
-println("\n-- FAN --")
-let fanCount = smc.getNumFans().numFans
-
-if fanCount == 0 { println("** Fanless **") }
-else {
-    for var i: UInt = 0; i < fanCount; ++i {
-        let name    = smc.getFanName(i).name
-        let current = smc.getFanRPM(i).rpm
-        let min     = smc.getFanMinRPM(i).rpm
-        let max     = smc.getFanMaxRPM(i).rpm
-
-        println(name)
-        println("\tCurrent:  \(current) RPM")
-        println("\tMin:      \(min) RPM")
-        println("\tMax:      \(max) RPM")
-    }
-}
-
-
-println("\n-- BATTERY & POWER --")
-println("AC Present:          \(smc.isACPresent().flag)")
-println("Battery Powered:     \(smc.isBatteryPowered().flag)")
-println("Charging:            \(smc.isCharging().flag)")
-println("Battery Ok:          \(smc.isBatteryOk().flag)")
-println("Max # of Batteries:  \(smc.maxNumberBatteries().count)")
-
-
-println("\n-- MISC --")
-println("Disc in ODD:         \(smc.isOpticalDiskDriveFull().flag)")
-
+if CLITemperatureFlag.value { printTemperatureInformation() }
+if CLIFanFlag.value         { printFanInformation()         }
+if CLIPowerFlag.value       { printPowerInformation()       }
+if CLIMiscFlag.value        { printMiscInformation()        }
 
 smc.close()
