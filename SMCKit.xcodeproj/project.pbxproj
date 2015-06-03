@@ -15,6 +15,9 @@
 		4CE566971A00A48800787F6B /* SMCKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 4CE5668B1A00A48800787F6B /* SMCKit.framework */; };
 		4CE5669E1A00A48800787F6B /* SMCKitTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4CE5669D1A00A48800787F6B /* SMCKitTests.swift */; };
 		4CE566A81A00A49600787F6B /* SMC.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4CE566A71A00A49600787F6B /* SMC.swift */; };
+		4CE5BC241B1F85880030FA55 /* CommandLine.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4CE5BC211B1F85880030FA55 /* CommandLine.swift */; };
+		4CE5BC251B1F85880030FA55 /* Option.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4CE5BC221B1F85880030FA55 /* Option.swift */; };
+		4CE5BC261B1F85880030FA55 /* StringExtensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4CE5BC231B1F85880030FA55 /* StringExtensions.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -60,6 +63,9 @@
 		4CE5669C1A00A48800787F6B /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		4CE5669D1A00A48800787F6B /* SMCKitTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SMCKitTests.swift; sourceTree = "<group>"; };
 		4CE566A71A00A49600787F6B /* SMC.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SMC.swift; sourceTree = "<group>"; };
+		4CE5BC211B1F85880030FA55 /* CommandLine.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = CommandLine.swift; path = lib/CommandLine/CommandLine/CommandLine.swift; sourceTree = "<group>"; };
+		4CE5BC221B1F85880030FA55 /* Option.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = Option.swift; path = lib/CommandLine/CommandLine/Option.swift; sourceTree = "<group>"; };
+		4CE5BC231B1F85880030FA55 /* StringExtensions.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = StringExtensions.swift; path = lib/CommandLine/CommandLine/StringExtensions.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -98,6 +104,7 @@
 		4C982BDE1A040CD500F4A639 /* SMCKitTool */ = {
 			isa = PBXGroup;
 			children = (
+				4CE5BC1F1B1F855C0030FA55 /* lib */,
 				4C982BDF1A040CD500F4A639 /* main.swift */,
 			);
 			path = SMCKitTool;
@@ -166,6 +173,24 @@
 				4CE5669C1A00A48800787F6B /* Info.plist */,
 			);
 			name = "Supporting Files";
+			sourceTree = "<group>";
+		};
+		4CE5BC1F1B1F855C0030FA55 /* lib */ = {
+			isa = PBXGroup;
+			children = (
+				4CE5BC201B1F856B0030FA55 /* CommandLine */,
+			);
+			name = lib;
+			sourceTree = "<group>";
+		};
+		4CE5BC201B1F856B0030FA55 /* CommandLine */ = {
+			isa = PBXGroup;
+			children = (
+				4CE5BC211B1F85880030FA55 /* CommandLine.swift */,
+				4CE5BC221B1F85880030FA55 /* Option.swift */,
+				4CE5BC231B1F85880030FA55 /* StringExtensions.swift */,
+			);
+			name = CommandLine;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -317,6 +342,9 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				4CE5BC251B1F85880030FA55 /* Option.swift in Sources */,
+				4CE5BC241B1F85880030FA55 /* CommandLine.swift in Sources */,
+				4CE5BC261B1F85880030FA55 /* StringExtensions.swift in Sources */,
 				4C982BE41A040CE200F4A639 /* SMC.swift in Sources */,
 				4C982BE01A040CD500F4A639 /* main.swift in Sources */,
 			);

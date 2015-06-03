@@ -2,7 +2,7 @@
 // Simple example usage of SMCKit. Prints machine status: temperatures, fans,
 // battery, power, misc.
 //
-// Example/main.swift
+// SMCKitTool/main.swift
 // SMCKit
 //
 // The MIT License
@@ -27,7 +27,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-import SMCKit
+import IOKit
 
 var smc = SMC()
 
