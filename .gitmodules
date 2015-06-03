@@ -1,0 +1,3 @@
+[submodule "SMCKitTool/lib/CommandLine"]
+	path = SMCKitTool/lib/CommandLine
+	url = https://github.com/jatoben/CommandLine.git
