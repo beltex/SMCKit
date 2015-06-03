@@ -38,6 +38,8 @@ import IOKit
 //------------------------------------------------------------------------------
 
 let SMCKitToolVersion = "0.0.1"
+let argCount = Process.arguments.count
+let displaySMCKeys: Bool
 
 //------------------------------------------------------------------------------
 // MARK: COMMAND LINE INTERFACE
@@ -51,6 +53,8 @@ let CLIPowerFlag       = BoolOption(shortFlag: "p", longFlag: "power",
                                     helpMessage: "Show power information.")
 let CLIMiscFlag        = BoolOption(shortFlag: "m", longFlag: "misc",
                                     helpMessage: "Show misc. information.")
+let CLIDisplayKeysFlag = BoolOption(shortFlag: "d", longFlag: "display-keys",
+                helpMessage: "Show SMC keys when printing temperature sensors.")
 let CLIHelpFlag        = BoolOption(shortFlag: "h", longFlag: "help",
                helpMessage: "Show the help message (list of options) and exit.")
 let CLIVersionFlag     = BoolOption(shortFlag: "v", longFlag: "version",
@@ -59,6 +63,7 @@ let CLIVersionFlag     = BoolOption(shortFlag: "v", longFlag: "version",
 
 let CLI = CommandLine()
 CLI.addOptions(CLITemperatureFlag, CLIFanFlag, CLIPowerFlag, CLIMiscFlag,
+                                                             CLIDisplayKeysFlag,
                                                              CLIHelpFlag,
                                                              CLIVersionFlag)
 let (success, error) = CLI.parse()
@@ -78,6 +83,9 @@ else if CLIVersionFlag.value {
     exit(EX_USAGE)
 }
 
+if CLIDisplayKeysFlag.value { displaySMCKeys = true  }
+else                        { displaySMCKeys = false }
+
 //------------------------------------------------------------------------------
 // MARK: FUNCTIONS
 //------------------------------------------------------------------------------
@@ -90,7 +98,9 @@ func printTemperatureInformation() {
         let temperatureSensorName = SMC.Temperature.allValues[key]!
         let temperature           = smc.getTemperature(key).tmp
 
-        println("\(temperatureSensorName)")
+        let smcKey = displaySMCKeys ? String("(" + key.rawValue + ")") : ""
+
+        println("\(temperatureSensorName) \(smcKey)")
         println("\t\(temperature)°C")
     }
 }
@@ -146,7 +156,7 @@ if smc.open() != kIOReturnSuccess {
     exit(EX_UNAVAILABLE)
 }
 
-if Process.arguments.count == 1 { printAll() }
+if argCount == 1 || (argCount == 2 && displaySMCKeys) { printAll() }
 
 if CLITemperatureFlag.value { printTemperatureInformation() }
 if CLIFanFlag.value         { printFanInformation()         }
