@@ -53,6 +53,9 @@ let CLIPowerFlag       = BoolOption(shortFlag: "p", longFlag: "power",
                                     helpMessage: "Show power information.")
 let CLIMiscFlag        = BoolOption(shortFlag: "m", longFlag: "misc",
                                     helpMessage: "Show misc. information.")
+let CLICheckKey        = StringOption(shortFlag: "k", longFlag: "check-key",
+                                      required: false,
+             helpMessage: "Check if FourCC is a valid SMC key on this machine.")
 let CLIDisplayKeysFlag = BoolOption(shortFlag: "d", longFlag: "display-keys",
                 helpMessage: "Show SMC keys when printing temperature sensors.")
 let CLIHelpFlag        = BoolOption(shortFlag: "h", longFlag: "help",
@@ -63,6 +66,7 @@ let CLIVersionFlag     = BoolOption(shortFlag: "v", longFlag: "version",
 
 let CLI = CommandLine()
 CLI.addOptions(CLITemperatureFlag, CLIFanFlag, CLIPowerFlag, CLIMiscFlag,
+                                                             CLICheckKey,
                                                              CLIDisplayKeysFlag,
                                                              CLIHelpFlag,
                                                              CLIVersionFlag)
@@ -146,6 +150,11 @@ func printAll() {
     printMiscInformation()
 }
 
+func checkKey(key: String) {
+    if smc.isKeyValid(key).valid { println("VALID") }
+    else                         { println("INVALID") }
+}
+
 //------------------------------------------------------------------------------
 // MARK: MAIN
 //------------------------------------------------------------------------------
@@ -157,6 +166,8 @@ if smc.open() != kIOReturnSuccess {
 }
 
 if argCount == 1 || (argCount == 2 && displaySMCKeys) { printAll() }
+
+if let key = CLICheckKey.value { checkKey(key) }
 
 if CLITemperatureFlag.value { printTemperatureInformation() }
 if CLIFanFlag.value         { printFanInformation()         }
