@@ -58,6 +58,10 @@ let CLICheckKey        = StringOption(shortFlag: "k", longFlag: "check-key",
              helpMessage: "Check if FourCC is a valid SMC key on this machine.")
 let CLIDisplayKeysFlag = BoolOption(shortFlag: "d", longFlag: "display-keys",
                 helpMessage: "Show SMC keys when printing temperature sensors.")
+let CLIFanNumberFlag   = IntOption(shortFlag: "n", longFlag: "fan-number",
+                  required: false, helpMessage: "The number of the fan to set.")
+let CLIFanSpeedFlag    = IntOption(shortFlag: "s", longFlag: "fan-speed",
+         required: false, helpMessage: "The min speed (RPM) of the fan to set.")
 let CLIHelpFlag        = BoolOption(shortFlag: "h", longFlag: "help",
                helpMessage: "Show the help message (list of options) and exit.")
 let CLIVersionFlag     = BoolOption(shortFlag: "v", longFlag: "version",
@@ -68,6 +72,8 @@ let CLI = CommandLine()
 CLI.addOptions(CLITemperatureFlag, CLIFanFlag, CLIPowerFlag, CLIMiscFlag,
                                                              CLICheckKey,
                                                              CLIDisplayKeysFlag,
+                                                             CLIFanNumberFlag,
+                                                             CLIFanSpeedFlag,
                                                              CLIHelpFlag,
                                                              CLIVersionFlag)
 let (success, error) = CLI.parse()
@@ -155,6 +161,25 @@ func checkKey(key: String) {
     else                         { println("INVALID") }
 }
 
+func setMinFanSpeed(fanNumber: Int, fanSpeed: Int) {
+    let result = smc.setFanMinRPM(UInt(fanNumber), RPM: UInt(fanSpeed))
+
+    if result.result { println("SUCCESS") }
+    else if result.IOReturn == kIOReturnNotPrivileged {
+        println("This operation must be invoked as the superuser")
+    }
+    else if result.IOReturn == kIOReturnBadArgument {
+        let maxSpeed = smc.getFanMaxRPM(UInt(fanNumber)).rpm
+        println("Invalid fan speed. Must be <= max fan speed (\(maxSpeed))")
+    }
+    else if result.kSMC == SMC.kSMC.kSMCKeyNotFound.rawValue {
+        println("This machine has no fan #\(fanNumber)")
+    }
+    else {
+        println("FAILED: IOKit(\(result.IOReturn)), SMC(\(result.kSMC))")
+    }
+}
+
 //------------------------------------------------------------------------------
 // MARK: MAIN
 //------------------------------------------------------------------------------
@@ -168,6 +193,15 @@ if smc.open() != kIOReturnSuccess {
 if argCount == 1 || (argCount == 2 && displaySMCKeys) { printAll() }
 
 if let key = CLICheckKey.value { checkKey(key) }
+
+
+if CLIFanNumberFlag.isSet && CLIFanSpeedFlag.isSet {
+    setMinFanSpeed(CLIFanNumberFlag.value!, CLIFanSpeedFlag.value!)
+}
+else if CLIFanSpeedFlag.isSet != CLIFanNumberFlag.isSet {   // XOR
+    println("Usage: Must set fan number (-n) AND fan speed (-s)")
+}
+
 
 if CLITemperatureFlag.value { printTemperatureInformation() }
 if CLIFanFlag.value         { printFanInformation()         }

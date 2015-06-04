@@ -984,6 +984,14 @@ public struct SMC {
         // TODO: Cache value
         let maxRPM = getFanMaxRPM(fanNumber)
 
+        if maxRPM.kSMC == kSMC.kSMCKeyNotFound.rawValue {
+            #if DEBUG
+                println("ERROR - \(__FILE__):\(__FUNCTION__) - FAN # " +
+                        "\(fanNumber) NOT FOUND")
+            #endif
+            return (false, kIOReturnNotFound, maxRPM.kSMC)
+        }
+
         // Safety check. RPM must be within safe range of fan speed
         if !(maxRPM.IOReturn == kIOReturnSuccess &&
              maxRPM.kSMC == kSMC.kSMCSuccess.rawValue &&
