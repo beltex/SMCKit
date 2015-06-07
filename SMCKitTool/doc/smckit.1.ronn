@@ -1,0 +1,98 @@
+smckit(1) -- OS X SMC tool
+==========================
+
+## SYNOPSIS
+
+`smckit` [`-d`]<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[`-f`]<br>
+
+## DESCRIPTION
+
+An OS X command line tool for interfacing with the Apple System Management
+Controller (SMC) in Swift on Intel based Macs.
+
+## OPTIONS
+
+List of supported command line options (flags/switchs):
+
+  * `-k`, `--check-key`:
+    Show SMC keys (FourCC) when printing temperature sensors.
+  
+  * `-d`, `--display-keys`:
+    Show SMC keys (FourCC) when printing temperature sensors.
+
+  * `-f`, `--fan`:
+    Show the machines fan speeds (RPM).
+
+  * `-h`, `--help`:
+    Show the help message (list of options) and exit.
+
+  * `-m`, `--misc`:
+    Show misc information about the machine.
+  
+  * `-n`, `--fan-number`:
+    Show misc information about the machine.
+
+  * `-p`, `--power`:
+  
+  * `-s`, `--fan-speed`:
+    Show misc information about the machine.
+
+  * `-t`, `--temperature`:
+
+  * `-v`, `--version`:
+    Show smckit version and exit.
+
+## DETAIL
+
+  * `Fan`:
+    Displays a list of all the fans the machine has with the current speed
+    (RPM - revolutions per minute) of each. All Intel based Macs to this point
+    have at least one fan, with the exception of the newly added fanless
+    MacBook.
+
+  * `Temperature`:
+    Displays a list of the machine temperature sensors in Celsius. The list
+    may not be exhaustive. In addition, the maximum temperature of each
+    individual sensor is not known. Thus, a global max of 128 degrees is used.
+    Finally, the names of the sensors may not be mapped to the correct hardware
+    component. This is all due to the fact that the SMC (System Management
+    Controller) has a closed source driver, and thus information about it's
+    inner workings is limited.
+
+    If a sensor has a value that is constant and completely disproportionate to
+    the rest, then there is a chance that it is faulty. This could be due to bad
+    or damaged hardware (liquid on the logic board), or a bug in the SMC driver
+    itself. Run the _Apple Hardware Test_ diagnostics suite in such a case to
+    confirm. See here for example <https://github.com/beltex/SMCKit/issues/15>
+
+  * `Setting min fan speed`:
+    Set the minimum speed (RPM - revolutions per minute) of a fan. This method
+    requires root privileges. By minimum we mean that OS X can interject and
+    raise the fan speed if needed, however it will not go below this.
+    WARNING: You are playing with hardware here, BE CAREFUL.
+
+## ENVIRONMENT
+
+Due to Swift, smckit requires OS X 10.9 (Mavericks) and above. This implies an
+Intel based 64-bit machine.
+
+## REPOSITORY
+
+<https://github.com/beltex/SMCKit>
+
+All project related matters, including source code, can be found at the GitHub
+repository listed above. In particular, the issue tracker, which can be used to
+report feedback, feature requests and bugs.
+
+## COPYRIGHT
+
+This project is under the _MIT License_.
+
+## AUTHOR
+
+beltex <http://beltex.github.io>
+
+## SEE ALSO
+
+dshb(1), powermetrics(1)
