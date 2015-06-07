@@ -1,10 +1,10 @@
 SMCKit
 ======
 
-A System Management Controller (SMC) user-space client library in pure Swift for
-Intel based Macs. The library works by talking to the AppleSMC.kext (kernel
-extension), the closed source driver for the SMC. Read temperature sensors,
-get and set fan speed (RPM), and more.
+An OS X System Management Controller (SMC) library & command line tool in Swift
+for Intel based Macs. The library works by talking to the AppleSMC.kext (kernel
+extension), the private driver for the SMC. Read temperature sensors, get and
+set fan speed (RPM), and more.
 
 - For a C based version, see [libsmc](https://github.com/beltex/libsmc)
 - For an example usage of this library, see
@@ -40,6 +40,13 @@ For more see:
 
 ### SMCKitTool
 
+This will build smckit from source and place the binary and manual page in your
+path.
+
+```
+make install
+```
+
 Sample output from SMCKitTool.
 
 ```bash
@@ -67,7 +74,7 @@ PALM_REST
   34.0°C
 
 -- FAN --
-Exhaust
+[0] Exhaust
   Current:  1324 RPM
   Min:      1299 RPM
   Max:      6199 RPM
@@ -77,11 +84,14 @@ AC Present:          true
 Battery Powered:     false
 Charging:            false
 Battery Ok:          true
-Max # of Batteries:  1
+Max Batteries:       1
 
 -- MISC --
 Disc in ODD:         false
 ```
+
+- [CommandLine](https://github.com/jatoben/CommandLine)
+    - For the CLI
 
 
 ### Usage Notes
@@ -111,7 +121,7 @@ Handy I/O Kit references:
 
 - [iOS Hacker's Handbook](http://ca.wiley.com/WileyCDA/WileyTitle/productCd-1118204123.html)
 - [Mac OS X and iOS Internals: To the Apple's Core](http://ca.wiley.com/WileyCDA/WileyTitle/productCd-1118057651.html)
-- [OS X and iOS Kernel Programming](http://www.apress.com/9781430235361-4892)
+- [OS X and iOS Kernel Programming](http://www.apress.com/apple-mac/objective-c/9781430235361)
 
 
 ### License
