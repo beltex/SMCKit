@@ -67,15 +67,18 @@ let CLIHelpFlag        = BoolOption(shortFlag: "h", longFlag: "help",
 let CLIVersionFlag     = BoolOption(shortFlag: "v", longFlag: "version",
                                    helpMessage: "Show smckit version and exit.")
 
+let CLIOptions = [CLITemperatureFlag, CLIFanFlag, CLIPowerFlag,
+                                                  CLIMiscFlag,
+                                                  CLICheckKey,
+                                                  CLIDisplayKeysFlag,
+                                                  CLIFanNumberFlag,
+                                                  CLIFanSpeedFlag,
+                                                  CLIHelpFlag,
+                                                  CLIVersionFlag]
 
 let CLI = CommandLine()
-CLI.addOptions(CLITemperatureFlag, CLIFanFlag, CLIPowerFlag, CLIMiscFlag,
-                                                             CLICheckKey,
-                                                             CLIDisplayKeysFlag,
-                                                             CLIFanNumberFlag,
-                                                             CLIFanSpeedFlag,
-                                                             CLIHelpFlag,
-                                                             CLIVersionFlag)
+CLI.addOptions(CLIOptions)
+
 let (success, error) = CLI.parse()
 if !success {
     println(error!)
@@ -95,6 +98,12 @@ else if CLIVersionFlag.value {
 
 if CLIDisplayKeysFlag.value { displaySMCKeys = true  }
 else                        { displaySMCKeys = false }
+
+let isSetNonBoolOptions = CLIOptions.filter({ $0.isSet == true &&
+                                              $0 as? BoolOption == nil})
+let isSetBoolOptions = CLIOptions.filter({ $0 as? BoolOption != nil })
+                                 .map({$0 as! BoolOption})
+                                 .filter({ $0.value == true})
 
 //------------------------------------------------------------------------------
 // MARK: FUNCTIONS
@@ -190,9 +199,12 @@ if smc.open() != kIOReturnSuccess {
     exit(EX_UNAVAILABLE)
 }
 
-if argCount == 1 || (argCount == 2 && displaySMCKeys) { printAll() }
 
-if let key = CLICheckKey.value { checkKey(key) }
+if argCount == 1 || (isSetNonBoolOptions.count == 0 &&
+                     isSetBoolOptions.count == 1 &&
+                     isSetBoolOptions[0].shortFlag == "d") {
+    printAll()
+}
 
 
 if CLIFanNumberFlag.isSet && CLIFanSpeedFlag.isSet {
@@ -202,6 +214,7 @@ else if CLIFanSpeedFlag.isSet != CLIFanNumberFlag.isSet {   // XOR
     println("Usage: Must set fan number (-n) AND fan speed (-s)")
 }
 
+if let key = CLICheckKey.value { checkKey(key) }
 
 if CLITemperatureFlag.value { printTemperatureInformation() }
 if CLIFanFlag.value         { printFanInformation()         }
