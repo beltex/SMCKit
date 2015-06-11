@@ -37,9 +37,11 @@ import IOKit
 // MARK: GLOBALS
 //------------------------------------------------------------------------------
 
-let SMCKitToolVersion = "0.0.1"
-let argCount = Process.arguments.count
-let displaySMCKeys: Bool
+let SMCKitToolVersion     = "0.0.1"
+let maxTemperatureCelsius = 128.0
+
+let displaySMCKeys  : Bool
+let isWarningFlagSet: Bool
 
 //------------------------------------------------------------------------------
 // MARK: COMMAND LINE INTERFACE
@@ -58,6 +60,8 @@ let CLICheckKey        = StringOption(shortFlag: "k", longFlag: "check-key",
              helpMessage: "Check if FourCC is a valid SMC key on this machine.")
 let CLIDisplayKeysFlag = BoolOption(shortFlag: "d", longFlag: "display-keys",
                 helpMessage: "Show SMC keys when printing temperature sensors.")
+let CLIWarnFlag        = BoolOption(shortFlag: "w", longFlag: "warn",
+                                    helpMessage: "Show warnings for stats.")
 let CLIFanNumberFlag   = IntOption(shortFlag: "n", longFlag: "fan-number",
                   required: false, helpMessage: "The number of the fan to set.")
 let CLIFanSpeedFlag    = IntOption(shortFlag: "s", longFlag: "fan-speed",
@@ -71,6 +75,7 @@ let CLIOptions = [CLITemperatureFlag, CLIFanFlag, CLIPowerFlag,
                                                   CLIMiscFlag,
                                                   CLICheckKey,
                                                   CLIDisplayKeysFlag,
+                                                  CLIWarnFlag,
                                                   CLIFanNumberFlag,
                                                   CLIFanSpeedFlag,
                                                   CLIHelpFlag,
@@ -99,6 +104,9 @@ else if CLIVersionFlag.value {
 if CLIDisplayKeysFlag.value { displaySMCKeys = true  }
 else                        { displaySMCKeys = false }
 
+if CLIWarnFlag.value { isWarningFlagSet = true  }
+else                 { isWarningFlagSet = false }
+
 let isSetNonBoolOptions = CLIOptions.filter({ $0.isSet == true &&
                                               $0 as? BoolOption == nil})
 let isSetBoolOptions = CLIOptions.filter({ $0 as? BoolOption != nil })
@@ -109,6 +117,19 @@ let isSetBoolOptions = CLIOptions.filter({ $0 as? BoolOption != nil })
 // MARK: FUNCTIONS
 //------------------------------------------------------------------------------
 
+func warningLevel(value: Double, maxValue: Double) -> String {
+    let percentage = value / maxValue
+
+    switch percentage {
+        case 0...0.45:
+            return "Normal"
+        case 0.45...0.75:
+            return "Danger"
+        default:
+            return "Crisis"
+    }
+}
+
 func printTemperatureInformation() {
     println("-- TEMPERATURE --")
     let temperatureSensors = smc.getAllValidTemperatureKeys()
@@ -117,10 +138,12 @@ func printTemperatureInformation() {
         let temperatureSensorName = SMC.Temperature.allValues[key]!
         let temperature           = smc.getTemperature(key).tmp
 
-        let smcKey = displaySMCKeys ? String("(" + key.rawValue + ")") : ""
+        let warning = isWarningFlagSet ?
+                    "(\(warningLevel(temperature, maxTemperatureCelsius)))" : ""
+        let smcKey = displaySMCKeys ? "(\(key.rawValue))" : ""
 
         println("\(temperatureSensorName) \(smcKey)")
-        println("\t\(temperature)°C")
+        println("\t\(temperature)°C \(warning)")
     }
 }
 
@@ -135,9 +158,11 @@ func printFanInformation() {
             let current = smc.getFanRPM(i).rpm
             let min     = smc.getFanMinRPM(i).rpm
             let max     = smc.getFanMaxRPM(i).rpm
+            let warning = isWarningFlagSet ?
+                          "(\(warningLevel(Double(current), Double(max))))" : ""
 
             println("[\(i)] \(name)")
-            println("\tCurrent:  \(current) RPM")
+            println("\tCurrent:  \(current) RPM \(warning)")
             println("\tMin:      \(min) RPM")
             println("\tMax:      \(max) RPM")
         }
@@ -200,9 +225,11 @@ if smc.open() != kIOReturnSuccess {
 }
 
 
-if argCount == 1 || (isSetNonBoolOptions.count == 0 &&
-                     isSetBoolOptions.count == 1 &&
-                     isSetBoolOptions[0].shortFlag == "d") {
+// FIXME: This is bad, need a better way. Need changes in CommandLine lib
+if Process.arguments.count == 1 ||
+   (isSetNonBoolOptions.count == 0 &&
+    isSetBoolOptions.filter({$0.shortFlag == "d" || $0.shortFlag == "w"}).count
+                                                    == isSetBoolOptions.count) {
     printAll()
 }
 
