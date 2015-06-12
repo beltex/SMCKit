@@ -41,6 +41,17 @@ let SMCKitToolVersion     = "0.0.1"
 let maxTemperatureCelsius = 128.0
 
 //------------------------------------------------------------------------------
+// MARK: ENUMS
+//------------------------------------------------------------------------------
+
+enum ANSIColor: String {
+    case Off    = "\u{001B}[0;0m"
+    case Red    = "\u{001B}[0;31m"
+    case Green  = "\u{001B}[0;32m"
+    case Yellow = "\u{001B}[0;33m"
+}
+
+//------------------------------------------------------------------------------
 // MARK: COMMAND LINE INTERFACE
 //------------------------------------------------------------------------------
 
@@ -59,6 +70,8 @@ let CLIDisplayKeysFlag = BoolOption(shortFlag: "d", longFlag: "display-keys",
                 helpMessage: "Show SMC keys when printing temperature sensors.")
 let CLIWarnFlag        = BoolOption(shortFlag: "w", longFlag: "warn",
                                     helpMessage: "Show warnings for stats.")
+let CLIColorFlag       = BoolOption(shortFlag: "c", longFlag: "color",
+                                    helpMessage: "Use color for output.")
 let CLIFanNumberFlag   = IntOption(shortFlag: "n", longFlag: "fan-number",
                   required: false, helpMessage: "The number of the fan to set.")
 let CLIFanSpeedFlag    = IntOption(shortFlag: "s", longFlag: "fan-speed",
@@ -73,6 +86,7 @@ let CLIOptions = [CLITemperatureFlag, CLIFanFlag, CLIPowerFlag,
                                                   CLICheckKey,
                                                   CLIDisplayKeysFlag,
                                                   CLIWarnFlag,
+                                                  CLIColorFlag,
                                                   CLIFanNumberFlag,
                                                   CLIFanSpeedFlag,
                                                   CLIHelpFlag,
@@ -99,25 +113,26 @@ else if CLIVersionFlag.value {
 }
 
 let isSetNonBoolOptions = CLIOptions.filter({ $0.isSet == true &&
-                                              $0 as? BoolOption == nil})
+                                              $0 as? BoolOption == nil })
 let isSetBoolOptions = CLIOptions.filter({ $0 as? BoolOption != nil })
-                                 .map({$0 as! BoolOption})
-                                 .filter({ $0.value == true})
+                                 .map({ $0 as! BoolOption })
+                                 .filter({ $0.value == true })
 
 //------------------------------------------------------------------------------
 // MARK: FUNCTIONS
 //------------------------------------------------------------------------------
 
-func warningLevel(value: Double, maxValue: Double) -> String {
+func warningLevel(value: Double, maxValue: Double) -> (name: String,
+                                                       color: ANSIColor) {
     let percentage = value / maxValue
 
     switch percentage {
         case 0...0.45:
-            return "Normal"
+            return ("Normal", ANSIColor.Green)
         case 0.45...0.75:
-            return "Danger"
+            return ("Danger", ANSIColor.Yellow)
         default:
-            return "Crisis"
+            return ("Crisis", ANSIColor.Red)
     }
 }
 
@@ -129,12 +144,15 @@ func printTemperatureInformation() {
         let temperatureSensorName = SMC.Temperature.allValues[key]!
         let temperature           = smc.getTemperature(key).tmp
 
-        let warning = CLIWarnFlag.value ?
-                    "(\(warningLevel(temperature, maxTemperatureCelsius)))" : ""
-        let smcKey = CLIDisplayKeysFlag.value ? "(\(key.rawValue))" : ""
+        let warning = warningLevel(temperature, maxTemperatureCelsius)
+        let level   = CLIWarnFlag.value ? "(\(warning.name))" : ""
+        let color   = CLIColorFlag.value ? warning.color : ANSIColor.Off
+
+        let smcKey  = CLIDisplayKeysFlag.value ? "(\(key.rawValue))" : ""
 
         println("\(temperatureSensorName) \(smcKey)")
-        println("\t\(temperature)°C \(warning)")
+        println("\t\(color.rawValue)\(temperature)°C \(level)" +
+                                                    "\(ANSIColor.Off.rawValue)")
     }
 }
 
@@ -149,11 +167,14 @@ func printFanInformation() {
             let current = smc.getFanRPM(i).rpm
             let min     = smc.getFanMinRPM(i).rpm
             let max     = smc.getFanMaxRPM(i).rpm
-            let warning = CLIWarnFlag.value ?
-                          "(\(warningLevel(Double(current), Double(max))))" : ""
+
+            let warning = warningLevel(Double(current), Double(max))
+            let level   = CLIWarnFlag.value ? "(\(warning.name))" : ""
+            let color   = CLIColorFlag.value ? warning.color : ANSIColor.Off
 
             println("[\(i)] \(name)")
-            println("\tCurrent:  \(current) RPM \(warning)")
+            println("\tCurrent:  \(color.rawValue)\(current) RPM \(level)" +
+                                                    "\(ANSIColor.Off.rawValue)")
             println("\tMin:      \(min) RPM")
             println("\tMax:      \(max) RPM")
         }
@@ -182,7 +203,7 @@ func printAll() {
 }
 
 func checkKey(key: String) {
-    if smc.isKeyValid(key).valid { println("VALID") }
+    if smc.isKeyValid(key).valid { println("VALID")   }
     else                         { println("INVALID") }
 }
 
@@ -219,8 +240,10 @@ if smc.open() != kIOReturnSuccess {
 // FIXME: This is bad, need a better way. Need changes in CommandLine lib
 if Process.arguments.count == 1 ||
    (isSetNonBoolOptions.count == 0 &&
-    isSetBoolOptions.filter({$0.shortFlag == "d" || $0.shortFlag == "w"}).count
-                                                    == isSetBoolOptions.count) {
+    isSetBoolOptions.filter({ switch $0.shortFlag {
+                                  case "c", "d", "w": return true
+                                  default           : return false
+                              }}).count == isSetBoolOptions.count) {
     printAll()
 }
 
