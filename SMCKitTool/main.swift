@@ -136,6 +136,15 @@ func warningLevel(value: Double, maxValue: Double) -> (name: String,
     }
 }
 
+func colorBoolOutput(value: Bool) -> String {
+    var color = ANSIColor.Off
+    if CLIColorFlag.value {
+        color = value ? ANSIColor.Green : ANSIColor.Red
+    }
+
+    return "\(color.rawValue)\(value)\(ANSIColor.Off.rawValue)"
+}
+
 func printTemperatureInformation() {
     println("-- TEMPERATURE --")
     let temperatureSensors = smc.getAllValidTemperatureKeys()
@@ -183,16 +192,18 @@ func printFanInformation() {
 
 func printPowerInformation() {
     println("-- POWER --")
-    println("AC Present:          \(smc.isACPresent().flag)")
-    println("Battery Powered:     \(smc.isBatteryPowered().flag)")
-    println("Charging:            \(smc.isCharging().flag)")
-    println("Battery Ok:          \(smc.isBatteryOk().flag)")
-    println("Max Batteries:       \(smc.maxNumberBatteries().count)")
+    println("AC Present:       \(colorBoolOutput(smc.isACPresent().flag))")
+    println("Battery Powered:  \(colorBoolOutput(smc.isBatteryPowered().flag))")
+    println("Charging:         \(colorBoolOutput(smc.isCharging().flag))")
+    println("Battery Ok:       \(colorBoolOutput(smc.isBatteryOk().flag))")
+    println("Max Batteries:    \(smc.maxNumberBatteries().count)")
 }
 
 func printMiscInformation() {
     println("-- MISC --")
-    println("Disc in ODD:         \(smc.isOpticalDiskDriveFull().flag)")
+
+    let ODDStatus = smc.isOpticalDiskDriveFull().flag
+    println("Disc in ODD:      \(colorBoolOutput(ODDStatus))")
 }
 
 func printAll() {
