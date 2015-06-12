@@ -40,9 +40,6 @@ import IOKit
 let SMCKitToolVersion     = "0.0.1"
 let maxTemperatureCelsius = 128.0
 
-let displaySMCKeys  : Bool
-let isWarningFlagSet: Bool
-
 //------------------------------------------------------------------------------
 // MARK: COMMAND LINE INTERFACE
 //------------------------------------------------------------------------------
@@ -101,12 +98,6 @@ else if CLIVersionFlag.value {
     exit(EX_USAGE)
 }
 
-if CLIDisplayKeysFlag.value { displaySMCKeys = true  }
-else                        { displaySMCKeys = false }
-
-if CLIWarnFlag.value { isWarningFlagSet = true  }
-else                 { isWarningFlagSet = false }
-
 let isSetNonBoolOptions = CLIOptions.filter({ $0.isSet == true &&
                                               $0 as? BoolOption == nil})
 let isSetBoolOptions = CLIOptions.filter({ $0 as? BoolOption != nil })
@@ -138,9 +129,9 @@ func printTemperatureInformation() {
         let temperatureSensorName = SMC.Temperature.allValues[key]!
         let temperature           = smc.getTemperature(key).tmp
 
-        let warning = isWarningFlagSet ?
+        let warning = CLIWarnFlag.value ?
                     "(\(warningLevel(temperature, maxTemperatureCelsius)))" : ""
-        let smcKey = displaySMCKeys ? "(\(key.rawValue))" : ""
+        let smcKey = CLIDisplayKeysFlag.value ? "(\(key.rawValue))" : ""
 
         println("\(temperatureSensorName) \(smcKey)")
         println("\t\(temperature)°C \(warning)")
@@ -158,7 +149,7 @@ func printFanInformation() {
             let current = smc.getFanRPM(i).rpm
             let min     = smc.getFanMinRPM(i).rpm
             let max     = smc.getFanMaxRPM(i).rpm
-            let warning = isWarningFlagSet ?
+            let warning = CLIWarnFlag.value ?
                           "(\(warningLevel(Double(current), Double(max))))" : ""
 
             println("[\(i)] \(name)")
