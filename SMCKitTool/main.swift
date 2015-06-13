@@ -55,42 +55,48 @@ enum ANSIColor: String {
 // MARK: COMMAND LINE INTERFACE
 //------------------------------------------------------------------------------
 
-let CLITemperatureFlag = BoolOption(shortFlag: "t", longFlag: "temperature",
-                                    helpMessage: "Show temperature sensors.")
-let CLIFanFlag         = BoolOption(shortFlag: "f", longFlag: "fan",
-                                    helpMessage: "Show fan speeds.")
-let CLIPowerFlag       = BoolOption(shortFlag: "p", longFlag: "power",
-                                    helpMessage: "Show power information.")
-let CLIMiscFlag        = BoolOption(shortFlag: "m", longFlag: "misc",
-                                    helpMessage: "Show misc. information.")
-let CLICheckKey        = StringOption(shortFlag: "k", longFlag: "check-key",
-                                      required: false,
-             helpMessage: "Check if FourCC is a valid SMC key on this machine.")
-let CLIDisplayKeysFlag = BoolOption(shortFlag: "d", longFlag: "display-keys",
-                helpMessage: "Show SMC keys when printing temperature sensors.")
-let CLIWarnFlag        = BoolOption(shortFlag: "w", longFlag: "warn",
-                                    helpMessage: "Show warnings for stats.")
-let CLIColorFlag       = BoolOption(shortFlag: "c", longFlag: "color",
-                                    helpMessage: "Use color for output.")
-let CLIFanNumberFlag   = IntOption(shortFlag: "n", longFlag: "fan-number",
-                  required: false, helpMessage: "The number of the fan to set.")
-let CLIFanSpeedFlag    = IntOption(shortFlag: "s", longFlag: "fan-speed",
-         required: false, helpMessage: "The min speed (RPM) of the fan to set.")
-let CLIHelpFlag        = BoolOption(shortFlag: "h", longFlag: "help",
-               helpMessage: "Show the help message (list of options) and exit.")
-let CLIVersionFlag     = BoolOption(shortFlag: "v", longFlag: "version",
-                                   helpMessage: "Show smckit version and exit.")
+let CLIColorOption       = BoolOption(shortFlag: "c", longFlag: "color",
+                                helpMessage: "Colorize output where applicable")
+let CLIDisplayKeysOption = BoolOption(shortFlag: "d", longFlag: "display-keys",
+        helpMessage: "Show SMC keys (FourCC) when printing temperature sensors")
+let CLIFanOption         = BoolOption(shortFlag: "f", longFlag: "fan",
+                         helpMessage: "Show Show the machines fan speeds (RPM)")
+let CLIHelpOption        = BoolOption(shortFlag: "h", longFlag: "help",
+                                      helpMessage: "Show the list of options")
+let CLICheckKeyOption    = StringOption(shortFlag: "k", longFlag: "check-key",
+                                        required: false,
+            helpMessage: "Check if a FourCC is a valid SMC key on this machine")
+let CLIMiscOption        = BoolOption(shortFlag: "m", longFlag: "misc",
+                        helpMessage: "Show misc information about this machine")
+let CLIFanIdOption       = IntOption(shortFlag: "n", longFlag: "fan-id",
+                                     required: false,
+   helpMessage: "The id (number - starts from 0) of the fan whose speed to set")
+let CLIPowerOption       = BoolOption(shortFlag: "p", longFlag: "power",
+               helpMessage: "Show power related information about this machine")
+let CLIFanSpeedOption    = IntOption(shortFlag: "s", longFlag: "fan-speed",
+                                   required: false,
+helpMessage: "The min speed (RPM) of the fan to set")
+let CLITemperatureOption = BoolOption(shortFlag: "t", longFlag: "temperature",
+            helpMessage: "Show the list of temperature sensors on this machine")
+let CLIVersionOption     = BoolOption(shortFlag: "v", longFlag: "version",
+                                   helpMessage: "Show smckit version")
+let CLIWarnOption        = BoolOption(shortFlag: "w", longFlag: "warn",
+      helpMessage: "Show warning levels for temperature sensors and fan speeds")
 
-let CLIOptions = [CLITemperatureFlag, CLIFanFlag, CLIPowerFlag,
-                                                  CLIMiscFlag,
-                                                  CLICheckKey,
-                                                  CLIDisplayKeysFlag,
-                                                  CLIWarnFlag,
-                                                  CLIColorFlag,
-                                                  CLIFanNumberFlag,
-                                                  CLIFanSpeedFlag,
-                                                  CLIHelpFlag,
-                                                  CLIVersionFlag]
+// Keep this list sorted by short flag. This will be the order that it is
+// printed when printUsage() ('--help') is called
+let CLIOptions = [CLIColorOption,
+                  CLIDisplayKeysOption,
+                  CLIFanOption,
+                  CLIHelpOption,
+                  CLICheckKeyOption,
+                  CLIMiscOption,
+                  CLIFanIdOption,
+                  CLIFanSpeedOption,
+                  CLIPowerOption,
+                  CLITemperatureOption,
+                  CLIVersionOption,
+                  CLIWarnOption]
 
 let CLI = CommandLine()
 CLI.addOptions(CLIOptions)
@@ -103,11 +109,11 @@ if !success {
 }
 
 // Give precedence to help flag
-if CLIHelpFlag.value {
+if CLIHelpOption.value {
     CLI.printUsage()
     exit(EX_USAGE)
 }
-else if CLIVersionFlag.value {
+else if CLIVersionOption.value {
     println(SMCKitToolVersion)
     exit(EX_USAGE)
 }
@@ -138,7 +144,7 @@ func warningLevel(value: Double, maxValue: Double) -> (name: String,
 
 func colorBoolOutput(value: Bool) -> String {
     var color = ANSIColor.Off
-    if CLIColorFlag.value {
+    if CLIColorOption.value {
         color = value ? ANSIColor.Green : ANSIColor.Red
     }
 
@@ -154,10 +160,10 @@ func printTemperatureInformation() {
         let temperature           = smc.getTemperature(key).tmp
 
         let warning = warningLevel(temperature, maxTemperatureCelsius)
-        let level   = CLIWarnFlag.value ? "(\(warning.name))" : ""
-        let color   = CLIColorFlag.value ? warning.color : ANSIColor.Off
+        let level   = CLIWarnOption.value ? "(\(warning.name))" : ""
+        let color   = CLIColorOption.value ? warning.color : ANSIColor.Off
 
-        let smcKey  = CLIDisplayKeysFlag.value ? "(\(key.rawValue))" : ""
+        let smcKey  = CLIDisplayKeysOption.value ? "(\(key.rawValue))" : ""
 
         println("\(temperatureSensorName) \(smcKey)")
         println("\t\(color.rawValue)\(temperature)°C \(level)" +
@@ -178,8 +184,8 @@ func printFanInformation() {
             let max     = smc.getFanMaxRPM(i).rpm
 
             let warning = warningLevel(Double(current), Double(max))
-            let level   = CLIWarnFlag.value ? "(\(warning.name))" : ""
-            let color   = CLIColorFlag.value ? warning.color : ANSIColor.Off
+            let level   = CLIWarnOption.value ? "(\(warning.name))" : ""
+            let color   = CLIColorOption.value ? warning.color : ANSIColor.Off
 
             println("[\(i)] \(name)")
             println("\tCurrent:  \(color.rawValue)\(current) RPM \(level)" +
@@ -259,18 +265,18 @@ if Process.arguments.count == 1 ||
 }
 
 
-if CLIFanNumberFlag.isSet && CLIFanSpeedFlag.isSet {
-    setMinFanSpeed(CLIFanNumberFlag.value!, CLIFanSpeedFlag.value!)
+if CLIFanIdOption.isSet && CLIFanSpeedOption.isSet {
+    setMinFanSpeed(CLIFanIdOption.value!, CLIFanSpeedOption.value!)
 }
-else if CLIFanSpeedFlag.isSet != CLIFanNumberFlag.isSet {   // XOR
+else if CLIFanSpeedOption.isSet != CLIFanIdOption.isSet {   // XOR
     println("Usage: Must set fan number (-n) AND fan speed (-s)")
 }
 
-if let key = CLICheckKey.value { checkKey(key) }
+if let key = CLICheckKeyOption.value { checkKey(key) }
 
-if CLITemperatureFlag.value { printTemperatureInformation() }
-if CLIFanFlag.value         { printFanInformation()         }
-if CLIPowerFlag.value       { printPowerInformation()       }
-if CLIMiscFlag.value        { printMiscInformation()        }
+if CLITemperatureOption.value { printTemperatureInformation() }
+if CLIFanOption.value         { printFanInformation()         }
+if CLIPowerOption.value       { printPowerInformation()       }
+if CLIMiscOption.value        { printMiscInformation()        }
 
 smc.close()
