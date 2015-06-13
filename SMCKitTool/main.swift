@@ -75,7 +75,7 @@ let CLIPowerOption       = BoolOption(shortFlag: "p", longFlag: "power",
                helpMessage: "Show power related information about this machine")
 let CLIFanSpeedOption    = IntOption(shortFlag: "s", longFlag: "fan-speed",
                                    required: false,
-helpMessage: "The min speed (RPM) of the fan to set")
+                           helpMessage: "The min speed (RPM) of the fan to set")
 let CLITemperatureOption = BoolOption(shortFlag: "t", longFlag: "temperature",
             helpMessage: "Show the list of temperature sensors on this machine")
 let CLIVersionOption     = BoolOption(shortFlag: "v", longFlag: "version",
@@ -187,7 +187,7 @@ func printFanInformation() {
             let level   = CLIWarnOption.value ? "(\(warning.name))" : ""
             let color   = CLIColorOption.value ? warning.color : ANSIColor.Off
 
-            println("[\(i)] \(name)")
+            println("[id \(i)] \(name)")
             println("\tCurrent:  \(color.rawValue)\(current) RPM \(level)" +
                                                     "\(ANSIColor.Off.rawValue)")
             println("\tMin:      \(min) RPM")
