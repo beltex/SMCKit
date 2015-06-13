@@ -33,23 +33,30 @@ For more see:
 
 ### Requirements
 
-- [Xcode 6.3](https://developer.apple.com/xcode/downloads/)
+- [Xcode 6.3.2](https://developer.apple.com/xcode/downloads/)
 - OS X 10.9+
     - This is due to Swift
 
 
 ### SMCKitTool
 
-This will build smckit from source and place the binary and manual page in your
-path.
+An OS X command line tool for interfacing with the SMC using SMCKit. The
+[CommandLine](https://github.com/jatoben/CommandLine) library is used for
+the CLI and [ronn](https://github.com/rtomayko/ronn) for generating the
+[manual page](http://beltex.github.io/SMCKit/smckit.1.html).
+
+##### Install
+
+This will build SMCKitTool (`smckit(1)`) from source and place the binary and
+manual page in your path.
 
 ```
 make install
 ```
 
-Sample output from SMCKitTool.
+##### Example
 
-```bash
+```sh
 $ smckit
 -- TEMPERATURE --
 CPU_0_DIODE
@@ -74,43 +81,40 @@ PALM_REST
   34.0°C
 
 -- FAN --
-[0] Exhaust
+[id 0] Exhaust
   Current:  1324 RPM
   Min:      1299 RPM
   Max:      6199 RPM
 
--- BATTERY & POWER --
-AC Present:          true
-Battery Powered:     false
-Charging:            false
-Battery Ok:          true
-Max Batteries:       1
+-- POWER --
+AC Present:       true
+Battery Powered:  false
+Charging:         false
+Battery Ok:       true
+Max Batteries:    1
 
 -- MISC --
-Disc in ODD:         false
+Disc in ODD:      false
 ```
 
-- [CommandLine](https://github.com/jatoben/CommandLine)
-    - For the CLI
 
+### Library Usage Notes
 
-### Usage Notes
-
-- The use of this framework will almost certainly not be allowed in the
+- The use of this library  will almost certainly not be allowed in the
   Mac App Store as it is essentially using a private API
 - If you are creating an OS X command line tool, you cannot use SMCKit as a
-  framework as Swift does not currently support static libraries. In such a
+  library as Swift does not currently support static libraries. In such a
   case, the `SMC.swift` file must simply be included in your project as another
   source file. See
   [SwiftInFlux/Runtime Dynamic Libraries](https://github.com/ksm/SwiftInFlux#runtime-dynamic-libraries)
-  for more information & [dshb](https://github.com/beltex/dshb) as an example
-  of such a case.
+  for more information and both SMCKitTool &
+  [dshb](https://github.com/beltex/dshb) as examples of such a case.
 
 
 ### References
 
-There are many projects that interface with the SMC for one purpose or another. Credit is most
-certainly due to them for the reference code. Such projects as:
+There are many projects that interface with the SMC for one purpose or another.
+Credit is most certainly due to them for the reference code. Such projects as:
 
 - iStat Pro
 - [osx-cpu-temp](https://github.com/lavoiesl/osx-cpu-temp)
