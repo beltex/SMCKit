@@ -84,8 +84,18 @@
 
 <h2 id="SYNOPSIS">SYNOPSIS</h2>
 
-<p><code>smckit</code> [<code>-d</code>]<br />
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[<code>-f</code>]<br /></p>
+<p><code>smckit</code> [<code>-c</code>]<br />
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[<code>-d</code>]<br />
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[<code>-f</code>]<br />
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[<code>-h</code>]<br />
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[<code>-k</code> <var>check-key</var>]<br />
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[<code>-m</code>]<br />
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[<code>-n</code> <var>fan-id</var>]<br />
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[<code>-p</code>]<br />
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[<code>-s</code> <var>fan-speed</var>]<br />
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[<code>-t</code>]<br />
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[<code>-v</code>]<br />
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[<code>-w</code>]<br /></p>
 
 <h2 id="DESCRIPTION">DESCRIPTION</h2>
 
@@ -97,43 +107,45 @@ Controller (SMC) in Swift on Intel based Macs.</p>
 <p>List of supported command line options (flags/switchs):</p>
 
 <dl>
-<dt><code>-k</code>, <code>--check-key</code></dt><dd><p>Show SMC keys (FourCC) when printing temperature sensors.</p></dd>
-<dt><code>-d</code>, <code>--display-keys</code></dt><dd><p>Show SMC keys (FourCC) when printing temperature sensors.</p></dd>
-<dt><code>-f</code>, <code>--fan</code></dt><dd><p>Show the machines fan speeds (RPM).</p></dd>
-<dt><code>-h</code>, <code>--help</code></dt><dd><p>Show the help message (list of options) and exit.</p></dd>
-<dt><code>-m</code>, <code>--misc</code></dt><dd><p>Show misc information about the machine.</p></dd>
-<dt><code>-n</code>, <code>--fan-number</code></dt><dd><p>Show misc information about the machine.</p></dd>
-<dt><code>-p</code>, <code>--power</code>:</dt><dd><p></p></dd>
-<dt><code>-s</code>, <code>--fan-speed</code></dt><dd><p>Show misc information about the machine.</p></dd>
-<dt><code>-t</code>, <code>--temperature</code>:</dt><dd><p></p></dd>
-<dt><code>-v</code>, <code>--version</code></dt><dd><p>Show smckit version and exit.</p></dd>
+<dt><code>-c</code>, <code>--color</code></dt><dd><p>Colorize output where applicable.</p></dd>
+<dt><code>-d</code>, <code>--show-keys</code></dt><dd><p>Show SMC keys (FourCC) when printing temperature sensors.</p></dd>
+<dt><code>-f</code>, <code>--fan</code></dt><dd><p>Show the machines fan speeds.</p></dd>
+<dt><code>-h</code>, <code>--help</code></dt><dd><p>Show the list of options.</p></dd>
+<dt><code>-k</code>, <code>--check-key</code> <var>value</var></dt><dd><p>Check if a FourCC is a valid SMC key on this machine.</p></dd>
+<dt><code>-m</code>, <code>--misc</code></dt><dd><p>Show misc information about this machine.</p></dd>
+<dt><code>-n</code>, <code>--fan-id</code> <var>value</var></dt><dd><p>The id (number - starts from 0) of the fan whose speed to set. The list of
+id's can be seen via the <code>--fan</code> option. Must be used in combination
+<code>--fan-speed</code>.</p></dd>
+<dt><code>-p</code>, <code>--power</code></dt><dd><p>Show power related information about this machine.</p></dd>
+<dt><code>-s</code>, <code>--fan-speed</code> <var>value</var></dt><dd><p>The minimum speed (RPM - revolutions per minute) of the fan to set. By
+minimum we mean that OS X can interject and raise the fan speed if needed,
+however it will not go below this. Must be used with <code>--fan-id</code>. Requires
+root privileges.</p>
+
+<p><strong>WARNING</strong>: You are playing with hardware here, <strong>BE CAREFUL</strong>.</p></dd>
+<dt><code>-t</code>, <code>--temperature</code></dt><dd><p>Show the list of temperature sensors on this machine.</p></dd>
+<dt><code>-v</code>, <code>--version</code></dt><dd><p>Show smckit version.</p></dd>
+<dt><code>-w</code>, <code>--warn</code></dt><dd><p>Show warning levels for temperature sensors and fan speeds.</p></dd>
 </dl>
 
 
 <h2 id="DETAIL">DETAIL</h2>
 
 <dl>
-<dt class="flush"><code>Fan</code></dt><dd><p>Displays a list of all the fans the machine has with the current speed
-(RPM - revolutions per minute) of each. All Intel based Macs to this point
-have at least one fan, with the exception of the newly added fanless
-MacBook.</p></dd>
-<dt><code>Temperature</code></dt><dd><p>Displays a list of the machine temperature sensors in Celsius. The list
-may not be exhaustive. In addition, the maximum temperature of each
-individual sensor is not known. Thus, a global max of 128 degrees is used.
-Finally, the names of the sensors may not be mapped to the correct hardware
-component. This is all due to the fact that the SMC (System Management
-Controller) has a closed source driver, and thus information about it's
-inner workings is limited.</p>
+<dt class="flush"><code>Fan</code></dt><dd><p>All Intel based Macs to this point have at least one fan, with the exception
+of the newly added fanless MacBook (8,1).</p></dd>
+<dt><code>Temperature</code></dt><dd><p>The list of temperature sensors may not be exhaustive. In addition, the
+maximum temperature of each individual sensor is not known. Thus, a global
+max of 128 degrees is used. Finally, the names of the sensors may not be
+mapped to the correct hardware component. This is all due to the fact that
+the SMC (System Management Controller) has a closed source driver, and thus
+information about it's inner workings is limited.</p>
 
 <p>If a sensor has a value that is constant and completely disproportionate to
 the rest, then there is a chance that it is faulty. This could be due to bad
 or damaged hardware (liquid on the logic board), or a bug in the SMC driver
 itself. Run the <em>Apple Hardware Test</em> diagnostics suite in such a case to
-confirm. See here for example <a href="https://github.com/beltex/SMCKit/issues/15" data-bare-link="true">https://github.com/beltex/SMCKit/issues/15</a></p></dd>
-<dt><code>Setting min fan speed</code></dt><dd><p>Set the minimum speed (RPM - revolutions per minute) of a fan. This method
-requires root privileges. By minimum we mean that OS X can interject and
-raise the fan speed if needed, however it will not go below this.
-WARNING: You are playing with hardware here, BE CAREFUL.</p></dd>
+confirm. Example: <a href="https://github.com/beltex/SMCKit/issues/15" data-bare-link="true">https://github.com/beltex/SMCKit/issues/15</a></p></dd>
 </dl>
 
 

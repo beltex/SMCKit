@@ -7,10 +7,40 @@
 \fBsmckit\fR \- OS X SMC tool
 .
 .SH "SYNOPSIS"
-\fBsmckit\fR [\fB\-d\fR]
+\fBsmckit\fR [\fB\-c\fR]
+.
+.br
+\~\~\~\~\~\~\~[\fB\-d\fR]
 .
 .br
 \~\~\~\~\~\~\~[\fB\-f\fR]
+.
+.br
+\~\~\~\~\~\~\~[\fB\-h\fR]
+.
+.br
+\~\~\~\~\~\~\~[\fB\-k\fR \fIcheck\-key\fR]
+.
+.br
+\~\~\~\~\~\~\~[\fB\-m\fR]
+.
+.br
+\~\~\~\~\~\~\~[\fB\-n\fR \fIfan\-id\fR]
+.
+.br
+\~\~\~\~\~\~\~[\fB\-p\fR]
+.
+.br
+\~\~\~\~\~\~\~[\fB\-s\fR \fIfan\-speed\fR]
+.
+.br
+\~\~\~\~\~\~\~[\fB\-t\fR]
+.
+.br
+\~\~\~\~\~\~\~[\fB\-v\fR]
+.
+.br
+\~\~\~\~\~\~\~[\fB\-w\fR]
 .
 .br
 .
@@ -21,61 +51,68 @@ An OS X command line tool for interfacing with the Apple System Management Contr
 List of supported command line options (flags/switchs):
 .
 .TP
-\fB\-k\fR, \fB\-\-check\-key\fR
-Show SMC keys (FourCC) when printing temperature sensors\.
+\fB\-c\fR, \fB\-\-color\fR
+Colorize output where applicable\.
 .
 .TP
-\fB\-d\fR, \fB\-\-display\-keys\fR
+\fB\-d\fR, \fB\-\-show\-keys\fR
 Show SMC keys (FourCC) when printing temperature sensors\.
 .
 .TP
 \fB\-f\fR, \fB\-\-fan\fR
-Show the machines fan speeds (RPM)\.
+Show the machines fan speeds\.
 .
 .TP
 \fB\-h\fR, \fB\-\-help\fR
-Show the help message (list of options) and exit\.
+Show the list of options\.
+.
+.TP
+\fB\-k\fR, \fB\-\-check\-key\fR \fIvalue\fR
+Check if a FourCC is a valid SMC key on this machine\.
 .
 .TP
 \fB\-m\fR, \fB\-\-misc\fR
-Show misc information about the machine\.
+Show misc information about this machine\.
 .
 .TP
-\fB\-n\fR, \fB\-\-fan\-number\fR
-Show misc information about the machine\.
+\fB\-n\fR, \fB\-\-fan\-id\fR \fIvalue\fR
+The id (number \- starts from 0) of the fan whose speed to set\. The list of id\'s can be seen via the \fB\-\-fan\fR option\. Must be used in combination \fB\-\-fan\-speed\fR\.
 .
 .TP
-\fB\-p\fR, \fB\-\-power\fR:
-
+\fB\-p\fR, \fB\-\-power\fR
+Show power related information about this machine\.
 .
 .TP
-\fB\-s\fR, \fB\-\-fan\-speed\fR
-Show misc information about the machine\.
+\fB\-s\fR, \fB\-\-fan\-speed\fR \fIvalue\fR
+The minimum speed (RPM \- revolutions per minute) of the fan to set\. By minimum we mean that OS X can interject and raise the fan speed if needed, however it will not go below this\. Must be used with \fB\-\-fan\-id\fR\. Requires root privileges\.
+.
+.IP
+\fBWARNING\fR: You are playing with hardware here, \fBBE CAREFUL\fR\.
 .
 .TP
-\fB\-t\fR, \fB\-\-temperature\fR:
-
+\fB\-t\fR, \fB\-\-temperature\fR
+Show the list of temperature sensors on this machine\.
 .
 .TP
 \fB\-v\fR, \fB\-\-version\fR
-Show smckit version and exit\.
+Show smckit version\.
+.
+.TP
+\fB\-w\fR, \fB\-\-warn\fR
+Show warning levels for temperature sensors and fan speeds\.
 .
 .SH "DETAIL"
 .
 .TP
 \fBFan\fR
-Displays a list of all the fans the machine has with the current speed (RPM \- revolutions per minute) of each\. All Intel based Macs to this point have at least one fan, with the exception of the newly added fanless MacBook\.
+All Intel based Macs to this point have at least one fan, with the exception of the newly added fanless MacBook (8,1)\.
 .
 .TP
 \fBTemperature\fR
-Displays a list of the machine temperature sensors in Celsius\. The list may not be exhaustive\. In addition, the maximum temperature of each individual sensor is not known\. Thus, a global max of 128 degrees is used\. Finally, the names of the sensors may not be mapped to the correct hardware component\. This is all due to the fact that the SMC (System Management Controller) has a closed source driver, and thus information about it\'s inner workings is limited\.
+The list of temperature sensors may not be exhaustive\. In addition, the maximum temperature of each individual sensor is not known\. Thus, a global max of 128 degrees is used\. Finally, the names of the sensors may not be mapped to the correct hardware component\. This is all due to the fact that the SMC (System Management Controller) has a closed source driver, and thus information about it\'s inner workings is limited\.
 .
 .IP
-If a sensor has a value that is constant and completely disproportionate to the rest, then there is a chance that it is faulty\. This could be due to bad or damaged hardware (liquid on the logic board), or a bug in the SMC driver itself\. Run the \fIApple Hardware Test\fR diagnostics suite in such a case to confirm\. See here for example \fIhttps://github\.com/beltex/SMCKit/issues/15\fR
-.
-.TP
-\fBSetting min fan speed\fR
-Set the minimum speed (RPM \- revolutions per minute) of a fan\. This method requires root privileges\. By minimum we mean that OS X can interject and raise the fan speed if needed, however it will not go below this\. WARNING: You are playing with hardware here, BE CAREFUL\.
+If a sensor has a value that is constant and completely disproportionate to the rest, then there is a chance that it is faulty\. This could be due to bad or damaged hardware (liquid on the logic board), or a bug in the SMC driver itself\. Run the \fIApple Hardware Test\fR diagnostics suite in such a case to confirm\. Example: \fIhttps://github\.com/beltex/SMCKit/issues/15\fR
 .
 .SH "ENVIRONMENT"
 Due to Swift, smckit requires OS X 10\.9 (Mavericks) and above\. This implies an Intel based 64\-bit machine\.
