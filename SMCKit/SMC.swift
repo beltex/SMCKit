@@ -558,7 +558,7 @@ public struct SMC {
         // TODO: Why does calling open() twice (without below) return success?
         if (conn != 0) {
             #if DEBUG
-                println("WARNING - \(__FILE__):\(__FUNCTION__) - " +
+                print("WARNING - \(__FILE__):\(__FUNCTION__) - " +
                         "\(SMC.IOSERVICE_SMC) connection already open")
             #endif
             return kIOReturnStillOpen
@@ -566,11 +566,11 @@ public struct SMC {
 
 
         let service = IOServiceGetMatchingService(kIOMasterPortDefault,
-                     IOServiceMatching(SMC.IOSERVICE_SMC).takeUnretainedValue())
+                      IOServiceMatching(SMC.IOSERVICE_SMC))
 
         if (service == 0) {
             #if DEBUG
-                println("ERROR - \(__FILE__):\(__FUNCTION__) - " +
+                print("ERROR - \(__FILE__):\(__FUNCTION__) - " +
                         "\(SMC.IOSERVICE_SMC) service not found")
             #endif
 
@@ -597,7 +597,7 @@ public struct SMC {
 
         #if DEBUG
             if (result != kIOReturnSuccess) {
-                println("ERROR - \(__FILE__):\(__FUNCTION__) - Failed to close")
+                print("ERROR - \(__FILE__):\(__FUNCTION__) - Failed to close")
             }
         #endif
 
@@ -625,9 +625,9 @@ public struct SMC {
                                             kSMC     : UInt8) {
         var ans = false
 
-        if (count(key) != SMC.SMC_KEY_SIZE) {
+        if (key.characters.count != SMC.SMC_KEY_SIZE) {
             #if DEBUG
-                println("ERROR - \(__FILE__):\(__FUNCTION__) - INVALID KEY" +
+                print("ERROR - \(__FILE__):\(__FUNCTION__) - INVALID KEY" +
                         "SIZE")
             #endif
             return (ans, kIOReturnBadArgument, kSMC.kSMCError.rawValue)
@@ -665,8 +665,8 @@ public struct SMC {
             }
         }
 
-        return sorted(SMCKeys, { Temperature.allValues[$0]! <
-                                 Temperature.allValues[$1]! })
+        return SMCKeys.sort { Temperature.allValues[$0]! <
+                              Temperature.allValues[$1]! }
     }
 
 
@@ -986,7 +986,7 @@ public struct SMC {
 
         if maxRPM.kSMC == kSMC.kSMCKeyNotFound.rawValue {
             #if DEBUG
-                println("ERROR - \(__FILE__):\(__FUNCTION__) - FAN # " +
+                print("ERROR - \(__FILE__):\(__FUNCTION__) - FAN # " +
                         "\(fanNumber) NOT FOUND")
             #endif
             return (false, kIOReturnNotFound, maxRPM.kSMC)
@@ -997,7 +997,7 @@ public struct SMC {
              maxRPM.kSMC == kSMC.kSMCSuccess.rawValue &&
              RPM <= maxRPM.rpm) {
             #if DEBUG
-                println("ERROR - \(__FILE__):\(__FUNCTION__) - UNSAFE RPM - " +
+                print("ERROR - \(__FILE__):\(__FUNCTION__) - UNSAFE RPM - " +
                         "Max \(maxRPM.rpm) RPM")
             #endif
 
@@ -1138,7 +1138,7 @@ public struct SMC {
         if (dataSize != outputStruct.keyInfo.dataSize ||
             dataType.rawValue != SMC.decodeSMCKey(outputStruct.keyInfo.dataType)) {
             #if DEBUG
-                println("ERROR - \(__FILE__):\(__FUNCTION__) - INVALID DATA - "
+                print("ERROR - \(__FILE__):\(__FUNCTION__) - INVALID DATA - "
                         + "Expected input = \(outputStruct.keyInfo)")
             #endif
             return (kIOReturnBadArgument, kSMC.kSMCError.rawValue)
@@ -1205,7 +1205,7 @@ public struct SMC {
             // Depending how far off this is from 80, call may or may not
             // work
             if inputStructSize != 80 {
-                println("WARNING - \(__FILE__):\(__FUNCTION__) - SMCParamStruct"
+                print("WARNING - \(__FILE__):\(__FUNCTION__) - SMCParamStruct"
                         + " size is \(inputStructSize) bytes. Expected 80")
 
                 return kIOReturnBadArgument
@@ -1223,7 +1223,7 @@ public struct SMC {
 
         #if DEBUG
             if result != kIOReturnSuccess {
-                println("ERROR - \(__FILE__):\(__FUNCTION__) - IOReturn = " +
+                print("ERROR - \(__FILE__):\(__FUNCTION__) - IOReturn = " +
                         "\(result) - kSMC = \(outputStruct.result)")
             }
         #endif
@@ -1244,8 +1244,8 @@ public struct SMC {
         var buffer = [CChar](count: CStringCount, repeatedValue: 0)
 
         #if DEBUG
-            if count(key) != SMC_KEY_SIZE {
-                println("WARN - \(__FILE__):\(__FUNCTION__) - Invalid key size")
+            if key.characters.count != SMC_KEY_SIZE {
+                print("WARN - \(__FILE__):\(__FUNCTION__) - Invalid key size")
             }
         #endif
 
@@ -1255,7 +1255,11 @@ public struct SMC {
         key.getCString(&buffer, maxLength: CStringCount,
                                 encoding: String.defaultCStringEncoding())
 
-        return UInt32(buffer[0]) << 24 +
+        // FIXME: Have to split this up due to a compiler regression in Xcode
+        //        7 Beta 1. See test 24890 in below
+        // https://github.com/practicalswift/swift-compiler-crashes/pull/75
+        let encoded = UInt32(buffer[0]) << 24
+        return encoded +
                UInt32(buffer[1]) << 16 +
                UInt32(buffer[2]) << 8  +
                UInt32(buffer[3])

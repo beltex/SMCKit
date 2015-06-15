@@ -44,7 +44,7 @@ let Yosemite    = NSOperatingSystemVersion(majorVersion: 10,
                                            patchVersion: 0)
 
 if !processInfo.isOperatingSystemAtLeastVersion(Yosemite) {
-    println("ERROR: powermetrics requires OS X 10.10 (Yosemite) or greater")
+    print("ERROR: powermetrics requires OS X 10.10 (Yosemite) or greater")
     exit(EX_USAGE)
 }
 
@@ -52,7 +52,7 @@ if !processInfo.isOperatingSystemAtLeastVersion(Yosemite) {
 // Setup SMC
 var smc = SMC()
 if smc.open() != kIOReturnSuccess {
-    println("ERROR: Failed to open connection to SMC")
+    print("ERROR: Failed to open connection to SMC")
     exit(EX_UNAVAILABLE)
 }
 
@@ -97,11 +97,11 @@ if let output = NSString(data: data, encoding: NSUTF8StringEncoding) as String? 
         let tokens = line.componentsSeparatedByString(" ")
 
         if line.hasPrefix("Fan:") && line.hasSuffix("rpm") {
-            let powermetricsRPM = tokens[1].toInt()!
+            let powermetricsRPM = Int(tokens[1])!
             let diff = abs(Int(smcRPM) - powermetricsRPM)
 
-            println("SMCKit fan 0 RPM:     \(smcRPM)")
-            println("powermetrics fan RPM: \(powermetricsRPM)")
+            print("SMCKit fan 0 RPM:     \(smcRPM)")
+            print("powermetrics fan RPM: \(powermetricsRPM)")
             assert(diff >= 0 && diff <= 5, "RPM differs by more than +/- 5")
 
         }
@@ -109,8 +109,8 @@ if let output = NSString(data: data, encoding: NSUTF8StringEncoding) as String? 
             let powermetricsCPUDieTemperature = (tokens[3] as NSString).doubleValue
             let diff = abs(smcCPUDieTemperature - powermetricsCPUDieTemperature)
 
-            println("SMCKit CPU_0_DIE:                 \(smcCPUDieTemperature)")
-            println("powermetrics CPU die temperature: \(powermetricsCPUDieTemperature)")
+            print("SMCKit CPU_0_DIE:                 \(smcCPUDieTemperature)")
+            print("powermetrics CPU die temperature: \(powermetricsCPUDieTemperature)")
             assert(diff >= 0 && diff <= 1, "Temperature differs by more than +/- 1")
         }
     }

@@ -144,7 +144,7 @@ class SMCKitTests: XCTestCase {
         if (devicesCount == 0) {
             // TODO: This means that there are no ODD that have burn capability?
             //       Should be fine, as all Apple drives should have it
-            println("No ODD devices")
+            print("No ODD devices")
             return
         }
         
@@ -195,8 +195,8 @@ class SMCKitTests: XCTestCase {
         // check our values
         // TODO: Simplify I/O Kit calls here - can do it in a single call
         // TODO: What if its a MacBook with a removable battery and its out?
-        var service = IOServiceGetMatchingService(kIOMasterPortDefault,
-               IOServiceNameMatching("AppleSmartBattery").takeUnretainedValue())
+        let service = IOServiceGetMatchingService(kIOMasterPortDefault,
+                      IOServiceNameMatching("AppleSmartBattery"))
         if (service != 0) {
             isLaptop = true
             
@@ -330,7 +330,7 @@ class SMCKitTests: XCTestCase {
         // via I/O Kit which can also get the model name
         var size = sizeof(io_name_t)
 
-        var ptr    = UnsafeMutablePointer<io_name_t>.alloc(1)
+        let ptr    = UnsafeMutablePointer<io_name_t>.alloc(1)
         let result = sysctl(&mib, u_int(mib.count), ptr, &size, nil, 0)
 
 
