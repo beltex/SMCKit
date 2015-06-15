@@ -101,10 +101,10 @@ let CLIOptions = [CLIColorOption,
 let CLI = CommandLine()
 CLI.addOptions(CLIOptions)
 
-let (success, error) = CLI.parse()
-if !success {
-    println(error!)
-    CLI.printUsage()
+do {
+    try CLI.parse()
+} catch {
+    CLI.printUsage(error)
     exit(EX_USAGE)
 }
 
@@ -114,7 +114,7 @@ if CLIHelpOption.value {
     exit(EX_USAGE)
 }
 else if CLIVersionOption.value {
-    println(SMCKitToolVersion)
+    print(SMCKitToolVersion)
     exit(EX_USAGE)
 }
 
@@ -152,30 +152,30 @@ func colorBoolOutput(value: Bool) -> String {
 }
 
 func printTemperatureInformation() {
-    println("-- TEMPERATURE --")
+    print("-- TEMPERATURE --")
     let temperatureSensors = smc.getAllValidTemperatureKeys()
 
     for key in temperatureSensors {
         let temperatureSensorName = SMC.Temperature.allValues[key]!
         let temperature           = smc.getTemperature(key).tmp
 
-        let warning = warningLevel(temperature, maxTemperatureCelsius)
+        let warning = warningLevel(temperature, maxValue: maxTemperatureCelsius)
         let level   = CLIWarnOption.value ? "(\(warning.name))" : ""
         let color   = CLIColorOption.value ? warning.color : ANSIColor.Off
 
         let smcKey  = CLIDisplayKeysOption.value ? "(\(key.rawValue))" : ""
 
-        println("\(temperatureSensorName) \(smcKey)")
-        println("\t\(color.rawValue)\(temperature)°C \(level)" +
+        print("\(temperatureSensorName) \(smcKey)")
+        print("\t\(color.rawValue)\(temperature)°C \(level)" +
                                                     "\(ANSIColor.Off.rawValue)")
     }
 }
 
 func printFanInformation() {
-    println("-- FAN --")
+    print("-- FAN --")
     let fanCount = smc.getNumFans().numFans
 
-    if fanCount == 0 { println("** Fanless **") }
+    if fanCount == 0 { print("** Fanless **") }
     else {
         for var i: UInt = 0; i < fanCount; ++i {
             let name    = smc.getFanName(i).name
@@ -183,33 +183,33 @@ func printFanInformation() {
             let min     = smc.getFanMinRPM(i).rpm
             let max     = smc.getFanMaxRPM(i).rpm
 
-            let warning = warningLevel(Double(current), Double(max))
+            let warning = warningLevel(Double(current), maxValue: Double(max))
             let level   = CLIWarnOption.value ? "(\(warning.name))" : ""
             let color   = CLIColorOption.value ? warning.color : ANSIColor.Off
 
-            println("[id \(i)] \(name)")
-            println("\tCurrent:  \(color.rawValue)\(current) RPM \(level)" +
+            print("[id \(i)] \(name)")
+            print("\tCurrent:  \(color.rawValue)\(current) RPM \(level)" +
                                                     "\(ANSIColor.Off.rawValue)")
-            println("\tMin:      \(min) RPM")
-            println("\tMax:      \(max) RPM")
+            print("\tMin:      \(min) RPM")
+            print("\tMax:      \(max) RPM")
         }
     }
 }
 
 func printPowerInformation() {
-    println("-- POWER --")
-    println("AC Present:       \(colorBoolOutput(smc.isACPresent().flag))")
-    println("Battery Powered:  \(colorBoolOutput(smc.isBatteryPowered().flag))")
-    println("Charging:         \(colorBoolOutput(smc.isCharging().flag))")
-    println("Battery Ok:       \(colorBoolOutput(smc.isBatteryOk().flag))")
-    println("Max Batteries:    \(smc.maxNumberBatteries().count)")
+    print("-- POWER --")
+    print("AC Present:       \(colorBoolOutput(smc.isACPresent().flag))")
+    print("Battery Powered:  \(colorBoolOutput(smc.isBatteryPowered().flag))")
+    print("Charging:         \(colorBoolOutput(smc.isCharging().flag))")
+    print("Battery Ok:       \(colorBoolOutput(smc.isBatteryOk().flag))")
+    print("Max Batteries:    \(smc.maxNumberBatteries().count)")
 }
 
 func printMiscInformation() {
-    println("-- MISC --")
+    print("-- MISC --")
 
     let ODDStatus = smc.isOpticalDiskDriveFull().flag
-    println("Disc in ODD:      \(colorBoolOutput(ODDStatus))")
+    print("Disc in ODD:      \(colorBoolOutput(ODDStatus))")
 }
 
 func printAll() {
@@ -220,26 +220,26 @@ func printAll() {
 }
 
 func checkKey(key: String) {
-    if smc.isKeyValid(key).valid { println("VALID")   }
-    else                         { println("INVALID") }
+    if smc.isKeyValid(key).valid { print("VALID")   }
+    else                         { print("INVALID") }
 }
 
 func setMinFanSpeed(fanNumber: Int, fanSpeed: Int) {
     let result = smc.setFanMinRPM(UInt(fanNumber), RPM: UInt(fanSpeed))
 
-    if result.result { println("SUCCESS") }
+    if result.result { print("SUCCESS") }
     else if result.IOReturn == kIOReturnNotPrivileged {
-        println("This operation must be invoked as the superuser")
+        print("This operation must be invoked as the superuser")
     }
     else if result.IOReturn == kIOReturnBadArgument {
         let maxSpeed = smc.getFanMaxRPM(UInt(fanNumber)).rpm
-        println("Invalid fan speed. Must be <= max fan speed (\(maxSpeed))")
+        print("Invalid fan speed. Must be <= max fan speed (\(maxSpeed))")
     }
     else if result.kSMC == SMC.kSMC.kSMCKeyNotFound.rawValue {
-        println("This machine has no fan #\(fanNumber)")
+        print("This machine has no fan #\(fanNumber)")
     }
     else {
-        println("FAILED: IOKit(\(result.IOReturn)), SMC(\(result.kSMC))")
+        print("FAILED: IOKit(\(result.IOReturn)), SMC(\(result.kSMC))")
     }
 }
 
@@ -249,7 +249,7 @@ func setMinFanSpeed(fanNumber: Int, fanSpeed: Int) {
 
 var smc = SMC()
 if smc.open() != kIOReturnSuccess {
-    println("ERROR: Failed to open connection to SMC")
+    print("ERROR: Failed to open connection to SMC")
     exit(EX_UNAVAILABLE)
 }
 
@@ -266,10 +266,10 @@ if Process.arguments.count == 1 ||
 
 
 if CLIFanIdOption.isSet && CLIFanSpeedOption.isSet {
-    setMinFanSpeed(CLIFanIdOption.value!, CLIFanSpeedOption.value!)
+    setMinFanSpeed(CLIFanIdOption.value!, fanSpeed: CLIFanSpeedOption.value!)
 }
 else if CLIFanSpeedOption.isSet != CLIFanIdOption.isSet {   // XOR
-    println("Usage: Must set fan number (-n) AND fan speed (-s)")
+    print("Usage: Must set fan number (-n) AND fan speed (-s)")
 }
 
 if let key = CLICheckKeyOption.value { checkKey(key) }
