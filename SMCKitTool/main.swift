@@ -143,10 +143,9 @@ func warningLevel(value: Double, maxValue: Double) -> (name: String,
 }
 
 func colorBoolOutput(value: Bool) -> String {
-    var color = ANSIColor.Off
-    if CLIColorOption.value {
-        color = value ? ANSIColor.Green : ANSIColor.Red
-    }
+    let color: ANSIColor
+    if CLIColorOption.value { color = value ? ANSIColor.Green : ANSIColor.Red }
+    else                    { color = ANSIColor.Off }
 
     return "\(color.rawValue)\(value)\(ANSIColor.Off.rawValue)"
 }
