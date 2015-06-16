@@ -118,11 +118,11 @@ else if CLIVersionOption.value {
     exit(EX_USAGE)
 }
 
-let isSetNonBoolOptions = CLIOptions.filter({ $0.isSet == true &&
-                                              $0 as? BoolOption == nil })
-let isSetBoolOptions = CLIOptions.filter({ $0 as? BoolOption != nil })
-                                 .map({ $0 as! BoolOption })
-                                 .filter({ $0.value == true })
+let isSetNonBoolOptions = CLIOptions.filter { $0.isSet == true &&
+                                              $0 as? BoolOption == nil }
+let isSetBoolOptions = CLIOptions.filter { $0 as? BoolOption != nil }
+                                 .map    { $0 as! BoolOption        }
+                                 .filter { $0.value == true         }
 
 //------------------------------------------------------------------------------
 // MARK: FUNCTIONS
@@ -257,10 +257,10 @@ if smc.open() != kIOReturnSuccess {
 // FIXME: This is bad, need a better way. Need changes in CommandLine lib
 if Process.arguments.count == 1 ||
    (isSetNonBoolOptions.count == 0 &&
-    isSetBoolOptions.filter({ switch $0.shortFlag {
+    isSetBoolOptions.filter { switch $0.shortFlag {
                                   case "c", "d", "w": return true
                                   default           : return false
-                              }}).count == isSetBoolOptions.count) {
+                              }}.count == isSetBoolOptions.count) {
     printAll()
 }
 
