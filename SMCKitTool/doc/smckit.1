@@ -109,7 +109,7 @@ All Intel based Macs to this point have at least one fan, with the exception of 
 .
 .TP
 \fBTemperature\fR
-The list of temperature sensors may not be exhaustive\. In addition, the maximum temperature of each individual sensor is not known\. Thus, a global max of 128 degrees is used\. Finally, the names of the sensors may not be mapped to the correct hardware component\. This is all due to the fact that the SMC (System Management Controller) has a closed source driver, and thus information about it\'s inner workings is limited\.
+The list of temperature sensors may not be exhaustive\. In addition, the maximum temperature of each individual sensor is not known\. Thus, a global max of 128 degrees is used\. Finally, the names of the sensors may not be mapped to the correct hardware component\. This is all due to the fact that the SMC has a closed source driver, and thus information about it\'s inner workings is limited\.
 .
 .IP
 If a sensor has a value that is constant and completely disproportionate to the rest, then there is a chance that it is faulty\. This could be due to bad or damaged hardware (liquid on the logic board), or a bug in the SMC driver itself\. Run the \fIApple Hardware Test\fR diagnostics suite in such a case to confirm\. Example: \fIhttps://github\.com/beltex/SMCKit/issues/15\fR

@@ -79,8 +79,8 @@ List of supported command line options (flags/switchs):
     maximum temperature of each individual sensor is not known. Thus, a global
     max of 128 degrees is used. Finally, the names of the sensors may not be
     mapped to the correct hardware component. This is all due to the fact that
-    the SMC (System Management Controller) has a closed source driver, and thus
-    information about it's inner workings is limited.
+    the SMC has a closed source driver, and thus information about it's inner
+    workings is limited.
 
     If a sensor has a value that is constant and completely disproportionate to
     the rest, then there is a chance that it is faulty. This could be due to bad
