@@ -178,8 +178,8 @@ private let SUB_IOKIT_COMMON: UInt32 = (0 & 0xfff) << 14
 /**
 Based on macro of the same name in <IOKit/IOReturn.h>. Generates the error code.
 
-:param: code The specific I/O Kit error code. Last 14 bits.
-:returns: Full 32 bit error code.
+- parameter code: The specific I/O Kit error code. Last 14 bits.
+- returns: Full 32 bit error code.
 */
 private func iokit_common_err(code: UInt32) -> kern_return_t {
     // Overflow otherwise
@@ -552,7 +552,7 @@ public struct SMC {
     /**
     Open a connection to the SMC
 
-    :returns: kIOReturnSuccess on successful connection to the SMC.
+    - returns: kIOReturnSuccess on successful connection to the SMC.
     */
     public mutating func open() -> kern_return_t {
         // TODO: Why does calling open() twice (without below) return success?
@@ -587,7 +587,7 @@ public struct SMC {
     /**
     Close connection to the SMC
 
-    :returns: kIOReturnSuccess on successful close of connection to the SMC.
+    - returns: kIOReturnSuccess on successful close of connection to the SMC.
     */
     public mutating func close() -> kern_return_t {
         // Calling close twice or if connection not open returns the Mach IPC
@@ -614,9 +614,9 @@ public struct SMC {
           getAllValidTemperatureKeys() discounts such sensors (even though
           isKeyValid() returns true).
 
-    :param: key The SMC key to check. 4 byte multi-character constant. Must be
+    - parameter key: The SMC key to check. 4 byte multi-character constant. Must be
                 4 characters in length.
-    :returns: valid True if the key is found, false otherwise
+    - returns: valid True if the key is found, false otherwise
     */
     public func isKeyValid(key: String) -> (valid    : Bool,
                                             IOReturn : kern_return_t,
@@ -650,7 +650,7 @@ public struct SMC {
     NOTE: Any sensor that reports a temperature of 0 is discounted.
           Temperature.HEATSINK_0 is known to do this.
 
-    :returns: Array of keys. For convenience, the array is sorted based on
+    - returns: Array of keys. For convenience, the array is sorted based on
               sensor names.
     */
     public func getAllValidTemperatureKeys() -> [Temperature] {
@@ -671,7 +671,7 @@ public struct SMC {
     /**
     Get the number of valid SMC keys for this machine.
 
-    :returns: numKeys The number of SMC keys
+    - returns: numKeys The number of SMC keys
     */
     public func getNumSMCKeys() -> (numKeys  : UInt32,
                                     IOReturn : kern_return_t,
@@ -691,10 +691,10 @@ public struct SMC {
     /**
     Get the current temperature from a sensor
 
-    :param: key The temperature sensor to read from
-    :param: unit The unit for the temperature value (optional). Defaults to
+    - parameter key: The temperature sensor to read from
+    - parameter unit: The unit for the temperature value (optional). Defaults to
                  Celsius.
-    :returns: Temperature of sensor. If the sensor is not found, or an error
+    - returns: Temperature of sensor. If the sensor is not found, or an error
               occurs, return will be zero
     */
     public func getTemperature(key  : Temperature,
@@ -731,7 +731,7 @@ public struct SMC {
     TODO: What if its a 3rd party ODD that was swapped internally?
     TODO: What about the old Mac Pro that can have 2 ODD?
 
-    :returns: flag True if there is, false otherwise
+    - returns: flag True if there is, false otherwise
     */
     public func isOpticalDiskDriveFull() -> (flag     : Bool,
                                              IOReturn : kern_return_t,
@@ -754,7 +754,7 @@ public struct SMC {
     Max number of batteries supported by the machine. For desktops, this should
     be 0, and 1 for laptops.
 
-    :returns: count Max number of batteries supported by the machine
+    - returns: count Max number of batteries supported by the machine
     */
     public func maxNumberBatteries() -> (count    : UInt,
                                          IOReturn : kern_return_t,
@@ -769,7 +769,7 @@ public struct SMC {
     /**
     Is the machine being powered by the battery?
 
-    :returns: flag True if it is, false otherwise
+    - returns: flag True if it is, false otherwise
     */
     public func isBatteryPowered() -> (flag     : Bool,
                                        IOReturn : kern_return_t,
@@ -786,7 +786,7 @@ public struct SMC {
     /**
     Is the machine charing?
 
-    :returns: flag True if it is, false otherwise
+    - returns: flag True if it is, false otherwise
     */
     public func isCharging() -> (flag     : Bool,
                                  IOReturn : kern_return_t,
@@ -803,7 +803,7 @@ public struct SMC {
     /**
     Is AC power present?
 
-    :returns: flag True if it is, false otherwise
+    - returns: flag True if it is, false otherwise
     */
     public func isACPresent() -> (flag     : Bool,
                                   IOReturn : kern_return_t,
@@ -821,7 +821,7 @@ public struct SMC {
     Is the battery ok? Currently no details on exactly what this entails. Even
     if service battery warning is given by OS X, this still seems to return OK.
 
-    :returns: flag True if it is, false otherwise
+    - returns: flag True if it is, false otherwise
     */
     public func isBatteryOk() -> (flag     : Bool,
                                   IOReturn : kern_return_t,
@@ -843,8 +843,8 @@ public struct SMC {
     /**
     Get the name of a fan.
 
-    :param: fanNum The number of the fan to check
-    :returns: name The name of the fan. Return will be empty on error.
+    - parameter fanNum: The number of the fan to check
+    - returns: name The name of the fan. Return will be empty on error.
     */
     public func getFanName(fanNumber: UInt) -> (name     : String,
                                                 IOReturn : kern_return_t,
@@ -883,8 +883,8 @@ public struct SMC {
     /**
     Get the current speed (RPM - revolutions per minute) of a fan.
 
-    :param: fanNum The number of the fan to check
-    :returns: rpm The fan RPM. If the fan is not found, or an error occurs,
+    - parameter fanNum: The number of the fan to check
+    - returns: rpm The fan RPM. If the fan is not found, or an error occurs,
                   return will be zero
     */
     public func getFanRPM(fanNumber: UInt) -> (rpm      : UInt,
@@ -898,8 +898,8 @@ public struct SMC {
     /**
     Get the minimum speed (RPM - revolutions per minute) of a fan.
 
-    :param: fanNum The number of the fan to check
-    :returns: rpm The minimum fan RPM. If the fan is not found, or an error
+    - parameter fanNum: The number of the fan to check
+    - returns: rpm The minimum fan RPM. If the fan is not found, or an error
                   occurs, return will be zero
     */
     public func getFanMinRPM(fanNumber: UInt) -> (rpm      : UInt,
@@ -913,8 +913,8 @@ public struct SMC {
     /**
     Get the maximum speed (RPM - revolutions per minute) of a fan.
 
-    :param: fanNum The number of the fan to check
-    :returns: rpm The maximum fan RPM. If the fan is not found, or an error
+    - parameter fanNum: The number of the fan to check
+    - returns: rpm The maximum fan RPM. If the fan is not found, or an error
                   occurs, return will be zero
     */
     public func getFanMaxRPM(fanNumber: UInt) -> (rpm      : UInt,
@@ -928,7 +928,7 @@ public struct SMC {
     /**
     Get the number of fans on this machine.
 
-    :returns: numFans The number of fans
+    - returns: numFans The number of fans
     */
     public func getNumFans() -> (numFans  : UInt,
                                  IOReturn : kern_return_t,
@@ -945,9 +945,9 @@ public struct SMC {
 
     WARNING: You are playing with hardware here, BE CAREFUL.
 
-    :param: fanNum The number of the fan to set
-    :param: rpm The speed you would like to set the fan to.
-    :returns: result True if successful, false otherwise.
+    - parameter fanNum: The number of the fan to set
+    - parameter rpm: The speed you would like to set the fan to.
+    - returns: result True if successful, false otherwise.
     */
     public func setFanMinRPM(fanNumber: UInt, RPM: UInt) ->
                                                       (result  : Bool,
@@ -1005,8 +1005,8 @@ public struct SMC {
     /**
     Read data from the SMC
 
-    :param: key The SMC key
-    :returns: Raw data return from the SMC
+    - parameter key: The SMC key
+    - returns: Raw data return from the SMC
     */
     private func readSMC(key: String) -> (data     : [UInt8],
                                           dataType : UInt32,
@@ -1081,8 +1081,8 @@ public struct SMC {
     /**
     Write data to the SMC.
 
-    :returns: IOReturn IOKit return code
-    :returns: kSMC SMC return code
+    - returns: IOReturn IOKit return code
+    - returns: kSMC SMC return code
     */
     private func writeSMC(key      : String,
                           data     : [UInt8],
@@ -1161,9 +1161,9 @@ public struct SMC {
     /**
     Make a call to the SMC
 
-    :param: inputStruct Struct that holds data telling the SMC what you want
-    :param: outputStruct Struct holding the SMC's response
-    :returns: IOKit return code
+    - parameter inputStruct: Struct that holds data telling the SMC what you want
+    - parameter outputStruct: Struct holding the SMC's response
+    - returns: IOKit return code
     */
     private func callSMC(inout inputStruct : SMCParamStruct,
                          inout outputStruct: SMCParamStruct) -> kern_return_t {
@@ -1257,8 +1257,8 @@ public struct SMC {
 
     https://stackoverflow.com/questions/22160746/fpe2-and-sp78-data-types
 
-    :param: data Data from the SMC to be converted. Assumed data size of 2.
-    :returns: Converted data
+    - parameter data: Data from the SMC to be converted. Assumed data size of 2.
+    - returns: Converted data
     */
     public static func decodeFPE2(data: (UInt8, UInt8)) -> UInt {
         return (UInt(data.0) << 6) + (UInt(data.1) >> 2)
@@ -1283,8 +1283,8 @@ public struct SMC {
     /**
     Celsius to Fahrenheit
 
-    :param: temperature Temperature in Celsius
-    :returns: Temperature in Fahrenheit
+    - parameter temperature: Temperature in Celsius
+    - returns: Temperature in Fahrenheit
     */
     private static func toFahrenheit(temperature: Double) -> Double {
         // https://en.wikipedia.org/wiki/Fahrenheit#Definition_and_conversions
@@ -1295,8 +1295,8 @@ public struct SMC {
     /**
     Celsius to Kelvin
 
-    :param: temperature Temperature in Celsius
-    :returns: Temperature in Kelvin
+    - parameter temperature: Temperature in Celsius
+    - returns: Temperature in Kelvin
     */
     private static func toKelvin(temperature: Double) -> Double {
         // https://en.wikipedia.org/wiki/Kelvin
