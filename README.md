@@ -33,7 +33,7 @@ For more see:
 
 ### Requirements
 
-- [Xcode 7 Beta 1](https://developer.apple.com/xcode/downloads/)
+- [Xcode 7 Beta 2](https://developer.apple.com/xcode/downloads/)
 - OS X 10.9+
     - This is due to Swift
 
