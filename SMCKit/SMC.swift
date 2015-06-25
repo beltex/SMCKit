@@ -617,8 +617,6 @@ public struct SMC {
     :param: key The SMC key to check. 4 byte multi-character constant. Must be
                 4 characters in length.
     :returns: valid True if the key is found, false otherwise
-    :returns: IOReturn IOKit return code
-    :returns: kSMC SMC return code
     */
     public func isKeyValid(key: String) -> (valid    : Bool,
                                             IOReturn : kern_return_t,
@@ -674,8 +672,6 @@ public struct SMC {
     Get the number of valid SMC keys for this machine.
 
     :returns: numKeys The number of SMC keys
-    :returns: IOReturn IOKit return code
-    :returns: kSMC SMC return code
     */
     public func getNumSMCKeys() -> (numKeys  : UInt32,
                                     IOReturn : kern_return_t,
@@ -700,8 +696,6 @@ public struct SMC {
                  Celsius.
     :returns: Temperature of sensor. If the sensor is not found, or an error
               occurs, return will be zero
-    :returns: IOReturn IOKit return code
-    :returns: kSMC SMC return code
     */
     public func getTemperature(key  : Temperature,
                                unit : TemperatureUnit = .Celsius) ->
@@ -738,8 +732,6 @@ public struct SMC {
     TODO: What about the old Mac Pro that can have 2 ODD?
 
     :returns: flag True if there is, false otherwise
-    :returns: IOReturn IOKit return code
-    :returns: kSMC SMC return code
     */
     public func isOpticalDiskDriveFull() -> (flag     : Bool,
                                              IOReturn : kern_return_t,
@@ -763,8 +755,6 @@ public struct SMC {
     be 0, and 1 for laptops.
 
     :returns: count Max number of batteries supported by the machine
-    :returns: IOReturn IOKit return code
-    :returns: kSMC SMC return code
     */
     public func maxNumberBatteries() -> (count    : UInt,
                                          IOReturn : kern_return_t,
@@ -780,8 +770,6 @@ public struct SMC {
     Is the machine being powered by the battery?
 
     :returns: flag True if it is, false otherwise
-    :returns: IOReturn IOKit return code
-    :returns: kSMC SMC return code
     */
     public func isBatteryPowered() -> (flag     : Bool,
                                        IOReturn : kern_return_t,
@@ -799,8 +787,6 @@ public struct SMC {
     Is the machine charing?
 
     :returns: flag True if it is, false otherwise
-    :returns: IOReturn IOKit return code
-    :returns: kSMC SMC return code
     */
     public func isCharging() -> (flag     : Bool,
                                  IOReturn : kern_return_t,
@@ -818,8 +804,6 @@ public struct SMC {
     Is AC power present?
 
     :returns: flag True if it is, false otherwise
-    :returns: IOReturn IOKit return code
-    :returns: kSMC SMC return code
     */
     public func isACPresent() -> (flag     : Bool,
                                   IOReturn : kern_return_t,
@@ -838,8 +822,6 @@ public struct SMC {
     if service battery warning is given by OS X, this still seems to return OK.
 
     :returns: flag True if it is, false otherwise
-    :returns: IOReturn IOKit return code
-    :returns: kSMC SMC return code
     */
     public func isBatteryOk() -> (flag     : Bool,
                                   IOReturn : kern_return_t,
@@ -863,8 +845,6 @@ public struct SMC {
 
     :param: fanNum The number of the fan to check
     :returns: name The name of the fan. Return will be empty on error.
-    :returns: IOReturn IOKit return code
-    :returns: kSMC SMC return code
     */
     public func getFanName(fanNumber: UInt) -> (name     : String,
                                                 IOReturn : kern_return_t,
@@ -906,8 +886,6 @@ public struct SMC {
     :param: fanNum The number of the fan to check
     :returns: rpm The fan RPM. If the fan is not found, or an error occurs,
                   return will be zero
-    :returns: IOReturn IOKit return code
-    :returns: kSMC SMC return code
     */
     public func getFanRPM(fanNumber: UInt) -> (rpm      : UInt,
                                                IOReturn : kern_return_t,
@@ -923,8 +901,6 @@ public struct SMC {
     :param: fanNum The number of the fan to check
     :returns: rpm The minimum fan RPM. If the fan is not found, or an error
                   occurs, return will be zero
-    :returns: IOReturn IOKit return code
-    :returns: kSMC SMC return code
     */
     public func getFanMinRPM(fanNumber: UInt) -> (rpm      : UInt,
                                                   IOReturn : kern_return_t,
@@ -940,8 +916,6 @@ public struct SMC {
     :param: fanNum The number of the fan to check
     :returns: rpm The maximum fan RPM. If the fan is not found, or an error
                   occurs, return will be zero
-    :returns: IOReturn IOKit return code
-    :returns: kSMC SMC return code
     */
     public func getFanMaxRPM(fanNumber: UInt) -> (rpm      : UInt,
                                                   IOReturn : kern_return_t,
@@ -955,8 +929,6 @@ public struct SMC {
     Get the number of fans on this machine.
 
     :returns: numFans The number of fans
-    :returns: IOReturn IOKit return code
-    :returns: kSMC SMC return code
     */
     public func getNumFans() -> (numFans  : UInt,
                                  IOReturn : kern_return_t,
@@ -1035,8 +1007,6 @@ public struct SMC {
 
     :param: key The SMC key
     :returns: Raw data return from the SMC
-    :returns: IOReturn IOKit return code
-    :returns: kSMC SMC return code
     */
     private func readSMC(key: String) -> (data     : [UInt8],
                                           dataType : UInt32,
