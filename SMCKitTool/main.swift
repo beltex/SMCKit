@@ -154,9 +154,30 @@ func printTemperatureInformation() {
     print("-- TEMPERATURE --")
     let temperatureSensors = smc.getAllValidTemperatureKeys()
 
+    if temperatureSensors.count == 0 {
+        print("No known temperature sensors found")
+        return
+    }
+
+
+    let sensorWithLongestName = temperatureSensors.maxElement
+                            { SMC.Temperature.allValues[$0]!.characters.count <
+                              SMC.Temperature.allValues[$1]!.characters.count }
+
+    let longestSensorNameCount =
+             SMC.Temperature.allValues[sensorWithLongestName!]!.characters.count
+
+
     for key in temperatureSensors {
-        let temperatureSensorName = SMC.Temperature.allValues[key]!
+        var temperatureSensorName = SMC.Temperature.allValues[key]!
         let temperature           = smc.getTemperature(key).tmp
+
+
+        // Padding to line up temperatures
+        let padding = longestSensorNameCount -
+                      temperatureSensorName.characters.count
+        for var i = 0; i < padding; ++i { temperatureSensorName.extend(" ") }
+
 
         let warning = warningLevel(temperature, maxValue: maxTemperatureCelsius)
         let level   = CLIWarnOption.value ? "(\(warning.name))" : ""
@@ -164,9 +185,9 @@ func printTemperatureInformation() {
 
         let smcKey  = CLIDisplayKeysOption.value ? "(\(key.rawValue))" : ""
 
-        print("\(temperatureSensorName) \(smcKey)")
-        print("\t\(color.rawValue)\(temperature)°C \(level)" +
-                                                    "\(ANSIColor.Off.rawValue)")
+        print("\(temperatureSensorName)   \(smcKey)  ", appendNewline: false)
+        print("\(color.rawValue)\(temperature)°C \(level)" +
+                                "\(ANSIColor.Off.rawValue)")
     }
 }
 
