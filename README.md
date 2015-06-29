@@ -38,6 +38,22 @@ For more see:
     - This is due to Swift
 
 
+### Clone
+
+Make sure to use the recursive option on clone to initialize all submodules.
+
+```sh
+git clone --recursive https://github.com/beltex/SMCKit
+```
+
+Incase you have already cloned the repository, run the following inside the
+project directory.
+
+```sh
+git submodule update --init
+```
+
+
 ### SMCKitTool
 
 An OS X command line tool for interfacing with the SMC using SMCKit. The
@@ -59,26 +75,15 @@ make install
 ```sh
 $ smckit
 -- TEMPERATURE --
-CPU_0_DIODE
-  70.0°C
-CPU_0_PROXIMITY
-  58.0°C
-ENCLOSURE_BASE_0
-  35.0°C
-ENCLOSURE_BASE_1
-  35.0°C
-ENCLOSURE_BASE_2
-  34.0°C
-ENCLOSURE_BASE_3
-  38.0°C
-HEATSINK_1
-  58.0°C
-NORTHBRIDGE_DIODE
-  65.0°C
-NORTHBRIDGE_PROXIMITY
-  53.0°C
-PALM_REST
-  34.0°C
+AMBIENT_AIR_0           41.0°C
+CPU_0_DIE               50.0°C
+CPU_0_PROXIMITY         46.0°C
+ENCLOSURE_BASE_0        33.0°C
+ENCLOSURE_BASE_1        33.0°C
+ENCLOSURE_BASE_2        30.0°C
+HEATSINK_1              40.0°C
+MEM_SLOTS_PROXIMITY     41.0°C
+PALM_REST               30.0°C
 -- FAN --
 [id 0] Exhaust
   Current:  1324 RPM
@@ -111,11 +116,12 @@ Disc in ODD:      false
 ### References
 
 There are many projects that interface with the SMC for one purpose or another.
-Credit is most certainly due to them for the reference code. Such projects as:
+Credit is most certainly due to them for the reference. Such projects as:
 
 - iStat Pro
 - [osx-cpu-temp](https://github.com/lavoiesl/osx-cpu-temp)
 - [PowerManagement](http://www.opensource.apple.com/source/PowerManagement/)
+- [powermetrics(1)](https://developer.apple.com/library/mac/documentation/Darwin/Reference/ManPages/man1/powermetrics.1.html)
 - [smcFanControl](https://github.com/hholtmann/smcFanControl)
 
 Handy I/O Kit references:
