@@ -118,12 +118,6 @@ else if CLIVersionOption.value {
     exit(EX_USAGE)
 }
 
-let isSetNonBoolOptions = CLIOptions.filter { $0.isSet == true &&
-                                              $0 as? BoolOption == nil }
-let isSetBoolOptions = CLIOptions.filter { $0 as? BoolOption != nil }
-                                 .map    { $0 as! BoolOption        }
-                                 .filter { $0.value == true         }
-
 //------------------------------------------------------------------------------
 // MARK: FUNCTIONS
 //------------------------------------------------------------------------------
@@ -274,23 +268,28 @@ if smc.open() != kIOReturnSuccess {
 }
 
 
-// FIXME: This is bad, need a better way. Need changes in CommandLine lib
-if Process.arguments.count == 1 ||
-   (isSetNonBoolOptions.count == 0 &&
-    isSetBoolOptions.filter { switch $0.shortFlag {
-                                  case "c", "d", "w": return true
-                                  default           : return false
-                              }}.count == isSetBoolOptions.count) {
-    printAll()
-}
+let wasSetOptions = CLIOptions.filter { $0.wasSet }
+
+// Want to check that only combination of the follow flags is passed for
+// printAll to occur
+let printAllOptionsCount = wasSetOptions.filter {
+    if $0.shortFlag == nil { return false }
+    switch $0.shortFlag! {
+    case "c", "d", "w": return true
+    default           : return false
+    }
+}.count
+
+if printAllOptionsCount == wasSetOptions.count { printAll() }
 
 
-if CLIFanIdOption.isSet && CLIFanSpeedOption.isSet {
-    setMinFanSpeed(CLIFanIdOption.value!, fanSpeed: CLIFanSpeedOption.value!)
+if let fanId = CLIFanIdOption.value, let fanSpeed = CLIFanSpeedOption.value {
+    setMinFanSpeed(fanId, fanSpeed: fanSpeed)
 }
-else if CLIFanSpeedOption.isSet != CLIFanIdOption.isSet {   // XOR
+else if CLIFanIdOption.wasSet != CLIFanSpeedOption.wasSet {
     print("Usage: Must set fan number (-n) AND fan speed (-s)")
 }
+
 
 if let key = CLICheckKeyOption.value { checkKey(key) }
 
