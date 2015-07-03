@@ -64,17 +64,14 @@ let CLIFanOption         = BoolOption(shortFlag: "f", longFlag: "fan",
 let CLIHelpOption        = BoolOption(shortFlag: "h", longFlag: "help",
                                       helpMessage: "Show the list of options")
 let CLICheckKeyOption    = StringOption(shortFlag: "k", longFlag: "check-key",
-                                        required: false,
             helpMessage: "Check if a FourCC is a valid SMC key on this machine")
 let CLIMiscOption        = BoolOption(shortFlag: "m", longFlag: "misc",
                         helpMessage: "Show misc information about this machine")
 let CLIFanIdOption       = IntOption(shortFlag: "n", longFlag: "fan-id",
-                                     required: false,
    helpMessage: "The id (number - starts from 0) of the fan whose speed to set")
 let CLIPowerOption       = BoolOption(shortFlag: "p", longFlag: "power",
                helpMessage: "Show power related information about this machine")
 let CLIFanSpeedOption    = IntOption(shortFlag: "s", longFlag: "fan-speed",
-                                   required: false,
                            helpMessage: "The min speed (RPM) of the fan to set")
 let CLITemperatureOption = BoolOption(shortFlag: "t", longFlag: "temperature",
             helpMessage: "Show the list of temperature sensors on this machine")
