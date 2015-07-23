@@ -1,5 +1,5 @@
 //
-// OS X SMC Tool
+// OS X Apple System Management Controller (SMC) Tool
 //
 // SMCKitTool/main.swift
 // SMCKit
@@ -26,7 +26,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-import IOKit
+import Darwin
 
 // Not using the following as frameworks, but as source files. See README.md for
 // more
@@ -34,14 +34,14 @@ import IOKit
 //import SMCKit
 
 //------------------------------------------------------------------------------
-// MARK: GLOBALS
+// MARK: Globals
 //------------------------------------------------------------------------------
 
-let SMCKitToolVersion     = "0.0.2"
+let SMCKitToolVersion     = "0.1.0-dev"
 let maxTemperatureCelsius = 128.0
 
 //------------------------------------------------------------------------------
-// MARK: ENUMS
+// MARK: Enums
 //------------------------------------------------------------------------------
 
 enum ANSIColor: String {
@@ -52,7 +52,7 @@ enum ANSIColor: String {
 }
 
 //------------------------------------------------------------------------------
-// MARK: COMMAND LINE INTERFACE
+// MARK: CLI
 //------------------------------------------------------------------------------
 
 let CLIColorOption       = BoolOption(shortFlag: "c", longFlag: "color",
@@ -106,17 +106,16 @@ do {
 }
 
 // Give precedence to help flag
-if CLIHelpOption.value {
+if CLIHelpOption.wasSet {
     CLI.printUsage()
-    exit(EX_USAGE)
-}
-else if CLIVersionOption.value {
+    exit(EX_OK)
+} else if CLIVersionOption.wasSet {
     print(SMCKitToolVersion)
-    exit(EX_USAGE)
+    exit(EX_OK)
 }
 
 //------------------------------------------------------------------------------
-// MARK: FUNCTIONS
+// MARK: Functions
 //------------------------------------------------------------------------------
 
 func warningLevel(value: Double, maxValue: Double) -> (name: String,
@@ -124,12 +123,9 @@ func warningLevel(value: Double, maxValue: Double) -> (name: String,
     let percentage = value / maxValue
 
     switch percentage {
-        case 0...0.45:
-            return ("Normal", ANSIColor.Green)
-        case 0.45...0.75:
-            return ("Danger", ANSIColor.Yellow)
-        default:
-            return ("Crisis", ANSIColor.Red)
+    case 0...0.45:    return ("Nominal", ANSIColor.Green)
+    case 0.45...0.75: return ("Danger", ANSIColor.Yellow)
+    default:          return ("Crisis", ANSIColor.Red)
     }
 }
 
@@ -143,83 +139,117 @@ func colorBoolOutput(value: Bool) -> String {
 
 func printTemperatureInformation() {
     print("-- TEMPERATURE --")
-    let temperatureSensors = smc.getAllValidTemperatureKeys()
 
-    if temperatureSensors.count == 0 {
+    let allTemperatureSensors: [TemperatureSensor]
+    do {
+        allTemperatureSensors = try SMCKit.allKnownTemperatureSensors()
+    } catch {
+        print(error)
+        return
+    }
+
+
+    if allTemperatureSensors.count == 0 {
         print("No known temperature sensors found")
         return
     }
 
 
-    let sensorWithLongestName = temperatureSensors.maxElement
-                            { SMC.Temperature.allValues[$0]!.characters.count <
-                              SMC.Temperature.allValues[$1]!.characters.count }
+    let sensorWithLongestName = allTemperatureSensors.maxElement
+                                { $0.name.characters.count <
+                                  $1.name.characters.count }
 
-    let longestSensorNameCount =
-             SMC.Temperature.allValues[sensorWithLongestName!]!.characters.count
+    let longestSensorNameCount = sensorWithLongestName!.name.characters.count
 
 
-    for key in temperatureSensors {
-        var temperatureSensorName = SMC.Temperature.allValues[key]!
-        let temperature           = smc.getTemperature(key).tmp
-
+    for sensor in allTemperatureSensors {
+        let temperature: Double
+        do {
+            temperature = try SMCKit.temperature(sensor.code)
+        } catch {
+            temperature = 0
+        }
 
         // Padding to line up temperatures
-        let padding = longestSensorNameCount -
-                      temperatureSensorName.characters.count
-        for var i = 0; i < padding; ++i { temperatureSensorName.extend(" ") }
+        let padding = String(count: longestSensorNameCount -
+                                    sensor.name.characters.count,
+                             repeatedValue: Character(" "))
 
 
         let warning = warningLevel(temperature, maxValue: maxTemperatureCelsius)
         let level   = CLIWarnOption.value ? "(\(warning.name))" : ""
         let color   = CLIColorOption.value ? warning.color : ANSIColor.Off
 
-        let smcKey  = CLIDisplayKeysOption.value ? "(\(key.rawValue))" : ""
+        let smcKey  = CLIDisplayKeysOption.value ? "(\(sensor.code.toString()))" : ""
 
-        print("\(temperatureSensorName)   \(smcKey)  ", appendNewline: false)
+        print("\(sensor.name + padding)   \(smcKey)  ", appendNewline: false)
         print("\(color.rawValue)\(temperature)°C \(level)" +
-                                "\(ANSIColor.Off.rawValue)")
+              "\(ANSIColor.Off.rawValue)")
     }
 }
 
 func printFanInformation() {
     print("-- FAN --")
-    let fanCount = smc.getNumFans().numFans
 
-    if fanCount == 0 { print("** Fanless **") }
-    else {
-        for var i: UInt = 0; i < fanCount; ++i {
-            let name    = smc.getFanName(i).name
-            let current = smc.getFanRPM(i).rpm
-            let min     = smc.getFanMinRPM(i).rpm
-            let max     = smc.getFanMaxRPM(i).rpm
+    let allFans: [Fan]
+    do {
+        allFans = try SMCKit.allFans()
+    } catch {
+        print(error)
+        return
+    }
 
-            let warning = warningLevel(Double(current), maxValue: Double(max))
-            let level   = CLIWarnOption.value ? "(\(warning.name))" : ""
-            let color   = CLIColorOption.value ? warning.color : ANSIColor.Off
+    if allFans.count == 0 { print("** Fanless **") }
 
-            print("[id \(i)] \(name)")
-            print("\tCurrent:  \(color.rawValue)\(current) RPM \(level)" +
+    for fan in allFans {
+        print("[id \(fan.id)] \(fan.name)")
+
+        do {
+            let currentSpeed = try SMCKit.fanCurrentSpeed(fan.id)
+            let warning = warningLevel(Double(currentSpeed),
+                                       maxValue: Double(fan.maxSpeed))
+            let level = CLIWarnOption.value ? "(\(warning.name))" : ""
+            let color = CLIColorOption.value ? warning.color : ANSIColor.Off
+            print("\tCurrent:  \(color.rawValue)\(currentSpeed) RPM \(level)" +
                                                     "\(ANSIColor.Off.rawValue)")
-            print("\tMin:      \(min) RPM")
-            print("\tMax:      \(max) RPM")
+        } catch {
+            print("\tCurrent:  NA")
         }
+
+        print("\tMin:      \(fan.minSpeed) RPM")
+        print("\tMax:      \(fan.maxSpeed) RPM")
     }
 }
 
 func printPowerInformation() {
+    let information: batteryInfo
+    do {
+        information = try SMCKit.batteryInformation()
+    } catch {
+        print(error)
+        return
+    }
+
     print("-- POWER --")
-    print("AC Present:       \(colorBoolOutput(smc.isACPresent().flag))")
-    print("Battery Powered:  \(colorBoolOutput(smc.isBatteryPowered().flag))")
-    print("Charging:         \(colorBoolOutput(smc.isCharging().flag))")
-    print("Battery Ok:       \(colorBoolOutput(smc.isBatteryOk().flag))")
-    print("Max Batteries:    \(smc.maxNumberBatteries().count)")
+    print("AC Present:       \(colorBoolOutput(information.isACPresent))")
+    print("Battery Powered:  \(colorBoolOutput(information.isBatteryPowered))")
+    print("Charging:         \(colorBoolOutput(information.isCharging))")
+    print("Battery Ok:       \(colorBoolOutput(information.isBatteryOk))")
+    print("Battery Count:    \(information.batteryCount)")
 }
 
 func printMiscInformation() {
     print("-- MISC --")
 
-    let ODDStatus = smc.isOpticalDiskDriveFull().flag
+    let ODDStatus: Bool
+    do {
+        ODDStatus = try SMCKit.isOpticalDiskDriveFull()
+    } catch SMCKit.Error.KeyNotFound { ODDStatus = false }
+      catch {
+        print(error)
+        return
+    }
+
     print("Disc in ODD:      \(colorBoolOutput(ODDStatus))")
 }
 
@@ -231,26 +261,31 @@ func printAll() {
 }
 
 func checkKey(key: String) {
-    if smc.isKeyValid(key).valid { print("VALID")   }
-    else                         { print("INVALID") }
+    if key.characters.count != 4 {
+        print("Must be FourCC")
+        return
+    }
+
+    do {
+        let isValid = try SMCKit.isKeyValid(FourCharCode(fromString: key))
+
+        if isValid { print("VALID")   }
+        else       { print("INVALID") }
+    } catch { print(error) }
 }
 
-func setMinFanSpeed(fanNumber: Int, fanSpeed: Int) {
-    let result = smc.setFanMinRPM(UInt(fanNumber), RPM: UInt(fanSpeed))
-
-    if result.result { print("SUCCESS") }
-    else if result.IOReturn == kIOReturnNotPrivileged {
+func setMinFanSpeed(fanId: Int, fanSpeed: Int) {
+    do {
+        try SMCKit.fanSetMinSpeed(fanId, speed: fanSpeed)
+        print("SUCCESS")
+    } catch SMCKit.Error.KeyNotFound {
+        print("This machine has no fan with id \(fanId)")
+    } catch SMCKit.Error.NotPrivileged {
         print("This operation must be invoked as the superuser")
-    }
-    else if result.IOReturn == kIOReturnBadArgument {
-        let maxSpeed = smc.getFanMaxRPM(UInt(fanNumber)).rpm
-        print("Invalid fan speed. Must be <= max fan speed (\(maxSpeed))")
-    }
-    else if result.kSMC == SMC.kSMC.kSMCKeyNotFound.rawValue {
-        print("This machine has no fan #\(fanNumber)")
-    }
-    else {
-        print("FAILED: IOKit(\(result.IOReturn)), SMC(\(result.kSMC))")
+    } catch SMCKit.Error.UnsafeFanSpeed {
+        print("Invalid fan speed. Must be <= max fan speed")
+    } catch {
+        print(error)
     }
 }
 
@@ -258,12 +293,12 @@ func setMinFanSpeed(fanNumber: Int, fanSpeed: Int) {
 // MARK: MAIN
 //------------------------------------------------------------------------------
 
-var smc = SMC()
-if smc.open() != kIOReturnSuccess {
+do {
+    try SMCKit.open()
+} catch {
     print("ERROR: Failed to open connection to SMC")
     exit(EX_UNAVAILABLE)
 }
-
 
 let wasSetOptions = CLIOptions.filter { $0.wasSet }
 
@@ -295,4 +330,4 @@ if CLIFanOption.value         { printFanInformation()         }
 if CLIPowerOption.value       { printPowerInformation()       }
 if CLIMiscOption.value        { printMiscInformation()        }
 
-smc.close()
+SMCKit.close()
