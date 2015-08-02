@@ -66,7 +66,7 @@ extension Bool {
     }
 }
 
-extension Int {
+public extension Int {
 
     init(fromFPE2 bytes: FPE2) {
         self = (Int(bytes.0) << 6) + (Int(bytes.1) >> 2)
@@ -86,7 +86,7 @@ extension Double {
 }
 
 // http://airspeedvelocity.net/2015/05/22/my-talk-at-swift-summit/
-extension FourCharCode {
+public extension FourCharCode {
 
     init(fromString str: String) {
         precondition(str.characters.count == 4)
@@ -504,8 +504,8 @@ public struct TemperatureSensors {
 }
 
 public struct TemperatureSensor {
-    let name: String
-    let code: FourCharCode
+    public let name: String
+    public let code: FourCharCode
 }
 
 public enum TemperatureUnit {
@@ -679,11 +679,11 @@ extension SMCKit {
 //------------------------------------------------------------------------------
 
 public struct batteryInfo {
-    let batteryCount: Int
-    let isACPresent: Bool
-    let isBatteryPowered: Bool
-    let isBatteryOk: Bool
-    let isCharging: Bool
+    public let batteryCount: Int
+    public let isACPresent: Bool
+    public let isBatteryPowered: Bool
+    public let isBatteryOk: Bool
+    public let isCharging: Bool
 }
 
 extension SMCKit {
