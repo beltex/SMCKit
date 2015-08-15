@@ -24,7 +24,6 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-import Cocoa
 import XCTest
 import SMCKit
 import DiscRecording
@@ -91,21 +90,21 @@ class SMCKitTests: XCTestCase {
 //        XCTAssertEqual(smc.close(), kIOReturnSuccess)
 //    }
     
-    func testTemperatureValues() throws {
-        let temperatureSensors = try SMCKit.allKnownTemperatureSensors()
+    func testTemperatureValues() {
+        let temperatureSensors = try! SMCKit.allKnownTemperatureSensors()
         
         for sensor in temperatureSensors {
-            let temperature = try SMCKit.temperature(sensor.code)
+            let temperature = try! SMCKit.temperature(sensor.code)
             
             XCTAssertGreaterThan(temperature, -128.0)
             XCTAssertLessThan(temperature, 128.0)
         }
     }
 
-    func testFanCount() throws {
+    func testFanCount() {
         // All Macs until now have at least 1 fan, except for the new 2015
         // MacBook (8,1)
-        let fanCount = try SMCKit.fanCount()
+        let fanCount = try! SMCKit.fanCount()
 
         if modelName() == "MacBook8,1" {
             // Fanless
@@ -129,23 +128,34 @@ class SMCKitTests: XCTestCase {
         XCTAssertTrue(try! SMCKit.isKeyValid(FourCharCode(fromString: "#KEY")))
     }
 
-    func testODD() throws {
+    func testODD() {
         // Cross check via DiscRecording framework
         //
         // Handy Refs:
         // http://stackoverflow.com/questions/8770048/objective-c-drdevice-h
         // https://developer.apple.com/legacy/library/samplecode/DeviceListener/
         // http://stackoverflow.com/a/24049111
-        
-        let ODDStatusSMC = try SMCKit.isOpticalDiskDriveFull()
-        let devicesCount = DRDevice.devices().count
-        
-        if devicesCount == 0 {
+
+        let ODDStatusSMC: Bool
+
+        do {
+            ODDStatusSMC = try SMCKit.isOpticalDiskDriveFull()
+        } catch SMCKit.Error.KeyNotFound {
+            ODDStatusSMC = false
+        } catch {
+            print(error)
+            fatalError()
+        }
+
+
+        if DRDevice.devices().count == 0 {
             // TODO: This means that there are no ODD that have burn capability?
             //       Should be fine, as all Apple drives should have it
             print("No ODD devices")
+            XCTAssertTrue(ODDStatusSMC == false)
             return
         }
+
         
         // To get the ODD object, need to reg for notification and wait. Since,
         // were looking for an internel device, should be instant.
@@ -185,7 +195,7 @@ class SMCKitTests: XCTestCase {
                                              object: nil)
     }
     
-    func testBatteryPowerMethods() throws {
+    func testBatteryPowerMethods() {
         var isLaptop    = false
         var ASPCharging = false
         var ASPCharged  = false
@@ -212,17 +222,9 @@ class SMCKitTests: XCTestCase {
             ASPCharged = prop.takeUnretainedValue() as! Int == 1 ? true : false
         }
         
-        let info = try SMCKit.batteryInformation()
+        let info = try! SMCKit.batteryInformation()
 
-        /*
-        public struct batteryInfo {
-        let batteryCount: Int
-        let isACPresent: Bool
-        let isBatteryPowered: Bool
-        let isBatteryOk: Bool
-        let isCharging: Bool
-        }
-        */
+
         let batteryPowered = info.isBatteryPowered
         let batteryOk      = info.isBatteryOk
         let ACPresent      = info.isACPresent
@@ -256,7 +258,7 @@ class SMCKitTests: XCTestCase {
             let B = ACPresent
             let C = charging && ASPCharging
             let D = ASPCharged
-            
+
             XCTAssertTrue((!A || !B) && (A || B) && (B || !C) && (!C || !D))
         }
         else {
