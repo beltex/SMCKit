@@ -122,9 +122,9 @@
 			isa = PBXGroup;
 			children = (
 				4CE5668D1A00A48800787F6B /* SMCKit */,
-				4C982BDE1A040CD500F4A639 /* SMCKitTool */,
 				4CE5669A1A00A48800787F6B /* SMCKitTests */,
 				4CDDA69E1AEC0D010037CE7B /* powermetricsTests */,
+				4C982BDE1A040CD500F4A639 /* SMCKitTool */,
 				4CE5668C1A00A48800787F6B /* Products */,
 			);
 			sourceTree = "<group>";
