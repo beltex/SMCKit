@@ -267,7 +267,7 @@ func checkKey(key: String) {
     }
 
     do {
-        let isValid = try SMCKit.isKeyValid(FourCharCode(fromString: key))
+        let isValid = try SMCKit.isKeyFound(FourCharCode(fromString: key))
 
         if isValid { print("VALID")   }
         else       { print("INVALID") }

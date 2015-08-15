@@ -440,7 +440,7 @@ extension SMCKit {
     }
 
     /// Is this key valid on this machine?
-    public static func isKeyValid(code: FourCharCode) throws -> Bool {
+    public static func isKeyFound(code: FourCharCode) throws -> Bool {
         do {
             try keyInformation(code)
         } catch Error.KeyNotFound { return false }
@@ -576,9 +576,7 @@ extension SMCKit {
         var sensors = [TemperatureSensor]()
 
         for sensor in TemperatureSensors.all {
-            do {
-                if try isKeyValid(sensor.code) { sensors.append(sensor) }
-            } catch Error.KeyNotFound { /* Do nothing */ }
+            if try isKeyFound(sensor.code) { sensors.append(sensor) }
         }
 
         return sensors

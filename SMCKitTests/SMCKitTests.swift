@@ -119,13 +119,13 @@ class SMCKitTests: XCTestCase {
         XCTAssertLessThanOrEqual(fanCount, 4)
     }
     
-    func testIsKeyValid() {
-        XCTAssertFalse(try! SMCKit.isKeyValid(FourCharCode(fromString: "CERN")))
-        XCTAssertFalse(try! SMCKit.isKeyValid(FourCharCode(fromString: "NASA")))
+    func testisKeyFound() {
+        XCTAssertFalse(try! SMCKit.isKeyFound(FourCharCode(fromString: "CERN")))
+        XCTAssertFalse(try! SMCKit.isKeyFound(FourCharCode(fromString: "NASA")))
 
         // We should be able to rely on always having this key. Returns the
         // number of valid keys on this machine
-        XCTAssertTrue(try! SMCKit.isKeyValid(FourCharCode(fromString: "#KEY")))
+        XCTAssertTrue(try! SMCKit.isKeyFound(FourCharCode(fromString: "#KEY")))
     }
 
     func testODD() {
