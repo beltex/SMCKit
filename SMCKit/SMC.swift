@@ -469,7 +469,7 @@ public struct TemperatureSensors {
     public static let AMBIENT_AIR_0 = TemperatureSensor(name: "AMBIENT_AIR_0",
                                    code: FourCharCode(fromStaticString: "TA0P"))
     public static let AMBIENT_AIR_1 = TemperatureSensor(name: "AMBIENT_AIR_1",
-                                   code: FourCharCode(fromStaticString: "TA0P"))
+                                   code: FourCharCode(fromStaticString: "TA1P"))
     // Via powermetrics(1)
     public static let CPU_0_DIE = TemperatureSensor(name: "CPU_0_DIE",
                                    code: FourCharCode(fromStaticString: "TC0F"))
@@ -480,6 +480,18 @@ public struct TemperatureSensors {
     public static let CPU_0_PROXIMITY =
                                       TemperatureSensor(name: "CPU_0_PROXIMITY",
                                    code: FourCharCode(fromStaticString: "TC0P"))
+    public static let ENCLOSURE_BASE_0 =
+                                     TemperatureSensor(name: "ENCLOSURE_BASE_0",
+                                   code: FourCharCode(fromStaticString: "TB0T"))
+    public static let ENCLOSURE_BASE_1 =
+                                     TemperatureSensor(name: "ENCLOSURE_BASE_1",
+                                   code: FourCharCode(fromStaticString: "TB1T"))
+    public static let ENCLOSURE_BASE_2 =
+                                     TemperatureSensor(name: "ENCLOSURE_BASE_2",
+                                   code: FourCharCode(fromStaticString: "TB2T"))
+    public static let ENCLOSURE_BASE_3 =
+                                     TemperatureSensor(name: "ENCLOSURE_BASE_3",
+                                   code: FourCharCode(fromStaticString: "TB3T"))
     public static let GPU_0_DIODE = TemperatureSensor(name: "GPU_0_DIODE",
                                    code: FourCharCode(fromStaticString: "TG0D"))
     public static let GPU_0_HEATSINK = TemperatureSensor(name: "GPU_0_HEATSINK",
@@ -487,26 +499,53 @@ public struct TemperatureSensors {
     public static let GPU_0_PROXIMITY =
                                       TemperatureSensor(name: "GPU_0_PROXIMITY",
                                    code: FourCharCode(fromStaticString: "TG0P"))
+    public static let HDD_PROXIMITY = TemperatureSensor(name: "HDD_PROXIMITY",
+                                   code: FourCharCode(fromStaticString: "TH0P"))
     public static let HEATSINK_0 = TemperatureSensor(name: "HEATSINK_0",
                                    code: FourCharCode(fromStaticString: "Th0H"))
     public static let HEATSINK_1 = TemperatureSensor(name: "HEATSINK_1",
                                    code: FourCharCode(fromStaticString: "Th1H"))
     public static let HEATSINK_2 = TemperatureSensor(name: "HEATSINK_2",
                                    code: FourCharCode(fromStaticString: "Th2H"))
+    public static let LCD_PROXIMITY = TemperatureSensor(name: "LCD_PROXIMITY",
+                                   code: FourCharCode(fromStaticString: "TL0P"))
     public static let MEM_SLOT_0 = TemperatureSensor(name: "MEM_SLOT_0",
                                    code: FourCharCode(fromStaticString: "TM0S"))
     public static let MEM_SLOTS_PROXIMITY =
                                   TemperatureSensor(name: "MEM_SLOTS_PROXIMITY",
-                                   code: FourCharCode(fromStaticString: "TM0S"))
+                                   code: FourCharCode(fromStaticString: "TM0P"))
+    public static let MISC_PROXIMITY = TemperatureSensor(name: "MISC_PROXIMITY",
+                                   code: FourCharCode(fromStaticString: "Tm0P"))
+    public static let NORTHBRIDGE = TemperatureSensor(name: "NORTHBRIDGE",
+                                   code: FourCharCode(fromStaticString: "TN0H"))
+    public static let NORTHBRIDGE_DIODE =
+                                    TemperatureSensor(name: "NORTHBRIDGE_DIODE",
+                                   code: FourCharCode(fromStaticString: "TN0D"))
+    public static let NORTHBRIDGE_PROXIMITY =
+                                TemperatureSensor(name: "NORTHBRIDGE_PROXIMITY",
+                                   code: FourCharCode(fromStaticString: "TN0P"))
+    public static let ODD_PROXIMITY = TemperatureSensor(name: "ODD_PROXIMITY",
+                                   code: FourCharCode(fromStaticString: "TO0P"))
     public static let PALM_REST = TemperatureSensor(name: "PALM_REST",
                                    code: FourCharCode(fromStaticString: "Ts0P"))
-
+    public static let PWR_SUPPLY_PROXIMITY =
+                                 TemperatureSensor(name: "PWR_SUPPLY_PROXIMITY",
+                                   code: FourCharCode(fromStaticString: "Tp0P"))
+    public static let THUNDERBOLT_0 = TemperatureSensor(name: "THUNDERBOLT_0",
+                                   code: FourCharCode(fromStaticString: "TI0P"))
+    public static let THUNDERBOLT_1 = TemperatureSensor(name: "THUNDERBOLT_1",
+                                   code: FourCharCode(fromStaticString: "TI1P"))
 
     public static let all = [AMBIENT_AIR_0, AMBIENT_AIR_1, CPU_0_DIE,
-                             CPU_0_DIODE, CPU_0_PROXIMITY, GPU_0_DIODE,
-                             GPU_0_HEATSINK, GPU_0_PROXIMITY, HEATSINK_0,
-                             HEATSINK_1, HEATSINK_2, MEM_SLOT_0,
-                             MEM_SLOTS_PROXIMITY, PALM_REST]
+                             CPU_0_DIODE, CPU_0_HEATSINK, CPU_0_PROXIMITY,
+                             ENCLOSURE_BASE_0, ENCLOSURE_BASE_1,
+                             ENCLOSURE_BASE_2, ENCLOSURE_BASE_3, GPU_0_DIODE,
+                             GPU_0_HEATSINK, GPU_0_PROXIMITY, HDD_PROXIMITY,
+                             HEATSINK_0, HEATSINK_1, HEATSINK_2, MEM_SLOT_0,
+                             MEM_SLOTS_PROXIMITY, PALM_REST, LCD_PROXIMITY,
+                             MISC_PROXIMITY, NORTHBRIDGE, NORTHBRIDGE_DIODE,
+                             NORTHBRIDGE_PROXIMITY, ODD_PROXIMITY,
+                             PWR_SUPPLY_PROXIMITY, THUNDERBOLT_0, THUNDERBOLT_1]
 }
 
 public struct TemperatureSensor {
