@@ -242,20 +242,25 @@ private func iokit_common_err(code: Int32) -> kern_return_t {
     return SYS_IOKIT | SUB_IOKIT_COMMON | code
 }
 
+/// SMC data type information
+public struct DataTypes {
 
-/// FIXME: Comments
-let dataTypeFDS  = DataType(type: FourCharCode(fromStaticString: "{fds"),
-                                                                       size: 16)
-let dataTypeFLAG = DataType(type: FourCharCode(fromStaticString: "flag"),
-                                                                        size: 1)
-let dataTypeFPE2 = DataType(type: FourCharCode(fromStaticString: "fpe2"),
-                                                                        size: 2)
-let dataTypeSP78 = DataType(type: FourCharCode(fromStaticString: "sp78"),
-                                                                        size: 2)
-let dataTypeUI8  = DataType(type: FourCharCode(fromStaticString: "ui8 "),
-                                                                        size: 1)
-let dataTypeUI32 = DataType(type: FourCharCode(fromStaticString: "ui32"),
-                                                                        size: 4)
+    /// Fan information struct
+    public static let FDS =
+                DataType(type: FourCharCode(fromStaticString: "{fds"), size: 16)
+    public static let Flag =
+                 DataType(type: FourCharCode(fromStaticString: "flag"), size: 1)
+    /// See type aliases
+    public static let FPE2 =
+                 DataType(type: FourCharCode(fromStaticString: "fpe2"), size: 2)
+    /// See type aliases
+    public static let SP78 =
+                 DataType(type: FourCharCode(fromStaticString: "sp78"), size: 2)
+    public static let UInt8 =
+                 DataType(type: FourCharCode(fromStaticString: "ui8 "), size: 1)
+    public static let UInt32 =
+                 DataType(type: FourCharCode(fromStaticString: "ui32"), size: 4)
+}
 
 public struct SMCKey {
     let code: FourCharCode
@@ -428,7 +433,7 @@ extension SMCKit {
     /// Get the number of valid SMC keys for this machine
     public static func keyCount() throws -> Int {
         let key = SMCKey(code: FourCharCode(fromStaticString: "#KEY"),
-            info: dataTypeUI32)
+                         info: DataTypes.UInt32)
 
         let data = try readData(key)
         return Int(UInt32(fromBytes: (data.0, data.1, data.2, data.3)))
@@ -543,13 +548,13 @@ extension SMCKit {
     public static func allUnknownTemperatureSensors() throws -> [SMCKey] {
         let keys = try allKeys()
         return keys.filter { $0.code.toString().hasPrefix("T") &&
-                             $0.info == dataTypeSP78 }
+                             $0.info == DataTypes.SP78 }
     }
 
     /// Get current temperature of a sensor
     public static func temperature(sensorCode: FourCharCode,
                              unit: TemperatureUnit = .Celius) throws -> Double {
-        let data = try readData(SMCKey(code: sensorCode, info: dataTypeSP78))
+        let data = try readData(SMCKey(code: sensorCode, info: DataTypes.SP78))
 
         let temperatureInCelius = Double(fromSP78: (data.0, data.1))
 
@@ -596,7 +601,7 @@ extension SMCKit {
     /// 2015 MacBook (8,1), have at least 1
     public static func fanCount() throws -> Int {
         let key = SMCKey(code: FourCharCode(fromStaticString: "FNum"),
-                                            info: dataTypeUI8)
+                                            info: DataTypes.UInt8)
 
         let data = try readData(key)
         return Int(data.0)
@@ -604,7 +609,7 @@ extension SMCKit {
 
     public static func fanName(id: Int) throws -> String {
         let key = SMCKey(code: FourCharCode(fromString: "F\(id)ID"),
-                                            info: dataTypeFDS)
+                                            info: DataTypes.FDS)
         let data = try readData(key)
 
         // The last 12 bytes of '{fds' data type, a custom struct defined by the
@@ -630,7 +635,7 @@ extension SMCKit {
 
     public static func fanCurrentSpeed(id: Int) throws -> Int {
         let key = SMCKey(code: FourCharCode(fromString: "F\(id)Ac"),
-                                            info: dataTypeFPE2)
+                                            info: DataTypes.FPE2)
 
         let data = try readData(key)
         return Int(fromFPE2: (data.0, data.1))
@@ -638,7 +643,7 @@ extension SMCKit {
 
     public static func fanMinSpeed(id: Int) throws -> Int {
         let key = SMCKey(code: FourCharCode(fromString: "F\(id)Mn"),
-                                            info: dataTypeFPE2)
+                                            info: DataTypes.FPE2)
 
         let data = try readData(key)
         return Int(fromFPE2: (data.0, data.1))
@@ -646,7 +651,7 @@ extension SMCKit {
 
     public static func fanMaxSpeed(id: Int) throws -> Int {
         let key = SMCKey(code: FourCharCode(fromString: "F\(id)Mx"),
-                                            info: dataTypeFPE2)
+                                            info: DataTypes.FPE2)
 
         let data = try readData(key)
         return Int(fromFPE2: (data.0, data.1))
@@ -669,7 +674,7 @@ extension SMCKit {
                      UInt8(0), UInt8(0))
 
         let key = SMCKey(code: FourCharCode(fromString: "F\(id)Mn"),
-                         info: dataTypeFPE2)
+                         info: DataTypes.FPE2)
 
         try writeData(key, data: bytes)
     }
@@ -691,7 +696,7 @@ extension SMCKit {
 
     public static func isOpticalDiskDriveFull() throws -> Bool {
         let key = SMCKey(code: FourCharCode(fromStaticString: "MSDI"),
-                         info: dataTypeFLAG)
+                         info: DataTypes.Flag)
 
         let data = try readData(key)
         return Bool(fromByte: data.0)
@@ -699,11 +704,14 @@ extension SMCKit {
 
     public static func batteryInformation() throws -> batteryInfo {
         let batteryCountKey =
-         SMCKey(code: FourCharCode(fromStaticString: "BNum"), info: dataTypeUI8)
+                            SMCKey(code: FourCharCode(fromStaticString: "BNum"),
+                                   info: DataTypes.UInt8)
         let batteryPoweredKey =
-        SMCKey(code: FourCharCode(fromStaticString: "BATP"), info: dataTypeFLAG)
+                            SMCKey(code: FourCharCode(fromStaticString: "BATP"),
+                                   info: DataTypes.Flag)
         let batteryInfoKey =
-         SMCKey(code: FourCharCode(fromStaticString: "BSIn"), info: dataTypeUI8)
+                            SMCKey(code: FourCharCode(fromStaticString: "BSIn"),
+                                   info: DataTypes.UInt8)
 
         let batteryCountData = try readData(batteryCountKey)
         let batteryCount = Int(batteryCountData.0)
