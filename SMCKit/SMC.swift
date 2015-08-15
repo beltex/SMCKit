@@ -85,6 +85,7 @@ extension Double {
     }
 }
 
+// Thanks to Airspeed Velocity for the great idea!
 // http://airspeedvelocity.net/2015/05/22/my-talk-at-swift-summit/
 public extension FourCharCode {
 
@@ -122,7 +123,6 @@ public extension FourCharCode {
 //------------------------------------------------------------------------------
 
 /// Defined by AppleSMC.kext
-/// TODO: Note IOKit param stuff
 ///
 /// This is the predefined struct that must be passed to communicate with the
 /// AppleSMC driver. While the driver is closed source, the definition of this
@@ -613,6 +613,7 @@ extension SMCKit {
 //------------------------------------------------------------------------------
 
 public struct Fan {
+    // TODO: Should we start the fan id from 1 instead of 0?
     public let id: Int
     public let name: String
     public let minSpeed: Int
@@ -734,6 +735,9 @@ public struct batteryInfo {
 extension SMCKit {
 
     public static func isOpticalDiskDriveFull() throws -> Bool {
+        // TODO: Should we catch key not found? That just means the machine
+        // doesn't have an ODD. Returning false though is not fully correct.
+        // Maybe we could throw a no ODD error instead?
         let key = SMCKey(code: FourCharCode(fromStaticString: "MSDI"),
                          info: DataTypes.Flag)
 
