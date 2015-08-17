@@ -142,7 +142,8 @@ func printTemperatureInformation() {
 
     let allTemperatureSensors: [TemperatureSensor]
     do {
-        allTemperatureSensors = try SMCKit.allKnownTemperatureSensors()
+        allTemperatureSensors = try SMCKit.allKnownTemperatureSensors().sort
+                                                           { $0.name < $1.name }
     } catch {
         print(error)
         return
