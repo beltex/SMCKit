@@ -49,6 +49,7 @@ enum ANSIColor: String {
     case Red    = "\u{001B}[0;31m"
     case Green  = "\u{001B}[0;32m"
     case Yellow = "\u{001B}[0;33m"
+    case Blue   = "\u{001B}[0;34m"
 }
 
 //------------------------------------------------------------------------------
@@ -75,6 +76,9 @@ let CLIFanSpeedOption    = IntOption(shortFlag: "s", longFlag: "fan-speed",
                            helpMessage: "The min speed (RPM) of the fan to set")
 let CLITemperatureOption = BoolOption(shortFlag: "t", longFlag: "temperature",
             helpMessage: "Show the list of temperature sensors on this machine")
+let CLIUnknownTemperatureOption = BoolOption(shortFlag: "u",
+                                        longFlag: "unknown-temperature-sensors",
+      helpMessage: "Show temperature sensors whose hardware mapping is unknown")
 let CLIVersionOption     = BoolOption(shortFlag: "v", longFlag: "version",
                                    helpMessage: "Show smckit version")
 let CLIWarnOption        = BoolOption(shortFlag: "w", longFlag: "warn",
@@ -92,6 +96,7 @@ let CLIOptions = [CLIColorOption,
                   CLIFanSpeedOption,
                   CLIPowerOption,
                   CLITemperatureOption,
+                  CLIUnknownTemperatureOption,
                   CLIVersionOption,
                   CLIWarnOption]
 
@@ -123,9 +128,11 @@ func warningLevel(value: Double, maxValue: Double) -> (name: String,
     let percentage = value / maxValue
 
     switch percentage {
-    case 0...0.45:    return ("Nominal", ANSIColor.Green)
-    case 0.45...0.75: return ("Danger", ANSIColor.Yellow)
-    default:          return ("Crisis", ANSIColor.Red)
+    // TODO: Is this safe? Rather, is this the best way to go about this?
+    case -Double.infinity...0: return ("Cool", ANSIColor.Blue)
+    case 0...0.45:             return ("Nominal", ANSIColor.Green)
+    case 0.45...0.75:          return ("Danger", ANSIColor.Yellow)
+    default:                   return ("Crisis", ANSIColor.Red)
     }
 }
 
@@ -155,7 +162,6 @@ func printTemperatureInformation() {
         return
     }
 
-
     let sensorWithLongestName = allTemperatureSensors.maxElement
                                 { $0.name.characters.count <
                                   $1.name.characters.count }
@@ -184,6 +190,46 @@ func printTemperatureInformation() {
         let smcKey  = CLIDisplayKeysOption.value ? "(\(sensor.code.toString()))" : ""
 
         print("\(sensor.name + padding)   \(smcKey)  ", appendNewline: false)
+        print("\(color.rawValue)\(temperature)°C \(level)" +
+              "\(ANSIColor.Off.rawValue)")
+    }
+}
+
+func printUnknownTemperatureInformation() {
+    print("-- Unknown Temperature Sensors --")
+
+    let allUnknownTemperatureSensors: [TemperatureSensor]
+
+    do {
+        allUnknownTemperatureSensors = try SMCKit.allUnknownTemperatureSensors()
+    } catch {
+        print(error)
+        return
+    }
+
+
+    if allUnknownTemperatureSensors.count == 0 {
+        print("None found")
+        return
+    }
+
+    for sensor in allUnknownTemperatureSensors {
+        let temperature: Double
+        do {
+            temperature = try SMCKit.temperature(sensor.code)
+        } catch {
+            // FIXME: Should print NA on error, not 0. Same for known sensors
+            temperature = 0
+        }
+
+
+        let warning = warningLevel(temperature, maxValue: maxTemperatureCelsius)
+        let level = CLIWarnOption.value ? "(\(warning.name))" : ""
+        let color = CLIColorOption.value ? warning.color : ANSIColor.Off
+
+        let smcKey = CLIDisplayKeysOption.value ? "(\(sensor.code.toString()))" : ""
+
+        print("\(sensor.name)   \(smcKey)  ", appendNewline: false)
         print("\(color.rawValue)\(temperature)°C \(level)" +
               "\(ANSIColor.Off.rawValue)")
     }
@@ -327,6 +373,7 @@ else if CLIFanIdOption.wasSet != CLIFanSpeedOption.wasSet {
 if let key = CLICheckKeyOption.value { checkKey(key) }
 
 if CLITemperatureOption.value { printTemperatureInformation() }
+if CLIUnknownTemperatureOption.wasSet { printUnknownTemperatureInformation() }
 if CLIFanOption.value         { printFanInformation()         }
 if CLIPowerOption.value       { printPowerInformation()       }
 if CLIMiscOption.value        { printMiscInformation()        }
