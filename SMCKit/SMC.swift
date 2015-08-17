@@ -81,7 +81,8 @@ extension Double {
 
     init(fromSP78 bytes: SP78) {
         // FIXME: Handle second byte
-        self = Double(bytes.0)
+        let sign = bytes.0 & 0x80 == 0 ? 1.0 : -1.0
+        self = sign * Double(bytes.0 & 0x7F)    // AND to mask sign bit
     }
 }
 
