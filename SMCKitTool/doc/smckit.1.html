@@ -84,18 +84,11 @@
 
 <h2 id="SYNOPSIS">SYNOPSIS</h2>
 
-<p><code>smckit</code> [<code>-c</code>]<br />
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[<code>-d</code>]<br />
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[<code>-f</code>]<br />
+<p><code>smckit</code> [<code>-cdfmptuw</code>]<br />
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[<code>-h</code>]<br />
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[<code>-k</code> <var>check-key</var>]<br />
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[<code>-m</code>]<br />
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[<code>-n</code> <var>fan-id</var>]<br />
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[<code>-p</code>]<br />
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[<code>-s</code> <var>fan-speed</var>]<br />
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[<code>-t</code>]<br />
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[<code>-v</code>]<br />
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[<code>-w</code>]<br /></p>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[<code>-n</code> <var>fan-id</var>] [<code>-s</code> <var>fan-speed</var>]<br />
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[<code>-v</code>]<br /></p>
 
 <h2 id="DESCRIPTION">DESCRIPTION</h2>
 
@@ -104,12 +97,14 @@ Controller (SMC) in Swift on Intel based Macs.</p>
 
 <h2 id="OPTIONS">OPTIONS</h2>
 
-<p>List of supported command line options (flags/switchs):</p>
+<p>List of supported command line options (flags/switches). Providing no options
+prints temperature (<code>-t</code>), fan (<code>-f</code>), power (<code>-p</code>), and misc (<code>-m</code>)
+information.</p>
 
 <dl>
 <dt><code>-c</code>, <code>--color</code></dt><dd><p>Colorize output where applicable.</p></dd>
 <dt><code>-d</code>, <code>--show-keys</code></dt><dd><p>Show SMC keys (FourCC) when printing temperature sensors.</p></dd>
-<dt><code>-f</code>, <code>--fan</code></dt><dd><p>Show the machines fan speeds.</p></dd>
+<dt><code>-f</code>, <code>--fan</code></dt><dd><p>Show the machines fan speeds (RPM).</p></dd>
 <dt><code>-h</code>, <code>--help</code></dt><dd><p>Show the list of options.</p></dd>
 <dt><code>-k</code>, <code>--check-key</code> <var>value</var></dt><dd><p>Check if a FourCC is a valid SMC key on this machine.</p></dd>
 <dt><code>-m</code>, <code>--misc</code></dt><dd><p>Show misc information about this machine.</p></dd>
@@ -123,8 +118,9 @@ however it will not go below this. Must be used with <code>--fan-id</code>. Requ
 root privileges.</p>
 
 <p><strong>WARNING</strong>: You are playing with hardware here, <strong>BE CAREFUL</strong>.</p></dd>
-<dt><code>-t</code>, <code>--temperature</code></dt><dd><p>Show the list of temperature sensors on this machine.</p></dd>
-<dt><code>-v</code>, <code>--version</code></dt><dd><p>Show smckit version.</p></dd>
+<dt><code>-t</code>, <code>--temperature</code></dt><dd><p>Show the list of known temperature sensors on this machine.</p></dd>
+<dt><code>-u</code>, <code>--unknown-temperature-sensors</code></dt><dd><p>Show the list of temperature sensors whose hardware mapping is unknown.</p></dd>
+<dt><code>-v</code>, <code>--version</code></dt><dd><p>Show SMCKitTool version.</p></dd>
 <dt><code>-w</code>, <code>--warn</code></dt><dd><p>Show warning levels for temperature sensors and fan speeds.</p></dd>
 </dl>
 
@@ -134,18 +130,24 @@ root privileges.</p>
 <dl>
 <dt class="flush"><code>Fan</code></dt><dd><p>All Intel based Macs to this point have at least one fan, with the exception
 of the newly added fanless MacBook (8,1).</p></dd>
-<dt><code>Temperature</code></dt><dd><p>The list of temperature sensors may not be exhaustive. In addition, the
-maximum temperature of each individual sensor is not known. Thus, a global
-max of 128 degrees is used. Finally, the names of the sensors may not be
-mapped to the correct hardware component. This is all due to the fact that
-the SMC has a closed source driver, and thus information about it's inner
-workings is limited.</p>
+<dt><code>Temperature</code></dt><dd><p>The list of known temperature sensors (<code>-t</code>) in combination with the unknown
+ones (<code>-u</code>) is exhaustive. However, the names of the known sensors may not
+be mapped to the correct hardware component. In addition, the maximum
+temperature of each individual sensor is not known. Thus, a global max of
+128 degrees Celsius is used. This is all due to the fact that the SMC has a
+closed source driver, and thus information about it's inner workings is
+limited.</p>
 
-<p>If a sensor has a value that is constant and completely disproportionate to
-the rest, then there is a chance that it is faulty. This could be due to bad
-or damaged hardware (liquid on the logic board), or a bug in the SMC driver
-itself. Run the <em>Apple Hardware Test</em> diagnostics suite in such a case to
-confirm. Example: <a href="https://github.com/beltex/SMCKit/issues/15" data-bare-link="true">https://github.com/beltex/SMCKit/issues/15</a></p></dd>
+<p>If a sensor has a value that is very high, constant, and completely
+disproportionate to the rest, then there is a chance that it is faulty. This
+could be due to bad or damaged hardware (liquid on the logic board). Run the
+ <em>Apple Diagnostics</em> (<em>Apple Hardware Test</em> for older machines) diagnostics
+suite in such a case to confirm.</p>
+
+<p>Some sensors however report very low values, below zero. The current theory
+on this is that at lower temperatures the sensors have inaccurate readings.
+It maybe that they are located close to an internal fan, and the airflow is
+causing it to be skewed.</p></dd>
 </dl>
 
 
@@ -177,7 +179,7 @@ report feedback, feature requests and bugs.</p>
 
   <ol class='man-decor man-foot man foot'>
     <li class='tl'></li>
-    <li class='tc'>June 2015</li>
+    <li class='tc'>August 2015</li>
     <li class='tr'>smckit(1)</li>
   </ol>
 

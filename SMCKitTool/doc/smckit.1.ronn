@@ -3,18 +3,11 @@ smckit(1) -- OS X SMC tool
 
 ## SYNOPSIS
 
-`smckit` [`-c`]<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[`-d`]<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[`-f`]<br>
+`smckit` [`-cdfmptuw`]<br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[`-h`]<br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[`-k` <check-key>]<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[`-m`]<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[`-n` <fan-id>]<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[`-p`]<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[`-s` <fan-speed>]<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[`-t`]<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[`-n` <fan-id>] [`-s` <fan-speed>]<br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[`-v`]<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[`-w`]<br>
 
 ## DESCRIPTION
 
@@ -23,7 +16,9 @@ Controller (SMC) in Swift on Intel based Macs.
 
 ## OPTIONS
 
-List of supported command line options (flags/switchs):
+List of supported command line options (flags/switches). Providing no options
+prints temperature (`-t`), fan (`-f`), power (`-p`), and misc (`-m`)
+information.
 
   * `-c`, `--color`:
     Colorize output where applicable.
@@ -32,7 +27,7 @@ List of supported command line options (flags/switchs):
     Show SMC keys (FourCC) when printing temperature sensors.
 
   * `-f`, `--fan`:
-    Show the machines fan speeds.
+    Show the machines fan speeds (RPM).
 
   * `-h`, `--help`:
     Show the list of options.
@@ -60,10 +55,13 @@ List of supported command line options (flags/switchs):
     **WARNING**: You are playing with hardware here, **BE CAREFUL**.
 
   * `-t`, `--temperature`:
-    Show the list of temperature sensors on this machine.
+    Show the list of known temperature sensors on this machine.
+
+  * `-u`, `--unknown-temperature-sensors`:
+    Show the list of temperature sensors whose hardware mapping is unknown.
 
   * `-v`, `--version`:
-    Show smckit version.
+    Show SMCKitTool version.
 
   * `-w`, `--warn`:
     Show warning levels for temperature sensors and fan speeds.
@@ -75,18 +73,24 @@ List of supported command line options (flags/switchs):
     of the newly added fanless MacBook (8,1).
 
   * `Temperature`:
-    The list of temperature sensors may not be exhaustive. In addition, the
-    maximum temperature of each individual sensor is not known. Thus, a global
-    max of 128 degrees is used. Finally, the names of the sensors may not be
-    mapped to the correct hardware component. This is all due to the fact that
-    the SMC has a closed source driver, and thus information about it's inner
-    workings is limited.
+    The list of known temperature sensors (`-t`) in combination with the unknown
+    ones (`-u`) is exhaustive. However, the names of the known sensors may not
+    be mapped to the correct hardware component. In addition, the maximum
+    temperature of each individual sensor is not known. Thus, a global max of
+    128 degrees Celsius is used. This is all due to the fact that the SMC has a
+    closed source driver, and thus information about it's inner workings is
+    limited.
 
-    If a sensor has a value that is constant and completely disproportionate to
-    the rest, then there is a chance that it is faulty. This could be due to bad
-    or damaged hardware (liquid on the logic board), or a bug in the SMC driver
-    itself. Run the _Apple Hardware Test_ diagnostics suite in such a case to
-    confirm. Example: <https://github.com/beltex/SMCKit/issues/15>
+    If a sensor has a value that is very high, constant, and completely
+    disproportionate to the rest, then there is a chance that it is faulty. This
+    could be due to bad or damaged hardware (liquid on the logic board). Run the
+     _Apple Diagnostics_ (_Apple Hardware Test_ for older machines) diagnostics
+    suite in such a case to confirm.
+
+    Some sensors however report very low values, below zero. The current theory
+    on this is that at lower temperatures the sensors have inaccurate readings.
+    It maybe that they are located close to an internal fan, and the airflow is
+    causing it to be skewed.
 
 ## ENVIRONMENT
 

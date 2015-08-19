@@ -1,19 +1,13 @@
 .\" generated with Ronn/v0.7.3
 .\" http://github.com/rtomayko/ronn/tree/0.7.3
 .
-.TH "SMCKIT" "1" "June 2015" "" ""
+.TH "SMCKIT" "1" "August 2015" "" ""
 .
 .SH "NAME"
 \fBsmckit\fR \- OS X SMC tool
 .
 .SH "SYNOPSIS"
-\fBsmckit\fR [\fB\-c\fR]
-.
-.br
-\~\~\~\~\~\~\~[\fB\-d\fR]
-.
-.br
-\~\~\~\~\~\~\~[\fB\-f\fR]
+\fBsmckit\fR [\fB\-cdfmptuw\fR]
 .
 .br
 \~\~\~\~\~\~\~[\fB\-h\fR]
@@ -22,25 +16,10 @@
 \~\~\~\~\~\~\~[\fB\-k\fR \fIcheck\-key\fR]
 .
 .br
-\~\~\~\~\~\~\~[\fB\-m\fR]
-.
-.br
-\~\~\~\~\~\~\~[\fB\-n\fR \fIfan\-id\fR]
-.
-.br
-\~\~\~\~\~\~\~[\fB\-p\fR]
-.
-.br
-\~\~\~\~\~\~\~[\fB\-s\fR \fIfan\-speed\fR]
-.
-.br
-\~\~\~\~\~\~\~[\fB\-t\fR]
+\~\~\~\~\~\~\~[\fB\-n\fR \fIfan\-id\fR] [\fB\-s\fR \fIfan\-speed\fR]
 .
 .br
 \~\~\~\~\~\~\~[\fB\-v\fR]
-.
-.br
-\~\~\~\~\~\~\~[\fB\-w\fR]
 .
 .br
 .
@@ -48,7 +27,7 @@
 An OS X command line tool for interfacing with the Apple System Management Controller (SMC) in Swift on Intel based Macs\.
 .
 .SH "OPTIONS"
-List of supported command line options (flags/switchs):
+List of supported command line options (flags/switches)\. Providing no options prints temperature (\fB\-t\fR), fan (\fB\-f\fR), power (\fB\-p\fR), and misc (\fB\-m\fR) information\.
 .
 .TP
 \fB\-c\fR, \fB\-\-color\fR
@@ -60,7 +39,7 @@ Show SMC keys (FourCC) when printing temperature sensors\.
 .
 .TP
 \fB\-f\fR, \fB\-\-fan\fR
-Show the machines fan speeds\.
+Show the machines fan speeds (RPM)\.
 .
 .TP
 \fB\-h\fR, \fB\-\-help\fR
@@ -91,11 +70,15 @@ The minimum speed (RPM \- revolutions per minute) of the fan to set\. By minimum
 .
 .TP
 \fB\-t\fR, \fB\-\-temperature\fR
-Show the list of temperature sensors on this machine\.
+Show the list of known temperature sensors on this machine\.
+.
+.TP
+\fB\-u\fR, \fB\-\-unknown\-temperature\-sensors\fR
+Show the list of temperature sensors whose hardware mapping is unknown\.
 .
 .TP
 \fB\-v\fR, \fB\-\-version\fR
-Show smckit version\.
+Show SMCKitTool version\.
 .
 .TP
 \fB\-w\fR, \fB\-\-warn\fR
@@ -109,10 +92,13 @@ All Intel based Macs to this point have at least one fan, with the exception of 
 .
 .TP
 \fBTemperature\fR
-The list of temperature sensors may not be exhaustive\. In addition, the maximum temperature of each individual sensor is not known\. Thus, a global max of 128 degrees is used\. Finally, the names of the sensors may not be mapped to the correct hardware component\. This is all due to the fact that the SMC has a closed source driver, and thus information about it\'s inner workings is limited\.
+The list of known temperature sensors (\fB\-t\fR) in combination with the unknown ones (\fB\-u\fR) is exhaustive\. However, the names of the known sensors may not be mapped to the correct hardware component\. In addition, the maximum temperature of each individual sensor is not known\. Thus, a global max of 128 degrees Celsius is used\. This is all due to the fact that the SMC has a closed source driver, and thus information about it\'s inner workings is limited\.
 .
 .IP
-If a sensor has a value that is constant and completely disproportionate to the rest, then there is a chance that it is faulty\. This could be due to bad or damaged hardware (liquid on the logic board), or a bug in the SMC driver itself\. Run the \fIApple Hardware Test\fR diagnostics suite in such a case to confirm\. Example: \fIhttps://github\.com/beltex/SMCKit/issues/15\fR
+If a sensor has a value that is very high, constant, and completely disproportionate to the rest, then there is a chance that it is faulty\. This could be due to bad or damaged hardware (liquid on the logic board)\. Run the \fIApple Diagnostics\fR (\fIApple Hardware Test\fR for older machines) diagnostics suite in such a case to confirm\.
+.
+.IP
+Some sensors however report very low values, below zero\. The current theory on this is that at lower temperatures the sensors have inaccurate readings\. It maybe that they are located close to an internal fan, and the airflow is causing it to be skewed\.
 .
 .SH "ENVIRONMENT"
 Due to Swift, smckit requires OS X 10\.9 (Mavericks) and above\. This implies an Intel based 64\-bit machine\.
