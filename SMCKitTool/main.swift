@@ -80,7 +80,7 @@ let CLIUnknownTemperatureOption = BoolOption(shortFlag: "u",
                                         longFlag: "unknown-temperature-sensors",
       helpMessage: "Show temperature sensors whose hardware mapping is unknown")
 let CLIVersionOption     = BoolOption(shortFlag: "v", longFlag: "version",
-                                   helpMessage: "Show smckit version")
+                                   helpMessage: "Show SMCKitTool version")
 let CLIWarnOption        = BoolOption(shortFlag: "w", longFlag: "warn",
       helpMessage: "Show warning levels for temperature sensors and fan speeds")
 
@@ -145,7 +145,7 @@ func colorBoolOutput(value: Bool) -> String {
 }
 
 func printTemperatureInformation() {
-    print("-- TEMPERATURE --")
+    print("-- Temperature --")
 
     let allTemperatureSensors: [TemperatureSensor]
     do {
@@ -236,7 +236,7 @@ func printUnknownTemperatureInformation() {
 }
 
 func printFanInformation() {
-    print("-- FAN --")
+    print("-- Fan --")
 
     let allFans: [Fan]
     do {
@@ -277,7 +277,7 @@ func printPowerInformation() {
         return
     }
 
-    print("-- POWER --")
+    print("-- Power --")
     print("AC Present:       \(colorBoolOutput(information.isACPresent))")
     print("Battery Powered:  \(colorBoolOutput(information.isBatteryPowered))")
     print("Charging:         \(colorBoolOutput(information.isCharging))")
@@ -286,7 +286,7 @@ func printPowerInformation() {
 }
 
 func printMiscInformation() {
-    print("-- MISC --")
+    print("-- Misc --")
 
     let ODDStatus: Bool
     do {
