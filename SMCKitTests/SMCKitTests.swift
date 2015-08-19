@@ -4,7 +4,7 @@
 //
 // The MIT License
 //
-// Copyright (C) 2015  beltex <http://beltex.github.io>
+// Copyright (C) 2014-2015  beltex <http://beltex.github.io>
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
@@ -24,7 +24,6 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-import Cocoa
 import XCTest
 import SMCKit
 import DiscRecording
@@ -52,84 +51,83 @@ TODO
 */
 class SMCKitTests: XCTestCase {
 
-    var smc = SMC()
-    
     /// List of internal ODD devices
     var internalODD = [DRDevice]()
     
-    
     // TODO: Setup once?
     override func setUp() {
-        super.setUp()
-        
         // Put setup code here. This method is called before the invocation of
         // each test method in the class.
-        // TODO: If this fails no test should run
-        smc.open()
+        super.setUp()
+
+        do {
+            try SMCKit.open()
+        } catch {
+            print(error)
+            fatalError()
+        }
     }
 
     override func tearDown() {
         // Put teardown code here. This method is called after the invocation of
         // each test method in the class.
-        smc.close()
-        
+        SMCKit.close()
+
         super.tearDown()
     }
     
-    func testOpenConnectionTwice() {
-        XCTAssertNotEqual(smc.open(), kIOReturnSuccess)
-    }
-    
-    func testCloseConnectionTwice() {
-        XCTAssertEqual(smc.close(), kIOReturnSuccess)
-        XCTAssertNotEqual(smc.close(), kIOReturnSuccess)
-        
-        // Test that we can reopen and things still work
-        smc.open()
-        XCTAssertGreaterThanOrEqual(smc.getNumFans().numFans, UInt(1))
-        XCTAssertEqual(smc.close(), kIOReturnSuccess)
-    }
+//    func testOpenConnectionTwice() {
+//        XCTAssertNotEqual(smc.open(), kIOReturnSuccess)
+//    }
+//
+//    func testCloseConnectionTwice() {
+//        XCTAssertEqual(smc.close(), kIOReturnSuccess)
+//        XCTAssertNotEqual(smc.close(), kIOReturnSuccess)
+//
+//        // Test that we can reopen and things still work
+//        smc.open()
+//        XCTAssertGreaterThanOrEqual(smc.getNumFans().numFans, UInt(1))
+//        XCTAssertEqual(smc.close(), kIOReturnSuccess)
+//    }
     
     func testTemperatureValues() {
-        let temperatureSensors = smc.getAllValidTemperatureKeys()
+        let temperatureSensors = try! SMCKit.allKnownTemperatureSensors()
         
         for sensor in temperatureSensors {
-            let temperature = smc.getTemperature(sensor).tmp
+            let temperature = try! SMCKit.temperature(sensor.code)
             
             XCTAssertGreaterThan(temperature, -128.0)
             XCTAssertLessThan(temperature, 128.0)
         }
     }
-    
-    func testGetNumberFans() {
+
+    func testFanCount() {
         // All Macs until now have at least 1 fan, except for the new 2015
         // MacBook (8,1)
-        let result = smc.getNumFans()
+        let fanCount = try! SMCKit.fanCount()
 
         if modelName() == "MacBook8,1" {
             // Fanless
-            XCTAssertEqual(result.numFans, 0)
+            XCTAssertEqual(fanCount, 0)
+            return
         }
-        else {
-            XCTAssertGreaterThanOrEqual(result.numFans, 1)
 
-            // Don't know the max number of fans, probably no more than 2 or 3,
-            // but we'll give it some slack incase
-            XCTAssertLessThanOrEqual(result.numFans, 4)
-        }
+        XCTAssertGreaterThanOrEqual(fanCount, 1)
+
+        // Don't know the max number of fans, probably no more than 2 or 3,
+        // but we'll give it some slack incase
+        XCTAssertLessThanOrEqual(fanCount, 4)
     }
     
-    func testIsKeyValid() {
-        XCTAssertFalse(smc.isKeyValid("").valid)
-        XCTAssertFalse(smc.isKeyValid("Vi").valid)
-        XCTAssertFalse(smc.isKeyValid("Vim").valid)
-        XCTAssertFalse(smc.isKeyValid("What is this new devilry?").valid)
-        
-        // We should be able to rely on always having these keys for now
-        XCTAssertTrue(smc.isKeyValid("FNum").valid)     // Number of fans
-        XCTAssertTrue(smc.isKeyValid("#KEY").valid)     // Number of keys
+    func testisKeyFound() {
+        XCTAssertFalse(try! SMCKit.isKeyFound(FourCharCode(fromString: "CERN")))
+        XCTAssertFalse(try! SMCKit.isKeyFound(FourCharCode(fromString: "NASA")))
+
+        // We should be able to rely on always having this key. Returns the
+        // number of valid keys on this machine
+        XCTAssertTrue(try! SMCKit.isKeyFound(FourCharCode(fromString: "#KEY")))
     }
-    
+
     func testODD() {
         // Cross check via DiscRecording framework
         //
@@ -137,16 +135,27 @@ class SMCKitTests: XCTestCase {
         // http://stackoverflow.com/questions/8770048/objective-c-drdevice-h
         // https://developer.apple.com/legacy/library/samplecode/DeviceListener/
         // http://stackoverflow.com/a/24049111
-        
-        let ODDStatusSMC = smc.isOpticalDiskDriveFull().flag
-        let devicesCount = DRDevice.devices().count
-        
-        if (devicesCount == 0) {
+
+        let ODDStatusSMC: Bool
+
+        do {
+            ODDStatusSMC = try SMCKit.isOpticalDiskDriveFull()
+        } catch SMCKit.Error.KeyNotFound {
+            ODDStatusSMC = false
+        } catch {
+            print(error)
+            fatalError()
+        }
+
+
+        if DRDevice.devices().count == 0 {
             // TODO: This means that there are no ODD that have burn capability?
             //       Should be fine, as all Apple drives should have it
             print("No ODD devices")
+            XCTAssertTrue(ODDStatusSMC == false)
             return
         }
+
         
         // To get the ODD object, need to reg for notification and wait. Since,
         // were looking for an internel device, should be instant.
@@ -160,24 +169,24 @@ class SMCKitTests: XCTestCase {
 
         
         // TODO: Ignoring the Mac Pro case for now, with 2 drives
-        if (internalODD.count == 1) {
+        if internalODD.count == 1 {
             let ODDStatus = internalODD[0].status()[DRDeviceMediaStateKey]
                                                                     as! NSString
             
             switch ODDStatus {
-                case DRDeviceMediaStateMediaPresent:
-                    XCTAssertTrue(ODDStatusSMC)
-                case DRDeviceMediaStateInTransition:
-                    // TODO: Should sleep and wait for state to become "stable",
-                    //       DRDeviceStatusChangedNotification
-                    // TODO: Throw a fail here?
-                    break
-                case DRDeviceMediaStateNone:
-                    XCTAssertFalse(ODDStatusSMC)
-                default:
-                    // Unknown state - this should never happen. Only here to
-                    // make compiler happy
-                    break
+            case DRDeviceMediaStateMediaPresent:
+                XCTAssertTrue(ODDStatusSMC)
+            case DRDeviceMediaStateInTransition:
+                // TODO: Should sleep and wait for state to become "stable",
+                //       DRDeviceStatusChangedNotification
+                // TODO: Throw a fail here?
+                true
+            case DRDeviceMediaStateNone:
+                XCTAssertFalse(ODDStatusSMC)
+            default:
+                // Unknown state - this should never happen. Only here to
+                // make compiler happy
+                true
             }
         }
         
@@ -197,7 +206,7 @@ class SMCKitTests: XCTestCase {
         // TODO: What if its a MacBook with a removable battery and its out?
         let service = IOServiceGetMatchingService(kIOMasterPortDefault,
                       IOServiceNameMatching("AppleSmartBattery"))
-        if (service != 0) {
+        if service != 0 {
             isLaptop = true
             
             // Getting these values to cross ref
@@ -213,16 +222,18 @@ class SMCKitTests: XCTestCase {
             ASPCharged = prop.takeUnretainedValue() as! Int == 1 ? true : false
         }
         
-        
-        let batteryPowered = smc.isBatteryPowered().flag
-        let batteryOk      = smc.isBatteryOk().flag
-        let ACPresent      = smc.isACPresent().flag
-        let charging       = smc.isCharging().flag
-        let numBatteries   = smc.maxNumberBatteries().count
-        
-        if (isLaptop) {
+        let info = try! SMCKit.batteryInformation()
+
+
+        let batteryPowered = info.isBatteryPowered
+        let batteryOk      = info.isBatteryOk
+        let ACPresent      = info.isACPresent
+        let charging       = info.isCharging
+        let numBatteries   = info.batteryCount
+
+        if isLaptop {
             // TODO: Is there any Mac that supports more then 1?
-            XCTAssertEqual(numBatteries, UInt(1))
+            XCTAssertEqual(numBatteries, 1)
             
             /*
             Yeah, truth tables!... :)
@@ -247,7 +258,7 @@ class SMCKitTests: XCTestCase {
             let B = ACPresent
             let C = charging && ASPCharging
             let D = ASPCharged
-            
+
             XCTAssertTrue((!A || !B) && (A || B) && (B || !C) && (!C || !D))
         }
         else {
@@ -255,7 +266,7 @@ class SMCKitTests: XCTestCase {
             XCTAssertFalse(batteryPowered)
             XCTAssertFalse(charging)
             XCTAssertTrue(ACPresent)
-            XCTAssertEqual(numBatteries, UInt(0))
+            XCTAssertEqual(numBatteries, 0)
         }
         
         
@@ -263,45 +274,36 @@ class SMCKitTests: XCTestCase {
         IOObjectRelease(service)
     }
 
-    func testEncodeDecodeSMCKey() {
-        let data: [(UInt32, String)] = [(1177567587, "F0Ac"),
-                                        (1413689414, "TC0F")]
+    func testFourCharCodeExtension() {
+        let data: [(FourCharCode, String)] = [(1177567587, "F0Ac"),
+                                              (1413689414, "TC0F")]
 
         for (encoded, decoded) in data {
-            XCTAssertEqual(encoded, SMC.encodeSMCKey(decoded))
-            XCTAssertEqual(decoded, SMC.decodeSMCKey(encoded))
+            XCTAssertEqual(encoded, FourCharCode(fromString: decoded))
+            XCTAssertEqual(decoded, encoded.toString())
         }
     }
 
-    func testEncodeDecodeFPE2() {
-        let data: [((UInt8, UInt8), UInt16)] = [((31, 64),  2000),
-                                                ((56, 244), 3645),
-                                                ((96, 220), 6199)]
+    func testIntExtension() {
+        let data: [(FPE2, Int)] = [((31, 64),  2000), ((56, 244), 3645),
+                                   ((96, 220), 6199)]
 
-        // NOTE: Compiler crash if for-in loop is used
-        for var i = 0; i < data.count; ++i {
-            let encoded = data[i].0
-            let decoded = data[i].1
+        for (encoded, decoded) in data {
+            let toFPE2 = decoded.toFPE2()
+            XCTAssert(encoded.0 == toFPE2.0 && encoded.1 == toFPE2.1)
 
-            // Surprisingly can't check equivalence for tuple as a whole
-            let encodedTest = SMC.encodeFPE2(decoded)
-            XCTAssert(encoded.0 == encodedTest.0 && encoded.1 == encodedTest.1)
-
-            XCTAssertEqual(UInt(decoded), SMC.decodeFPE2(encoded))
+            XCTAssertEqual(decoded, Int(fromFPE2: encoded))
         }
     }
 
 
     //--------------------------------------------------------------------------
-    // MARK: HELPERS
+    // MARK: Helpers
     //--------------------------------------------------------------------------
-    
-    
-    /**
-    Callback on disc recording device (ODD) being found.
-    
-    NOTE: Must not be private ACL, otherwise selector can't be reached
-    */
+
+    /// Callback on disc recording device (ODD) being found.
+    ///
+    /// NOTE: Must not be private ACL, otherwise selector can't be reached
     func deviceAppeared(aNotification: NSNotification) {
         let newDevice  = aNotification.object as! DRDevice
         let deviceInfo = newDevice.info()
@@ -323,7 +325,7 @@ class SMCKitTests: XCTestCase {
     /// Get the model name of this machine. Same as "sysctl hw.model". Via
     /// SystemKit
     func modelName() -> String {
-        let name: String
+        var name = String()
         var mib = [CTL_HW, HW_MODEL]
 
         // Max model name size not defined by sysctl. Instead we use io_name_t
@@ -333,10 +335,7 @@ class SMCKitTests: XCTestCase {
         let ptr    = UnsafeMutablePointer<io_name_t>.alloc(1)
         let result = sysctl(&mib, u_int(mib.count), ptr, &size, nil, 0)
 
-
         if result == 0 { name = String.fromCString(UnsafePointer(ptr))! }
-        else           { name = String() }
-
 
         ptr.dealloc(1)
 

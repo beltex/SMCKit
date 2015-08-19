@@ -6,7 +6,6 @@ for Intel based Macs. The library works by talking to the AppleSMC.kext (kernel
 extension), the private driver for the SMC. Read temperature sensors, get and
 set fan speed (RPM), and more.
 
-- For a C based version, see [libsmc](https://github.com/beltex/libsmc)
 - For an example usage of this library, see
   [dshb](https://github.com/beltex/dshb), an OS X system monitor in Swift
 - For other system related statistics in Swift for OS X, see
@@ -33,7 +32,7 @@ For more see:
 
 ### Requirements
 
-- [Xcode 7 Beta 3](https://developer.apple.com/xcode/downloads/)
+- [Xcode 7 Beta 5](https://developer.apple.com/xcode/downloads/)
 - OS X 10.9+
     - This is due to Swift
 

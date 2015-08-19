@@ -50,9 +50,10 @@ if !processInfo.isOperatingSystemAtLeastVersion(Yosemite) {
 
 
 // Setup SMC
-var smc = SMC()
-if smc.open() != kIOReturnSuccess {
-    print("ERROR: Failed to open connection to SMC")
+do {
+    try SMCKit.open()
+} catch {
+    print(error)
     exit(EX_UNAVAILABLE)
 }
 
@@ -78,12 +79,12 @@ let data = pipe.fileHandleForReading.readDataToEndOfFile()
 // Get SMC data right after powermetrics has run. This is because it first
 // prints out some general information about the machine, and then seems to
 // sleep for 1 second to "line up" its sampling window
-let smcFanCount          = smc.getNumFans().numFans
-let smcRPM               = smc.getFanRPM(0).rpm
+let smcFanCount          = try! SMCKit.fanCount()
+let smcRPM               = try! SMCKit.fanCurrentSpeed(0)
 
 // The key used by powermetrics was determined via DTrace script below
 // https://gist.github.com/beltex/acbbeef815a7be938abf
-let smcCPUDieTemperature = smc.getTemperature(SMC.Temperature.CPU_0_DIE).tmp
+let smcCPUDieTemperature = try! SMCKit.temperature(TemperatureSensors.CPU_0_DIE.code)
 
 
 // Parse the output from powermetrics
@@ -116,4 +117,4 @@ if let output = NSString(data: data, encoding: NSUTF8StringEncoding) as String? 
     }
 }
 
-smc.close()
+SMCKit.close()

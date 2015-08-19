@@ -4,7 +4,7 @@
 //
 // The MIT License
 //
-// Copyright (C) 2014, 2015  beltex <https://github.com/beltex>
+// Copyright (C) 2014-2015  beltex <http://beltex.github.io>
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
@@ -28,1278 +28,769 @@ import IOKit
 import Foundation
 
 //------------------------------------------------------------------------------
-// MARK: GLOBAL PUBLIC PROPERTIES
+// MARK: Type Aliases
 //------------------------------------------------------------------------------
 
+// http://stackoverflow.com/a/22383661
 
-/*
-I/O Kit common error codes - as defined in <IOKit/IOReturn.h>
+/// Floating point, unsigned, 14 bits exponent, 2 bits fraction
+public typealias FPE2 = (UInt8, UInt8)
 
-Swift can't import complex macros, thus we have to manually add them here.
-Most of these are not relevant to us, but for the sake of completeness. See
-"Accessing Hardware From Applications -> Handling Errors" Apple document for
-more information.
+/// Floating point, signed, 7 bits exponent, 8 bits fraction
+public typealias SP78 = (UInt8, UInt8)
 
-NOTE: kIOReturnSuccess is the only return code already defined in IOKit module
-      for us.
-
-https://developer.apple.com/library/mac/qa/qa1075/_index.html
-*/
-
-
-/// General error
-public let kIOReturnError            = iokit_common_err(0x2bc)
-/// Can't allocate memory
-public let kIOReturnNoMemory         = iokit_common_err(0x2bd)
-/// Resource shortage
-public let kIOReturnNoResources      = iokit_common_err(0x2be)
-/// Error during IPC
-public let kIOReturnIPCError         = iokit_common_err(0x2bf)
-/// No such device
-public let kIOReturnNoDevice         = iokit_common_err(0x2c0)
-/// Privilege violation
-public let kIOReturnNotPrivileged    = iokit_common_err(0x2c1)
-/// Invalid argument
-public let kIOReturnBadArgument      = iokit_common_err(0x2c2)
-/// Device read locked
-public let kIOReturnLockedRead       = iokit_common_err(0x2c3)
-/// Exclusive access and device already open
-public let kIOReturnExclusiveAccess  = iokit_common_err(0x2c5)
-/// Sent/received messages had different msg_id
-public let kIOReturnBadMessageID     = iokit_common_err(0x2c6)
-/// Unsupported function
-public let kIOReturnUnsupported      = iokit_common_err(0x2c7)
-/// Misc. VM failure
-public let kIOReturnVMError          = iokit_common_err(0x2c8)
-/// Internal error
-public let kIOReturnInternalError    = iokit_common_err(0x2c9)
-/// General I/O error
-public let kIOReturnIOError          = iokit_common_err(0x2ca)
-/// Can't acquire lock
-public let kIOReturnCannotLock       = iokit_common_err(0x2cc)
-/// Device not open
-public let kIOReturnNotOpen          = iokit_common_err(0x2cd)
-/// Read not supported
-public let kIOReturnNotReadable      = iokit_common_err(0x2ce)
-/// Write not supported
-public let kIOReturnNotWritable      = iokit_common_err(0x2cf)
-/// Alignment error
-public let kIOReturnNotAligned       = iokit_common_err(0x2d0)
-/// Media Error
-public let kIOReturnBadMedia         = iokit_common_err(0x2d1)
-/// Device(s) still open
-public let kIOReturnStillOpen        = iokit_common_err(0x2d2)
-/// RLD failure
-public let kIOReturnRLDError         = iokit_common_err(0x2d3)
-/// DMA failure
-public let kIOReturnDMAError         = iokit_common_err(0x2d4)
-/// Device Busy
-public let kIOReturnBusy             = iokit_common_err(0x2d5)
-/// I/O Timeout
-public let kIOReturnTimeout          = iokit_common_err(0x2d6)
-/// Device offline
-public let kIOReturnOffline          = iokit_common_err(0x2d7)
-/// Not ready
-public let kIOReturnNotReady         = iokit_common_err(0x2d8)
-/// Device not attached
-public let kIOReturnNotAttached      = iokit_common_err(0x2d9)
-/// No DMA channels left
-public let kIOReturnNoChannels       = iokit_common_err(0x2da)
-/// No space for data
-public let kIOReturnNoSpace          = iokit_common_err(0x2db)
-/// Port already exists
-public let kIOReturnPortExists       = iokit_common_err(0x2dd)
-/// Can't wire down physical memory
-public let kIOReturnCannotWire       = iokit_common_err(0x2de)
-/// No interrupt attached
-public let kIOReturnNoInterrupt      = iokit_common_err(0x2df)
-/// No DMA frames enqueued
-public let kIOReturnNoFrames         = iokit_common_err(0x2e0)
-/// Oversized msg received on interrupt port
-public let kIOReturnMessageTooLarge  = iokit_common_err(0x2e1)
-/// Not permitted
-public let kIOReturnNotPermitted     = iokit_common_err(0x2e2)
-/// No power to device
-public let kIOReturnNoPower          = iokit_common_err(0x2e3)
-/// Media not present
-public let kIOReturnNoMedia          = iokit_common_err(0x2e4)
-/// Media not formatted
-public let kIOReturnUnformattedMedia = iokit_common_err(0x2e5)
-/// No such mode
-public let kIOReturnUnsupportedMode  = iokit_common_err(0x2e6)
-/// Data underrun
-public let kIOReturnUnderrun         = iokit_common_err(0x2e7)
-/// Data overrun
-public let kIOReturnOverrun          = iokit_common_err(0x2e8)
-/// The device is not working properly!
-public let kIOReturnDeviceError      = iokit_common_err(0x2e9)
-/// A completion routine is required
-public let kIOReturnNoCompletion     = iokit_common_err(0x2ea)
-/// Operation aborted
-public let kIOReturnAborted          = iokit_common_err(0x2eb)
-/// Bus bandwidth would be exceeded
-public let kIOReturnNoBandwidth      = iokit_common_err(0x2ec)
-/// Device not responding
-public let kIOReturnNotResponding    = iokit_common_err(0x2ed)
-/// Isochronous I/O request for distant past!
-public let kIOReturnIsoTooOld        = iokit_common_err(0x2ee)
-/// Isochronous I/O request for distant future
-public let kIOReturnIsoTooNew        = iokit_common_err(0x2ef)
-/// Data was not found
-public let kIOReturnNotFound         = iokit_common_err(0x2f0)
-/// Should never be seen
-public let kIOReturnInvalid          = iokit_common_err(0x1)
-
+public typealias SMCBytes = (UInt8, UInt8, UInt8, UInt8, UInt8, UInt8, UInt8,
+                             UInt8, UInt8, UInt8, UInt8, UInt8, UInt8, UInt8,
+                             UInt8, UInt8, UInt8, UInt8, UInt8, UInt8, UInt8,
+                             UInt8, UInt8, UInt8, UInt8, UInt8, UInt8, UInt8,
+                             UInt8, UInt8, UInt8, UInt8)
 
 //------------------------------------------------------------------------------
-// MARK: GLOBAL PRIVATE PROPERTIES
+// MARK: Standard Library Extensions
 //------------------------------------------------------------------------------
 
+extension UInt32 {
 
-/**
-I/O Kit system code is 0x38. First 6 bits of error code. Passed to err_system()
-macro as defined in <mach/error.h>.
-*/
-private let SYS_IOKIT: UInt32 = (0x38 & 0x3f) << 26
-
-
-/**
-I/O Kit subsystem code is 0. Middle 12 bits of error code. Passed to err_sub()
-macro as defined in <mach/error.h>.
-*/
-private let SUB_IOKIT_COMMON: UInt32 = (0 & 0xfff) << 14
-
-
-//------------------------------------------------------------------------------
-// MARK: GLOBAL PRIVATE FUNCTIONS
-//------------------------------------------------------------------------------
-
-
-/**
-Based on macro of the same name in <IOKit/IOReturn.h>. Generates the error code.
-
-- parameter code: The specific I/O Kit error code. Last 14 bits.
-- returns: Full 32 bit error code.
-*/
-private func iokit_common_err(code: UInt32) -> kern_return_t {
-    // Overflow otherwise
-    return Int32(bitPattern: SYS_IOKIT | SUB_IOKIT_COMMON | code)
+    init(fromBytes bytes: (UInt8, UInt8, UInt8, UInt8)) {
+        self = UInt32(bytes.0) << 24 |
+               UInt32(bytes.1) << 16 |
+               UInt32(bytes.2) << 8  |
+               UInt32(bytes.3)
+    }
 }
 
+extension Bool {
 
-/**
-System Management Controller (SMC) API from user space for Intel based Macs.
-Works by talking to the AppleSMC.kext (kernel extension), the closed source
-driver for the SMC.
-*/
-public struct SMC {
+    init(fromByte byte: UInt8) {
+        self = byte == 1 ? true : false
+    }
+}
 
+public extension Int {
 
-    //--------------------------------------------------------------------------
-    // MARK: PUBLIC ENUMS
-    //--------------------------------------------------------------------------
-
-
-    /**
-    SMC keys for temperature sensors - 4 byte multi-character constants
-
-    Not applicable to all Mac's of course. In adition, the definition of the
-    codes may not be 100% accurate necessarily. Finally, list is incomplete.
-
-    Presumed letter translations:
-
-    - T = Temperature (if first char)
-    - C = CPU
-    - G = GPU
-    - P = Proximity
-    - D = Diode
-    - H = Heatsink
-
-
-    Sources:
-
-    - http://www.opensource.apple.com/source/net_snmp/
-    - https://www.apple.com/downloads/dashboard/status/istatpro.html
-    - https://github.com/hholtmann/smcFanControl
-    - https://github.com/jedda/OSX-Monitoring-Tools
-    - http://www.parhelia.ch/blog/statics/k3_keys.html
-    */
-    public enum Temperature: String {
-        // TODO: Add more CPU and GPU keys. GPU is usually maxed at 2, see Mac
-        //       Pro & 15' Macbook Pro. Not sure what max CPU's is though. We
-        //       can get the value via Mach API at runtime but that won't help.
-
-        case AMBIENT_AIR_0          = "TA0P"
-        case AMBIENT_AIR_1          = "TA1P"
-        /// This key was found via Apple's own powermetrics tool
-        case CPU_0_DIE              = "TC0F"
-        case CPU_0_DIODE            = "TC0D"
-        case CPU_0_HEATSINK         = "TC0H"
-        case CPU_0_PROXIMITY        = "TC0P"
-        case ENCLOSURE_BASE_0       = "TB0T"
-        case ENCLOSURE_BASE_1       = "TB1T"
-        case ENCLOSURE_BASE_2       = "TB2T"
-        case ENCLOSURE_BASE_3       = "TB3T"
-        case GPU_0_DIODE            = "TG0D"
-        case GPU_0_HEATSINK         = "TG0H"
-        case GPU_0_PROXIMITY        = "TG0P"
-        case HDD_PROXIMITY          = "TH0P"
-        case HEATSINK_0             = "Th0H"
-        case HEATSINK_1             = "Th1H"
-        case HEATSINK_2             = "Th2H"
-        case LCD_PROXIMITY          = "TL0P"
-        case MEM_SLOT_0             = "TM0S"
-        case MEM_SLOTS_PROXIMITY    = "TM0P"
-        case MISC_PROXIMITY         = "Tm0P"
-        case NORTHBRIDGE            = "TN0H"
-        case NORTHBRIDGE_DIODE      = "TN0D"
-        case NORTHBRIDGE_PROXIMITY  = "TN0P"
-        case ODD_PROXIMITY          = "TO0P"
-        case PALM_REST              = "Ts0P"
-        case PWR_SUPPLY_PROXIMITY   = "Tp0P"
-        case THUNDERBOLT_0          = "TI0P"
-        case THUNDERBOLT_1          = "TI1P"
-        // See https://github.com/beltex/SMCKit/issues/15
-        //case WIRELESS_MODULE        = "TW0P"
-
-
-        /**
-        For enumerating all values of the enum. Not ideal. Seems to be the
-        cleanest current solution. See: http://stackoverflow.com/a/24137319
-
-        Also, for getting the name of the enum, again, currently no way to do
-        this in Swift.
-        */
-        public static let allValues =
-                               [AMBIENT_AIR_0         : "AMBIENT_AIR_0",
-                                AMBIENT_AIR_1         : "AMBIENT_AIR_1",
-                                CPU_0_DIE             : "CPU_0_DIE",
-                                CPU_0_DIODE           : "CPU_0_DIODE",
-                                CPU_0_HEATSINK        : "CPU_0_HEATSINK",
-                                CPU_0_PROXIMITY       : "CPU_0_PROXIMITY",
-                                ENCLOSURE_BASE_0      : "ENCLOSURE_BASE_0",
-                                ENCLOSURE_BASE_1      : "ENCLOSURE_BASE_1",
-                                ENCLOSURE_BASE_2      : "ENCLOSURE_BASE_2",
-                                ENCLOSURE_BASE_3      : "ENCLOSURE_BASE_3",
-                                GPU_0_DIODE           : "GPU_0_DIODE",
-                                GPU_0_HEATSINK        : "GPU_0_HEATSINK",
-                                GPU_0_PROXIMITY       : "GPU_0_PROXIMITY",
-                                HDD_PROXIMITY         : "HDD_PROXIMITY",
-                                HEATSINK_0            : "HEATSINK_0",
-                                HEATSINK_1            : "HEATSINK_1",
-                                HEATSINK_2            : "HEATSINK_2",
-                                LCD_PROXIMITY         : "LCD_PROXIMITY",
-                                MEM_SLOT_0            : "MEM_SLOT_0",
-                                MEM_SLOTS_PROXIMITY   : "MEM_SLOTS_PROXIMITY",
-                                MISC_PROXIMITY        : "MISC_PROXIMITY",
-                                NORTHBRIDGE           : "NORTHBRIDGE",
-                                NORTHBRIDGE_DIODE     : "NORTHBRIDGE_DIODE",
-                                NORTHBRIDGE_PROXIMITY : "NORTHBRIDGE_PROXIMITY",
-                                ODD_PROXIMITY         : "ODD_PROXIMITY",
-                                PALM_REST             : "PALM_REST",
-                                PWR_SUPPLY_PROXIMITY  : "PWR_SUPPLY_PROXIMITY",
-                                THUNDERBOLT_0         : "THUNDERBOLT_0",
-                                THUNDERBOLT_1         : "THUNDERBOLT_1"]
-                                //WIRELESS_MODULE       : "WIRELESS_MODULE"]
+    init(fromFPE2 bytes: FPE2) {
+        self = (Int(bytes.0) << 6) + (Int(bytes.1) >> 2)
     }
 
+    func toFPE2() -> FPE2 {
+        return (UInt8(self >> 6), UInt8((self << 2) ^ ((self >> 6) << 8)))
+    }
+}
 
-    /// Temperature units
-    public enum TemperatureUnit {
-        case Celsius
-        case Fahrenheit
-        case Kelvin
+extension Double {
+
+    init(fromSP78 bytes: SP78) {
+        // FIXME: Handle second byte
+        let sign = bytes.0 & 0x80 == 0 ? 1.0 : -1.0
+        self = sign * Double(bytes.0 & 0x7F)    // AND to mask sign bit
+    }
+}
+
+// Thanks to Airspeed Velocity for the great idea!
+// http://airspeedvelocity.net/2015/05/22/my-talk-at-swift-summit/
+public extension FourCharCode {
+
+    init(fromString str: String) {
+        precondition(str.characters.count == 4)
+
+        self = str.utf8.reduce(0) { sum, character in
+            return sum << 8 | UInt32(character)
+        }
     }
 
+    init(fromStaticString str: StaticString) {
+        precondition(str.byteSize == 4)
 
-    /**
-    Defined by AppleSMC.kext. See SMCParamStruct.
-
-    These are SMC specific return codes
-    */
-    public enum kSMC: UInt8 {
-        case kSMCSuccess     = 0
-        case kSMCError       = 1
-        case kSMCKeyNotFound = 0x84
+        self = str.withUTF8Buffer { (buffer) -> UInt32 in
+            // FIXME: Compiler hang, need to break up expression
+            let temp = UInt32(buffer[0]) << 24
+            return temp                    |
+                   UInt32(buffer[1]) << 16 |
+                   UInt32(buffer[2]) << 8  |
+                   UInt32(buffer[3])
+        }
     }
 
-
-    //--------------------------------------------------------------------------
-    // MARK: PRIVATE ENUMS
-    //--------------------------------------------------------------------------
-
-
-    /**
-    SMC keys for fans - 4 byte multi-character constants
-
-    Number of fans on Macs vary of course, thus not all keys will be applicable.
-
-    Presumed letter translations:
-
-    - F  = Fan
-    - Ac = Acutal
-    - Mn = Min
-    - Mx = Max
-    - Sf = Safe
-    - Tg = Target
-
-    Sources: See Temperature enum
-    */
-    private enum Fan: String {
-        case COUNT            = "FNum"
-        case FAN_0            = "F0Ac"
-        case FAN_0_DESC       = "F0ID"
-        case FAN_0_MIN_RPM    = "F0Mn"
-        case FAN_0_MAX_RPM    = "F0Mx"
-        case FAN_0_SAFE_RPM   = "F0Sf"
-        case FAN_0_TARGET_RPM = "F0Tg"
+    func toString() -> String {
+        return String(UnicodeScalar(self >> 24 & 0xff)) +
+               String(UnicodeScalar(self >> 16 & 0xff)) +
+               String(UnicodeScalar(self >> 8  & 0xff)) +
+               String(UnicodeScalar(self       & 0xff))
     }
+}
 
+//------------------------------------------------------------------------------
+// MARK: Defined by AppleSMC.kext
+//------------------------------------------------------------------------------
 
-    /**
-    Misc SMC keys - 4 byte multi-character constants
+/// Defined by AppleSMC.kext
+///
+/// This is the predefined struct that must be passed to communicate with the
+/// AppleSMC driver. While the driver is closed source, the definition of this
+/// struct happened to appear in the Apple PowerManagement project at around
+/// version 211, and soon after disappeared. It can be seen in the PrivateLib.c
+/// file under pmconfigd. Given that it is C code, this is the closest
+/// translation to Swift from a type perspective.
+///
+/// ### Issues
+///
+/// * Padding for struct alignment when passed over to C side
+/// * Size of struct must be 80 bytes
+/// * C array's are bridged as tuples
+///
+/// http://www.opensource.apple.com/source/PowerManagement/PowerManagement-211/
+public struct SMCParamStruct {
 
-    Sources: See Temperature enum
-    */
-    private enum SMCKeyMisc: String {
-        /// Battery information
-        case BATT_INFO = "BSIn"
-
-        /// Max number of batteries
-        case BATT_MAX_NUM = "BNum"
-
-        /// Is the machine being powered by the battery?
-        case BATT_PWR  = "BATP"
-
-        /// How many SMC keys does this machine have?
-        case NUM_KEYS  = "#KEY"
-
-        /// Is there a CD in the optical disk drive (ODD)?
-        case ODD_FULL  = "MSDI"
-    }
-
-
-    /**
-    SMC data types - 4 byte multi-character constants
-
-    Sources: See Temperature enum
-
-    http://stackoverflow.com/questions/22160746/fpe2-and-sp78-data-types
-    */
-    private enum DataType: String {
-        case FLAG = "flag"
-        case FPE2 = "fpe2"
-        case SFDS = "{fds"
-        case SP78 = "sp78"
-    }
-
-
-    /**
-    Defined by AppleSMC.kext. See SMCParamStruct.
-
-    Function selectors. Used to tell the SMC which function inside it to call.
-    */
-    private enum Selector: UInt32 {
-        case kSMCUserClientOpen  = 0
-        case kSMCUserClientClose = 1
+    /// I/O Kit function selector
+    public enum Selector: UInt8 {
         case kSMCHandleYPCEvent  = 2
         case kSMCReadKey         = 5
         case kSMCWriteKey        = 6
-        case kSMCGetKeyCount     = 7
         case kSMCGetKeyFromIndex = 8
         case kSMCGetKeyInfo      = 9
     }
 
-
-    //--------------------------------------------------------------------------
-    // MARK: PRIVATE STRUCTS
-    //--------------------------------------------------------------------------
-
-
-    /// Defined by AppleSMC.kext. See SMCParamStruct.
-    private struct SMCVersion {
-        var major    : CUnsignedChar  = 0
-        var minor    : CUnsignedChar  = 0
-        var build    : CUnsignedChar  = 0
-        var reserved : CUnsignedChar  = 0
-        var release  : CUnsignedShort = 0
+    /// Return codes for SMCParamStruct.result property
+    public enum Result: UInt8 {
+        case kSMCSuccess     = 0
+        case kSMCError       = 1
+        case kSMCKeyNotFound = 132
     }
 
-
-    /// Defined by AppleSMC.kext. See SMCParamStruct.
-    private struct SMCPLimitData {
-        var version   : UInt16 = 0
-        var length    : UInt16 = 0
-        var cpuPLimit : UInt32 = 0
-        var gpuPLimit : UInt32 = 0
-        var memPLimit : UInt32 = 0
+    public struct SMCVersion {
+        var major: CUnsignedChar = 0
+        var minor: CUnsignedChar = 0
+        var build: CUnsignedChar = 0
+        var reserved: CUnsignedChar = 0
+        var release: CUnsignedShort = 0
     }
 
-
-    /**
-    Defined by AppleSMC.kext. See SMCParamStruct.
-
-    - dataSize : How many values written to SMCParamStruct.bytes
-    - dataType : Type of data written to SMCParamStruct.bytes. This lets us
-                 know how to interpret it (translate it to human readable)
-    */
-    private struct SMCKeyInfoData {
-        var dataSize       : IOByteCount = 0
-        var dataType       : UInt32      = 0
-        var dataAttributes : UInt8       = 0
+    public struct SMCPLimitData {
+        var version: UInt16 = 0
+        var length: UInt16 = 0
+        var cpuPLimit: UInt32 = 0
+        var gpuPLimit: UInt32 = 0
+        var memPLimit: UInt32 = 0
     }
 
+    public struct SMCKeyInfoData {
+        /// How many bytes written to SMCParamStruct.bytes
+        var dataSize: IOByteCount = 0
 
-    /**
-    Defined by AppleSMC.kext.
+        /// Type of data written to SMCParamStruct.bytes. This lets us know how
+        /// to interpret it (translate it to human readable)
+        var dataType: UInt32 = 0
 
-    This is the predefined struct that must be passed to communicate with the
-    AppleSMC driver. While the driver is closed source, the definition of this
-    struct happened to appear in the Apple PowerManagement project at around
-    version 211, and soon after disappeared. It can be seen in the PrivateLib.c
-    file under pmconfigd. Given that it is C code, this is the closest
-    translation to Swift from a type perspective.
-
-    ISSUES
-
-    - Padding for struct alignment when passed over to C side
-    - Can't read array once passed back from C, thus enumerate 32 UInt8 values
-      instead. See issue #11.
-    - Size of struct must be 80 bytes
-
-    http://www.opensource.apple.com/source/PowerManagement/PowerManagement-211/
-    */
-    private struct SMCParamStruct {
-        var key        : UInt32 = 0
-        var vers                = SMCVersion()
-        var pLimitData          = SMCPLimitData()
-        var keyInfo             = SMCKeyInfoData()
-        var padding    : UInt16 = 0
-        var result     : UInt8  = 0
-        var status     : UInt8  = 0
-        var data8      : UInt8  = 0
-        var data32     : UInt32 = 0
-        var bytes_0    : UInt8  = 0
-        var bytes_1    : UInt8  = 0
-        var bytes_2    : UInt8  = 0
-        var bytes_3    : UInt8  = 0
-        var bytes_4    : UInt8  = 0
-        var bytes_5    : UInt8  = 0
-        var bytes_6    : UInt8  = 0
-        var bytes_7    : UInt8  = 0
-        var bytes_8    : UInt8  = 0
-        var bytes_9    : UInt8  = 0
-        var bytes_10   : UInt8  = 0
-        var bytes_11   : UInt8  = 0
-        var bytes_12   : UInt8  = 0
-        var bytes_13   : UInt8  = 0
-        var bytes_14   : UInt8  = 0
-        var bytes_15   : UInt8  = 0
-        var bytes_16   : UInt8  = 0
-        var bytes_17   : UInt8  = 0
-        var bytes_18   : UInt8  = 0
-        var bytes_19   : UInt8  = 0
-        var bytes_20   : UInt8  = 0
-        var bytes_21   : UInt8  = 0
-        var bytes_22   : UInt8  = 0
-        var bytes_23   : UInt8  = 0
-        var bytes_24   : UInt8  = 0
-        var bytes_25   : UInt8  = 0
-        var bytes_26   : UInt8  = 0
-        var bytes_27   : UInt8  = 0
-        var bytes_28   : UInt8  = 0
-        var bytes_29   : UInt8  = 0
-        var bytes_30   : UInt8  = 0
-        var bytes_31   : UInt8  = 0
+        var dataAttributes: UInt8 = 0
     }
 
+    /// FourCharCode telling the SMC what we want
+    var key: UInt32 = 0
 
-    //--------------------------------------------------------------------------
-    // MARK: PRIVATE PROPERTIES
-    //--------------------------------------------------------------------------
+    var vers = SMCVersion()
 
+    var pLimitData = SMCPLimitData()
 
-    /// Our connection to the SMC
-    private var conn: io_connect_t = 0
+    var keyInfo = SMCKeyInfoData()
 
+    /// Padding for struct alignment when passed over to C side
+    var padding: UInt16 = 0
 
-    /**
-    Name of the SMC IOService as seen in the IORegistry. You can view it either
-    via command line with ioreg or through the IORegistryExplorer app (found on
-    Apple's developer site - Hardware IO Tools for Xcode)
-    */
-    private static let IOSERVICE_SMC = "AppleSMC"
+    /// Result of an operation
+    var result: UInt8 = 0
 
+    var status: UInt8 = 0
 
-    /// Number of characters in an SMC key
-    private static let SMC_KEY_SIZE = 4
+    /// Method selector
+    var data8: UInt8 = 0
 
+    var data32: UInt32 = 0
 
-    //--------------------------------------------------------------------------
-    // MARK: PUBLIC INITIALIZERS
-    //--------------------------------------------------------------------------
+    /// Data returned from the SMC
+    var bytes = (UInt8(0), UInt8(0), UInt8(0), UInt8(0), UInt8(0), UInt8(0),
+                 UInt8(0), UInt8(0), UInt8(0), UInt8(0), UInt8(0), UInt8(0),
+                 UInt8(0), UInt8(0), UInt8(0), UInt8(0), UInt8(0), UInt8(0),
+                 UInt8(0), UInt8(0), UInt8(0), UInt8(0), UInt8(0), UInt8(0),
+                 UInt8(0), UInt8(0), UInt8(0), UInt8(0), UInt8(0), UInt8(0),
+                 UInt8(0), UInt8(0))
+}
 
+//------------------------------------------------------------------------------
+// MARK: SMC Client
+//------------------------------------------------------------------------------
 
-    // http://stackoverflow.com/a/25598333
-    public init() { }
+/// I/O Kit common error codes - as defined in <IOKit/IOReturn.h>
+///
+/// Swift currently can't import complex macros, thus we have to manually add
+/// them here.
 
+/// Privilege violation
+private let kIOReturnNotPrivileged = iokit_common_err(0x2c1)
 
-    //--------------------------------------------------------------------------
-    // MARK: PUBLIC METHODS
-    //--------------------------------------------------------------------------
+/// Based on macro of the same name in <IOKit/IOReturn.h>. Generates the full
+/// 32-bit error code.
+///
+/// - parameter code: The specific I/O Kit error code. Last 14 bits
+private func iokit_common_err(code: Int32) -> kern_return_t {
+    // I/O Kit system code is 0x38. First 6 bits of error code. Passed to
+    // err_system() macro as defined in <mach/error.h>
+    let SYS_IOKIT: Int32 = (0x38 & 0x3f) << 26
 
+    // I/O Kit subsystem code is 0. Middle 12 bits of error code. Passed to
+    // err_sub() macro as defined in <mach/error.h>
+    let SUB_IOKIT_COMMON: Int32 = (0 & 0xfff) << 14
 
-    /**
-    Open a connection to the SMC
+    return SYS_IOKIT | SUB_IOKIT_COMMON | code
+}
 
-    - returns: kIOReturnSuccess on successful connection to the SMC.
-    */
-    public mutating func open() -> kern_return_t {
-        // TODO: Why does calling open() twice (without below) return success?
-        if (conn != 0) {
-            #if DEBUG
-                print("WARNING - \(__FILE__):\(__FUNCTION__) - " +
-                        "\(SMC.IOSERVICE_SMC) connection already open")
-            #endif
-            return kIOReturnStillOpen
-        }
+/// SMC data type information
+public struct DataTypes {
 
+    /// Fan information struct
+    public static let FDS =
+                DataType(type: FourCharCode(fromStaticString: "{fds"), size: 16)
+    public static let Flag =
+                 DataType(type: FourCharCode(fromStaticString: "flag"), size: 1)
+    /// See type aliases
+    public static let FPE2 =
+                 DataType(type: FourCharCode(fromStaticString: "fpe2"), size: 2)
+    /// See type aliases
+    public static let SP78 =
+                 DataType(type: FourCharCode(fromStaticString: "sp78"), size: 2)
+    public static let UInt8 =
+                 DataType(type: FourCharCode(fromStaticString: "ui8 "), size: 1)
+    public static let UInt32 =
+                 DataType(type: FourCharCode(fromStaticString: "ui32"), size: 4)
+}
 
+public struct SMCKey {
+    let code: FourCharCode
+    let info: DataType
+}
+
+public struct DataType: Equatable {
+    let type: FourCharCode
+    let size: UInt32
+}
+
+public func ==(lhs: DataType, rhs: DataType) -> Bool {
+    return lhs.type == rhs.type && lhs.size == rhs.size
+}
+
+/// Apple System Management Controller (SMC) user-space client for Intel-based
+/// Macs. Works by talking to the AppleSMC.kext (kernel extension), the closed
+/// source driver for the SMC.
+public struct SMCKit {
+
+    public enum Error: ErrorType {
+        /// AppleSMC driver not found
+        case DriverNotFound
+
+        /// Failed to open a connection to the AppleSMC driver
+        case FailedToOpen
+
+        /// This SMC key is not valid on this machine
+        case KeyNotFound(code: String)
+
+        /// Requires root privileges
+        case NotPrivileged
+
+        /// Fan speed must be > 0 && <= fanMaxSpeed
+        case UnsafeFanSpeed
+
+        /// https://developer.apple.com/library/mac/qa/qa1075/_index.html
+        ///
+        /// - parameter kIOReturn: I/O Kit error code
+        /// - parameter SMCResult: SMC specific return code
+        case Unknown(kIOReturn: kern_return_t, SMCResult: UInt8)
+    }
+
+    /// Connection to the SMC driver
+    private static var connection: io_connect_t = 0
+
+    /// Open connection to the SMC driver. This must be done first before any
+    /// other calls
+    public static func open() throws {
         let service = IOServiceGetMatchingService(kIOMasterPortDefault,
-                      IOServiceMatching(SMC.IOSERVICE_SMC))
+                                                  IOServiceMatching("AppleSMC"))
 
-        if (service == 0) {
-            #if DEBUG
-                print("ERROR - \(__FILE__):\(__FUNCTION__) - " +
-                        "\(SMC.IOSERVICE_SMC) service not found")
-            #endif
+        if service == 0 { throw Error.DriverNotFound }
 
-            return kIOReturnError
-        }
-
-        let result = IOServiceOpen(service, mach_task_self_, 0, &conn)
+        let result = IOServiceOpen(service, mach_task_self_, 0,
+                                   &SMCKit.connection)
         IOObjectRelease(service)
 
-        return result
+        if result != kIOReturnSuccess { throw Error.FailedToOpen }
     }
 
-
-    /**
-    Close connection to the SMC
-
-    - returns: kIOReturnSuccess on successful close of connection to the SMC.
-    */
-    public mutating func close() -> kern_return_t {
-        // Calling close twice or if connection not open returns the Mach IPC
-        // error - MACH_SEND_INVALID_DEST
-        let result = IOServiceClose(conn)
-        conn = 0    // Reset this incase open() is called again
-
-        #if DEBUG
-            if (result != kIOReturnSuccess) {
-                print("ERROR - \(__FILE__):\(__FUNCTION__) - Failed to close")
-            }
-        #endif
-
-        return result
+    /// Close connection to the SMC driver
+    public static func close() -> Bool {
+        let result = IOServiceClose(SMCKit.connection)
+        return result == kIOReturnSuccess ? true : false
     }
 
+    /// Get information about a key
+    public static func keyInformation(key: FourCharCode) throws -> DataType {
+        var inputStruct = SMCParamStruct()
 
-    /**
-    Check if an SMC key is valid. Useful for determining if a certain machine
-    has particular sensor or fan for example.
+        inputStruct.key = key
+        inputStruct.data8 = SMCParamStruct.Selector.kSMCGetKeyInfo.rawValue
 
-    NOTE: While a key may be valid, it can still report no data. This is a
-          known issue with for example Temperature.HEATSINK_0. Thus,
-          getAllValidTemperatureKeys() discounts such sensors (even though
-          isKeyValid() returns true).
+        let outputStruct = try callDriver(&inputStruct)
 
-    - parameter key: The SMC key to check. 4 byte multi-character constant. Must be
-                4 characters in length.
-    - returns: valid True if the key is found, false otherwise
-    */
-    public func isKeyValid(key: String) -> (valid    : Bool,
-                                            IOReturn : kern_return_t,
-                                            kSMC     : UInt8) {
-        var ans = false
-
-        if (key.characters.count != SMC.SMC_KEY_SIZE) {
-            #if DEBUG
-                print("ERROR - \(__FILE__):\(__FUNCTION__) - INVALID KEY" +
-                        "SIZE")
-            #endif
-            return (ans, kIOReturnBadArgument, kSMC.kSMCError.rawValue)
-        }
-
-        // Try a read and see if it succeeds
-        let result = readSMC(key)
-
-        if (result.IOReturn == kIOReturnSuccess &&
-            result.kSMC == kSMC.kSMCSuccess.rawValue) {
-            ans = true
-        }
-
-        return (ans, result.IOReturn, result.kSMC)
+        return DataType(type: outputStruct.keyInfo.dataType,
+                        size: outputStruct.keyInfo.dataSize)
     }
 
+    /// Get information about the key at index
+    public static func keyInformationAtIndex(index: Int) throws ->
+                                                                  FourCharCode {
+        var inputStruct = SMCParamStruct()
 
-    /**
-    Get all valid SMC temperature keys (based on Temperature enum, thus list
-    may not be complete).
+        inputStruct.data8 = SMCParamStruct.Selector.kSMCGetKeyFromIndex.rawValue
+        inputStruct.data32 = UInt32(index)
 
-    NOTE: Any sensor that reports a temperature of 0 is discounted.
-          Temperature.HEATSINK_0 is known to do this.
+        let outputStruct = try callDriver(&inputStruct)
 
-    - returns: Array of keys. For convenience, the array is sorted based on
-              sensor names.
-    */
-    public func getAllValidTemperatureKeys() -> [Temperature] {
-        var SMCKeys = [Temperature]()
-
-        for SMCKey in Temperature.allValues.keys.array {
-            if (isKeyValid(SMCKey.rawValue).valid &&
-                readSMC(SMCKey.rawValue).data[0] != 0) {
-                SMCKeys.append(SMCKey)
-            }
-        }
-
-        return SMCKeys.sort { Temperature.allValues[$0]! <
-                              Temperature.allValues[$1]! }
+        return outputStruct.key
     }
 
+    /// Read data of a key
+    public static func readData(key: SMCKey) throws -> SMCBytes {
+        var inputStruct = SMCParamStruct()
 
-    /**
-    Get the number of valid SMC keys for this machine.
+        inputStruct.key = key.code
+        inputStruct.keyInfo.dataSize = UInt32(key.info.size)
+        inputStruct.data8 = SMCParamStruct.Selector.kSMCReadKey.rawValue
 
-    - returns: numKeys The number of SMC keys
-    */
-    public func getNumSMCKeys() -> (numKeys  : UInt32,
-                                    IOReturn : kern_return_t,
-                                    kSMC     : UInt8) {
-        let result = readSMC(SMCKeyMisc.NUM_KEYS.rawValue)
+        let outputStruct = try callDriver(&inputStruct)
 
-        // Type ui32 - size 4
-        var numKeys = UInt32(result.data[0]) << 24
-        numKeys += UInt32(result.data[1]) << 16
-        numKeys += UInt32(result.data[2]) << 8
-        numKeys += UInt32(result.data[3])
-
-        return (numKeys, result.IOReturn, result.kSMC)
+        return outputStruct.bytes
     }
 
+    /// Write data for a key
+    public static func writeData(key: SMCKey, data: SMCBytes) throws {
+        var inputStruct = SMCParamStruct()
 
-    /**
-    Get the current temperature from a sensor
+        inputStruct.key = key.code
+        inputStruct.bytes = data
+        inputStruct.keyInfo.dataSize = UInt32(key.info.size)
+        inputStruct.data8 = SMCParamStruct.Selector.kSMCWriteKey.rawValue
 
-    - parameter key: The temperature sensor to read from
-    - parameter unit: The unit for the temperature value (optional). Defaults to
-                 Celsius.
-    - returns: Temperature of sensor. If the sensor is not found, or an error
-              occurs, return will be zero
-    */
-    public func getTemperature(key  : Temperature,
-                               unit : TemperatureUnit = .Celsius) ->
-                                                      (tmp      : Double,
-                                                       IOReturn : kern_return_t,
-                                                       kSMC     : UInt8) {
-       let result = readSMC(key.rawValue)
-
-       // We drop the decimal value (data[1]) for now - thus maybe be off +/- 1
-       // Data type is sp78 - signed floating point
-       // http://stackoverflow.com/questions/22160746/fpe2-and-sp78-data-types
-       var tmp = Double(result.data[0])
-
-       switch unit {
-           case .Celsius:
-               // Do nothing, in Celsius by default
-               break
-           case .Fahrenheit:
-               tmp = SMC.toFahrenheit(tmp)
-           case .Kelvin:
-               tmp = SMC.toKelvin(tmp)
-       }
-
-       return (tmp, result.IOReturn, result.kSMC)
+        try callDriver(&inputStruct)
     }
 
+    /// Make an actual call to the SMC driver
+    public static func callDriver(inout inputStruct: SMCParamStruct,
+                        selector: SMCParamStruct.Selector = .kSMCHandleYPCEvent)
+                                                      throws -> SMCParamStruct {
+        assert(strideof(SMCParamStruct) == 80, "SMCParamStruct size is != 80")
 
-    /**
-    Is there a CD in the optical disk drive (ODD)?
-
-    NOTE: This almost certainly does not apply to an external ODD, like an Apple
-          USB SuperDrive. This is yet to be tested.
-    TODO: What if its a 3rd party ODD that was swapped internally?
-    TODO: What about the old Mac Pro that can have 2 ODD?
-
-    - returns: flag True if there is, false otherwise
-    */
-    public func isOpticalDiskDriveFull() -> (flag     : Bool,
-                                             IOReturn : kern_return_t,
-                                             kSMC     : UInt8) {
-        let result = readSMC(SMCKeyMisc.ODD_FULL.rawValue)
-
-        // Data type is flag - 1 bit. 1 if CD inserted, 0 otherwise
-        let flag = result.data[0] == 1 ? true : false
-
-        return (flag, result.IOReturn, result.kSMC)
-    }
-
-
-    //--------------------------------------------------------------------------
-    // MARK: PUBLIC METHODS - BATTERY/POWER
-    //--------------------------------------------------------------------------
-
-
-    /**
-    Max number of batteries supported by the machine. For desktops, this should
-    be 0, and 1 for laptops.
-
-    - returns: count Max number of batteries supported by the machine
-    */
-    public func maxNumberBatteries() -> (count    : UInt,
-                                         IOReturn : kern_return_t,
-                                         kSMC     : UInt8) {
-        let result = readSMC(SMCKeyMisc.BATT_MAX_NUM.rawValue)
-
-        // TODO: return -1 on error and get rid of return codes. See issue #8.
-        return (UInt(result.data[0]), result.IOReturn, result.kSMC)
-    }
-
-
-    /**
-    Is the machine being powered by the battery?
-
-    - returns: flag True if it is, false otherwise
-    */
-    public func isBatteryPowered() -> (flag     : Bool,
-                                       IOReturn : kern_return_t,
-                                       kSMC     : UInt8) {
-        let result = readSMC(SMCKeyMisc.BATT_PWR.rawValue)
-
-        // Data type is flag - 1 bit. 1 if battery powered, 0 otherwise
-        let flag = result.data[0] == 1 ? true : false
-
-        return (flag, result.IOReturn, result.kSMC)
-    }
-
-
-    /**
-    Is the machine charing?
-
-    - returns: flag True if it is, false otherwise
-    */
-    public func isCharging() -> (flag     : Bool,
-                                 IOReturn : kern_return_t,
-                                 kSMC     : UInt8) {
-        let result = readSMC(SMCKeyMisc.BATT_INFO.rawValue)
-
-        // First bit contains the charging flag
-        let flag = (result.data[0] & 1) == 1 ? true : false
-
-        return (flag, result.IOReturn, result.kSMC)
-    }
-
-
-    /**
-    Is AC power present?
-
-    - returns: flag True if it is, false otherwise
-    */
-    public func isACPresent() -> (flag     : Bool,
-                                  IOReturn : kern_return_t,
-                                  kSMC     : UInt8) {
-        let result = readSMC(SMCKeyMisc.BATT_INFO.rawValue)
-
-        // Second bit contains the AC present flag
-        let flag = ((result.data[0] >> 1) & 1) == 1 ? true : false
-
-        return (flag, result.IOReturn, result.kSMC)
-    }
-
-
-    /**
-    Is the battery ok? Currently no details on exactly what this entails. Even
-    if service battery warning is given by OS X, this still seems to return OK.
-
-    - returns: flag True if it is, false otherwise
-    */
-    public func isBatteryOk() -> (flag     : Bool,
-                                  IOReturn : kern_return_t,
-                                  kSMC     : UInt8) {
-        let result = readSMC(SMCKeyMisc.BATT_INFO.rawValue)
-
-        // Sixth bit contains the battery ok flag
-        let flag = ((result.data[0] >> 6) & 1) == 1 ? true : false
-
-        return (flag, result.IOReturn, result.kSMC)
-    }
-
-
-    //--------------------------------------------------------------------------
-    // MARK: PUBLIC METHODS - FANS
-    //--------------------------------------------------------------------------
-
-
-    /**
-    Get the name of a fan.
-
-    - parameter fanNum: The number of the fan to check
-    - returns: name The name of the fan. Return will be empty on error.
-    */
-    public func getFanName(fanNumber: UInt) -> (name     : String,
-                                                IOReturn : kern_return_t,
-                                                kSMC     : UInt8) {
-        var name = String()
-        let result = readSMC("F" + String(fanNumber) + "ID")
-
-
-        /*
-        We know the data size is 16 bytes and the type is "{fds", a custom
-        struct defined by the AppleSMC.kext. See Temperature enum sources for
-        the struct.
-
-        The last 12 bytes contain the name of the fan, an array of chars, hence
-        the loop range.
-
-        TODO: Use dataSize value from readSMC()
-        */
-        for var i = 4; i < 16; ++i {
-            // Check if at the end (name may not be full 12 bytes)
-            if (result.data[i] <= 0) {
-                break
-            }
-            name.append(UnicodeScalar(UInt32(result.data[i])))
-        }
-
-
-        // Strip whitespace (some names have it)
-        let whitespace = NSCharacterSet.whitespaceCharacterSet()
-        name = name.stringByTrimmingCharactersInSet(whitespace)
-
-        return (name, result.IOReturn, result.kSMC)
-    }
-
-
-    /**
-    Get the current speed (RPM - revolutions per minute) of a fan.
-
-    - parameter fanNum: The number of the fan to check
-    - returns: rpm The fan RPM. If the fan is not found, or an error occurs,
-                  return will be zero
-    */
-    public func getFanRPM(fanNumber: UInt) -> (rpm      : UInt,
-                                               IOReturn : kern_return_t,
-                                               kSMC     : UInt8) {
-        let result = readSMC("F" + String(fanNumber) + "Ac")
-        return (SMC.decodeFPE2(result.data[0], result.data[1]), result.IOReturn, result.kSMC)
-    }
-
-
-    /**
-    Get the minimum speed (RPM - revolutions per minute) of a fan.
-
-    - parameter fanNum: The number of the fan to check
-    - returns: rpm The minimum fan RPM. If the fan is not found, or an error
-                  occurs, return will be zero
-    */
-    public func getFanMinRPM(fanNumber: UInt) -> (rpm      : UInt,
-                                                  IOReturn : kern_return_t,
-                                                  kSMC     : UInt8) {
-        let result = readSMC("F" + String(fanNumber) + "Mn")
-        return (SMC.decodeFPE2(result.data[0], result.data[1]), result.IOReturn, result.kSMC)
-    }
-
-
-    /**
-    Get the maximum speed (RPM - revolutions per minute) of a fan.
-
-    - parameter fanNum: The number of the fan to check
-    - returns: rpm The maximum fan RPM. If the fan is not found, or an error
-                  occurs, return will be zero
-    */
-    public func getFanMaxRPM(fanNumber: UInt) -> (rpm      : UInt,
-                                                  IOReturn : kern_return_t,
-                                                  kSMC     : UInt8) {
-        let result = readSMC("F" + String(fanNumber) + "Mx")
-        return (SMC.decodeFPE2(result.data[0], result.data[1]), result.IOReturn, result.kSMC)
-    }
-
-
-    /**
-    Get the number of fans on this machine.
-
-    - returns: numFans The number of fans
-    */
-    public func getNumFans() -> (numFans  : UInt,
-                                 IOReturn : kern_return_t,
-                                 kSMC     : UInt8) {
-        let result = readSMC(Fan.COUNT.rawValue)
-        return (UInt(result.data[0]), result.IOReturn, result.kSMC)
-    }
-
-
-    /**
-    Set the minimum speed (RPM - revolutions per minute) of a fan. This method
-    requires root privileges. By minimum we mean that OS X can interject and
-    raise the fan speed if needed, however it will not go below this.
-
-    WARNING: You are playing with hardware here, BE CAREFUL.
-
-    - parameter fanNum: The number of the fan to set
-    - parameter rpm: The speed you would like to set the fan to.
-    - returns: result True if successful, false otherwise.
-    */
-    public func setFanMinRPM(fanNumber: UInt, RPM: UInt) ->
-                                                      (result  : Bool,
-                                                       IOReturn: kern_return_t,
-                                                       kSMC    : UInt8) {
-        // TODO: Cache value
-        let maxRPM = getFanMaxRPM(fanNumber)
-
-        if maxRPM.kSMC == kSMC.kSMCKeyNotFound.rawValue {
-            #if DEBUG
-                print("ERROR - \(__FILE__):\(__FUNCTION__) - FAN # " +
-                        "\(fanNumber) NOT FOUND")
-            #endif
-            return (false, kIOReturnNotFound, maxRPM.kSMC)
-        }
-
-        // Safety check. RPM must be within safe range of fan speed
-        if !(maxRPM.IOReturn == kIOReturnSuccess &&
-             maxRPM.kSMC == kSMC.kSMCSuccess.rawValue &&
-             RPM <= maxRPM.rpm) {
-            #if DEBUG
-                print("ERROR - \(__FILE__):\(__FUNCTION__) - UNSAFE RPM - " +
-                        "Max \(maxRPM.rpm) RPM")
-            #endif
-
-            return (false, kIOReturnBadArgument, kSMC.kSMCError.rawValue)
-        }
-
-        // Prep data
-        let encodedRPM = SMC.encodeFPE2(UInt16(RPM))
-        var data = [UInt8](count: 32, repeatedValue: 0)
-        data[0] = encodedRPM.0
-        data[1] = encodedRPM.1
-
-        // TODO: Don't use magic number for dataSize
-        let result = writeSMC("F" + String(fanNumber) + "Mn", data: data,
-                              dataType: DataType.FPE2,
-                              dataSize: 2)
-
-        var answer = false
-        if result.IOReturn == kIOReturnSuccess &&
-           result.kSMC     == kSMC.kSMCSuccess.rawValue {
-            answer = true
-        }
-
-        return (answer, result.IOReturn, result.kSMC)
-    }
-
-
-    //--------------------------------------------------------------------------
-    // MARK: PRIVATE METHODS
-    //--------------------------------------------------------------------------
-
-
-    /**
-    Read data from the SMC
-
-    - parameter key: The SMC key
-    - returns: Raw data return from the SMC
-    */
-    private func readSMC(key: String) -> (data     : [UInt8],
-                                          dataType : UInt32,
-                                          dataSize : IOByteCount,
-                                          IOReturn : kern_return_t,
-                                          kSMC     : UInt8) {
-        var result: kern_return_t
-        var inputStruct  = SMCParamStruct()
         var outputStruct = SMCParamStruct()
-        var data         = [UInt8](count: 32, repeatedValue: 0)
-
-
-        // First call to AppleSMC - get key info
-        inputStruct.key = SMC.encodeSMCKey(key)
-        inputStruct.data8 = UInt8(Selector.kSMCGetKeyInfo.rawValue)
-
-        result = callSMC(&inputStruct, outputStruct: &outputStruct)
-
-        // Store for return - we only get this info on key info calls
-        let dataType = outputStruct.keyInfo.dataType
-        let dataSize = outputStruct.keyInfo.dataSize
-
-        if (result != kIOReturnSuccess ||
-            outputStruct.result != kSMC.kSMCSuccess.rawValue) {
-            return (data, dataType, dataSize, result, outputStruct.result)
-        }
-
-        // Second call to AppleSMC - now we can get the data
-        inputStruct.keyInfo.dataSize = outputStruct.keyInfo.dataSize
-        inputStruct.data8 = UInt8(Selector.kSMCReadKey.rawValue)
-
-        result = callSMC(&inputStruct, outputStruct: &outputStruct)
-
-        // Set the data
-        data[0]  = outputStruct.bytes_0
-        data[1]  = outputStruct.bytes_1
-        data[2]  = outputStruct.bytes_2
-        data[3]  = outputStruct.bytes_3
-        data[4]  = outputStruct.bytes_4
-        data[5]  = outputStruct.bytes_5
-        data[6]  = outputStruct.bytes_6
-        data[7]  = outputStruct.bytes_7
-        data[8]  = outputStruct.bytes_8
-        data[9]  = outputStruct.bytes_9
-        data[10] = outputStruct.bytes_10
-        data[11] = outputStruct.bytes_11
-        data[12] = outputStruct.bytes_12
-        data[13] = outputStruct.bytes_13
-        data[14] = outputStruct.bytes_14
-        data[15] = outputStruct.bytes_15
-        data[16] = outputStruct.bytes_16
-        data[17] = outputStruct.bytes_17
-        data[18] = outputStruct.bytes_18
-        data[19] = outputStruct.bytes_19
-        data[20] = outputStruct.bytes_20
-        data[21] = outputStruct.bytes_21
-        data[22] = outputStruct.bytes_22
-        data[23] = outputStruct.bytes_23
-        data[24] = outputStruct.bytes_24
-        data[25] = outputStruct.bytes_25
-        data[26] = outputStruct.bytes_26
-        data[27] = outputStruct.bytes_27
-        data[28] = outputStruct.bytes_28
-        data[29] = outputStruct.bytes_29
-        data[30] = outputStruct.bytes_30
-        data[31] = outputStruct.bytes_31
-
-        return (data, dataType, dataSize, result, outputStruct.result)
-    }
-
-
-    /**
-    Write data to the SMC.
-
-    - returns: IOReturn IOKit return code
-    - returns: kSMC SMC return code
-    */
-    private func writeSMC(key      : String,
-                          data     : [UInt8],
-                          dataType : DataType,
-                          dataSize : IOByteCount) -> (IOReturn : kern_return_t,
-                                                      kSMC     : UInt8) {
-        var result: kern_return_t
-        var inputStruct  = SMCParamStruct()
-        var outputStruct = SMCParamStruct()
-
-        // First call to AppleSMC - get key info
-        inputStruct.key = SMC.encodeSMCKey(key)
-        inputStruct.data8 = UInt8(Selector.kSMCGetKeyInfo.rawValue)
-
-        result = callSMC(&inputStruct, outputStruct: &outputStruct)
-
-        if (result != kIOReturnSuccess ||
-            outputStruct.result != kSMC.kSMCSuccess.rawValue) {
-            return (result, outputStruct.result)
-        }
-
-        // Check if given data matches expected input
-        if (dataSize != outputStruct.keyInfo.dataSize ||
-            dataType.rawValue != SMC.decodeSMCKey(outputStruct.keyInfo.dataType)) {
-            #if DEBUG
-                print("ERROR - \(__FILE__):\(__FUNCTION__) - INVALID DATA - "
-                        + "Expected input = \(outputStruct.keyInfo)")
-            #endif
-            return (kIOReturnBadArgument, kSMC.kSMCError.rawValue)
-        }
-
-        // Second call to AppleSMC - now we can write the data
-        inputStruct.keyInfo.dataSize = outputStruct.keyInfo.dataSize
-        inputStruct.data8 = UInt8(Selector.kSMCWriteKey.rawValue)
-
-        // Set data to write
-        inputStruct.bytes_0  = data[0]
-        inputStruct.bytes_1  = data[1]
-        inputStruct.bytes_2  = data[2]
-        inputStruct.bytes_3  = data[3]
-        inputStruct.bytes_4  = data[4]
-        inputStruct.bytes_5  = data[5]
-        inputStruct.bytes_6  = data[6]
-        inputStruct.bytes_7  = data[7]
-        inputStruct.bytes_8  = data[8]
-        inputStruct.bytes_9  = data[9]
-        inputStruct.bytes_10 = data[10]
-        inputStruct.bytes_11 = data[11]
-        inputStruct.bytes_12 = data[12]
-        inputStruct.bytes_13 = data[13]
-        inputStruct.bytes_14 = data[14]
-        inputStruct.bytes_15 = data[15]
-        inputStruct.bytes_16 = data[16]
-        inputStruct.bytes_17 = data[17]
-        inputStruct.bytes_18 = data[18]
-        inputStruct.bytes_19 = data[19]
-        inputStruct.bytes_20 = data[20]
-        inputStruct.bytes_21 = data[21]
-        inputStruct.bytes_22 = data[22]
-        inputStruct.bytes_23 = data[23]
-        inputStruct.bytes_24 = data[24]
-        inputStruct.bytes_25 = data[25]
-        inputStruct.bytes_26 = data[26]
-        inputStruct.bytes_27 = data[27]
-        inputStruct.bytes_28 = data[28]
-        inputStruct.bytes_29 = data[29]
-        inputStruct.bytes_30 = data[30]
-        inputStruct.bytes_31 = data[31]
-
-        result = callSMC(&inputStruct, outputStruct: &outputStruct)
-
-        return (result, outputStruct.result)
-    }
-
-
-    /**
-    Make a call to the SMC
-
-    - parameter inputStruct: Struct that holds data telling the SMC what you want
-    - parameter outputStruct: Struct holding the SMC's response
-    - returns: IOKit return code
-    */
-    private func callSMC(inout inputStruct : SMCParamStruct,
-                         inout outputStruct: SMCParamStruct) -> kern_return_t {
-        let inputStructSize  = strideof(SMCParamStruct)
+        let inputStructSize = strideof(SMCParamStruct)
         var outputStructSize = strideof(SMCParamStruct)
 
+        let result = IOConnectCallStructMethod(SMCKit.connection,
+                                               UInt32(selector.rawValue),
+                                               &inputStruct,
+                                               inputStructSize,
+                                               &outputStruct,
+                                               &outputStructSize)
 
-        #if DEBUG
-            // Depending how far off this is from 80, call may or may not
-            // work
-            if inputStructSize != 80 {
-                print("WARNING - \(__FILE__):\(__FUNCTION__) - SMCParamStruct"
-                        + " size is \(inputStructSize) bytes. Expected 80")
+        switch (result, outputStruct.result) {
+        case (kIOReturnSuccess, SMCParamStruct.Result.kSMCSuccess.rawValue):
+            return outputStruct
+        case (kIOReturnSuccess, SMCParamStruct.Result.kSMCKeyNotFound.rawValue):
+            throw Error.KeyNotFound(code: inputStruct.key.toString())
+        case (kIOReturnNotPrivileged, _):
+            throw Error.NotPrivileged
+        default:
+            throw Error.Unknown(kIOReturn: result,
+                                SMCResult: outputStruct.result)
+        }
+    }
+}
 
-                return kIOReturnBadArgument
-            }
-        #endif
+//------------------------------------------------------------------------------
+// MARK: General
+//------------------------------------------------------------------------------
 
+extension SMCKit {
 
-        let result = IOConnectCallStructMethod(conn,
-                                           Selector.kSMCHandleYPCEvent.rawValue,
-                                           &inputStruct,
-                                           inputStructSize,
-                                           &outputStruct,
-                                           &outputStructSize)
+    /// Get all valid SMC keys for this machine
+    public static func allKeys() throws -> [SMCKey] {
+        let count = try keyCount()
+        var keys = [SMCKey]()
 
+        for var i = 0; i < count; ++i {
+            let key = try keyInformationAtIndex(i)
+            let info = try keyInformation(key)
+            keys.append(SMCKey(code: key, info: info))
+        }
 
-        #if DEBUG
-            if result != kIOReturnSuccess {
-                print("ERROR - \(__FILE__):\(__FUNCTION__) - IOReturn = " +
-                        "\(result) - kSMC = \(outputStruct.result)")
-            }
-        #endif
-
-        return result
+        return keys
     }
 
+    /// Get the number of valid SMC keys for this machine
+    public static func keyCount() throws -> Int {
+        let key = SMCKey(code: FourCharCode(fromStaticString: "#KEY"),
+                         info: DataTypes.UInt32)
 
-    //--------------------------------------------------------------------------
-    // MARK: PUBLIC TYPE METHODS - EN/DE-CODERS
-    //--------------------------------------------------------------------------
-
-
-    /// Encode SMC key to UInt32 format. Must be 4 characters.
-    public static func encodeSMCKey(key: String) -> UInt32 {
-        // Have to account for null-character
-        let CStringCount = SMC_KEY_SIZE + 1
-        var buffer = [CChar](count: CStringCount, repeatedValue: 0)
-
-        #if DEBUG
-            if key.characters.count != SMC_KEY_SIZE {
-                print("WARN - \(__FILE__):\(__FUNCTION__) - Invalid key size")
-            }
-        #endif
-
-        // Swift Strings cannot be indexed since Character type can be variable
-        // size, have to iterate. Thus, if we want to do loop unrolling, have
-        // to get CString
-        key.getCString(&buffer, maxLength: CStringCount,
-                                encoding: String.defaultCStringEncoding())
-
-        // FIXME: Have to split this up due to a compiler regression in Xcode
-        //        7 Beta 1. See test 24890 in below
-        // https://github.com/practicalswift/swift-compiler-crashes/pull/75
-        let encoded = UInt32(buffer[0]) << 24
-        return encoded +
-               UInt32(buffer[1]) << 16 +
-               UInt32(buffer[2]) << 8  +
-               UInt32(buffer[3])
+        let data = try readData(key)
+        return Int(UInt32(fromBytes: (data.0, data.1, data.2, data.3)))
     }
 
+    /// Is this key valid on this machine?
+    public static func isKeyFound(code: FourCharCode) throws -> Bool {
+        do {
+            try keyInformation(code)
+        } catch Error.KeyNotFound { return false }
 
-    /**
-    Convert UInt32 value to 4 character String. For decoding SMCParamStruct.key,
-    SMCKeyInfoData.dataType, etc.
-    */
-    public static func decodeSMCKey(value: UInt32) -> String {
-        // To get each char, we shift it into the lower 8 bits, and then
-        // & by 255 to insolate it
-        return String(UnicodeScalar(value >> 24 & 0xff)) +
-               String(UnicodeScalar(value >> 16 & 0xff)) +
-               String(UnicodeScalar(value >> 8  & 0xff)) +
-               String(UnicodeScalar(value       & 0xff))
+        return true
     }
+}
 
+//------------------------------------------------------------------------------
+// MARK: Temperature
+//------------------------------------------------------------------------------
 
-    /**
-    Convert data from SMC of fpe2 type to human readable. For example, fan RPM
-    is of this data type. This is assumend to mean floating point, with 2
-    exponent bits.
+/// The list is NOT exhaustive. In addition, the names of the sensors may not be
+/// mapped to the correct hardware component.
+///
+/// ### Sources
+///
+/// * powermetrics(1)
+/// * https://www.apple.com/downloads/dashboard/status/istatpro.html
+/// * https://github.com/hholtmann/smcFanControl
+/// * https://github.com/jedda/OSX-Monitoring-Tools
+/// * http://www.opensource.apple.com/source/net_snmp/
+/// * http://www.parhelia.ch/blog/statics/k3_keys.html
+public struct TemperatureSensors {
 
-    https://stackoverflow.com/questions/22160746/fpe2-and-sp78-data-types
+    public static let AMBIENT_AIR_0 = TemperatureSensor(name: "AMBIENT_AIR_0",
+                                   code: FourCharCode(fromStaticString: "TA0P"))
+    public static let AMBIENT_AIR_1 = TemperatureSensor(name: "AMBIENT_AIR_1",
+                                   code: FourCharCode(fromStaticString: "TA1P"))
+    // Via powermetrics(1)
+    public static let CPU_0_DIE = TemperatureSensor(name: "CPU_0_DIE",
+                                   code: FourCharCode(fromStaticString: "TC0F"))
+    public static let CPU_0_DIODE = TemperatureSensor(name: "CPU_0_DIODE",
+                                   code: FourCharCode(fromStaticString: "TC0D"))
+    public static let CPU_0_HEATSINK = TemperatureSensor(name: "CPU_0_HEATSINK",
+                                   code: FourCharCode(fromStaticString: "TC0H"))
+    public static let CPU_0_PROXIMITY =
+                                      TemperatureSensor(name: "CPU_0_PROXIMITY",
+                                   code: FourCharCode(fromStaticString: "TC0P"))
+    public static let ENCLOSURE_BASE_0 =
+                                     TemperatureSensor(name: "ENCLOSURE_BASE_0",
+                                   code: FourCharCode(fromStaticString: "TB0T"))
+    public static let ENCLOSURE_BASE_1 =
+                                     TemperatureSensor(name: "ENCLOSURE_BASE_1",
+                                   code: FourCharCode(fromStaticString: "TB1T"))
+    public static let ENCLOSURE_BASE_2 =
+                                     TemperatureSensor(name: "ENCLOSURE_BASE_2",
+                                   code: FourCharCode(fromStaticString: "TB2T"))
+    public static let ENCLOSURE_BASE_3 =
+                                     TemperatureSensor(name: "ENCLOSURE_BASE_3",
+                                   code: FourCharCode(fromStaticString: "TB3T"))
+    public static let GPU_0_DIODE = TemperatureSensor(name: "GPU_0_DIODE",
+                                   code: FourCharCode(fromStaticString: "TG0D"))
+    public static let GPU_0_HEATSINK = TemperatureSensor(name: "GPU_0_HEATSINK",
+                                   code: FourCharCode(fromStaticString: "TG0H"))
+    public static let GPU_0_PROXIMITY =
+                                      TemperatureSensor(name: "GPU_0_PROXIMITY",
+                                   code: FourCharCode(fromStaticString: "TG0P"))
+    public static let HDD_PROXIMITY = TemperatureSensor(name: "HDD_PROXIMITY",
+                                   code: FourCharCode(fromStaticString: "TH0P"))
+    public static let HEATSINK_0 = TemperatureSensor(name: "HEATSINK_0",
+                                   code: FourCharCode(fromStaticString: "Th0H"))
+    public static let HEATSINK_1 = TemperatureSensor(name: "HEATSINK_1",
+                                   code: FourCharCode(fromStaticString: "Th1H"))
+    public static let HEATSINK_2 = TemperatureSensor(name: "HEATSINK_2",
+                                   code: FourCharCode(fromStaticString: "Th2H"))
+    public static let LCD_PROXIMITY = TemperatureSensor(name: "LCD_PROXIMITY",
+                                   code: FourCharCode(fromStaticString: "TL0P"))
+    public static let MEM_SLOT_0 = TemperatureSensor(name: "MEM_SLOT_0",
+                                   code: FourCharCode(fromStaticString: "TM0S"))
+    public static let MEM_SLOTS_PROXIMITY =
+                                  TemperatureSensor(name: "MEM_SLOTS_PROXIMITY",
+                                   code: FourCharCode(fromStaticString: "TM0P"))
+    public static let MISC_PROXIMITY = TemperatureSensor(name: "MISC_PROXIMITY",
+                                   code: FourCharCode(fromStaticString: "Tm0P"))
+    public static let NORTHBRIDGE = TemperatureSensor(name: "NORTHBRIDGE",
+                                   code: FourCharCode(fromStaticString: "TN0H"))
+    public static let NORTHBRIDGE_DIODE =
+                                    TemperatureSensor(name: "NORTHBRIDGE_DIODE",
+                                   code: FourCharCode(fromStaticString: "TN0D"))
+    public static let NORTHBRIDGE_PROXIMITY =
+                                TemperatureSensor(name: "NORTHBRIDGE_PROXIMITY",
+                                   code: FourCharCode(fromStaticString: "TN0P"))
+    public static let ODD_PROXIMITY = TemperatureSensor(name: "ODD_PROXIMITY",
+                                   code: FourCharCode(fromStaticString: "TO0P"))
+    public static let PALM_REST = TemperatureSensor(name: "PALM_REST",
+                                   code: FourCharCode(fromStaticString: "Ts0P"))
+    public static let PWR_SUPPLY_PROXIMITY =
+                                 TemperatureSensor(name: "PWR_SUPPLY_PROXIMITY",
+                                   code: FourCharCode(fromStaticString: "Tp0P"))
+    public static let THUNDERBOLT_0 = TemperatureSensor(name: "THUNDERBOLT_0",
+                                   code: FourCharCode(fromStaticString: "TI0P"))
+    public static let THUNDERBOLT_1 = TemperatureSensor(name: "THUNDERBOLT_1",
+                                   code: FourCharCode(fromStaticString: "TI1P"))
 
-    - parameter data: Data from the SMC to be converted. Assumed data size of 2.
-    - returns: Converted data
-    */
-    public static func decodeFPE2(data: (UInt8, UInt8)) -> UInt {
-        return (UInt(data.0) << 6) + (UInt(data.1) >> 2)
-    }
+    public static let all = [AMBIENT_AIR_0.code : AMBIENT_AIR_0,
+                             AMBIENT_AIR_1.code : AMBIENT_AIR_1,
+                             CPU_0_DIE.code : CPU_0_DIE,
+                             CPU_0_DIODE.code : CPU_0_DIODE,
+                             CPU_0_HEATSINK.code : CPU_0_HEATSINK,
+                             CPU_0_PROXIMITY.code : CPU_0_PROXIMITY,
+                             ENCLOSURE_BASE_0.code : ENCLOSURE_BASE_0,
+                             ENCLOSURE_BASE_1.code : ENCLOSURE_BASE_1,
+                             ENCLOSURE_BASE_2.code : ENCLOSURE_BASE_2,
+                             ENCLOSURE_BASE_3.code : ENCLOSURE_BASE_3,
+                             GPU_0_DIODE.code : GPU_0_DIODE,
+                             GPU_0_HEATSINK.code : GPU_0_HEATSINK,
+                             GPU_0_PROXIMITY.code : GPU_0_PROXIMITY,
+                             HDD_PROXIMITY.code : HDD_PROXIMITY,
+                             HEATSINK_0.code : HEATSINK_0,
+                             HEATSINK_1.code : HEATSINK_1,
+                             HEATSINK_2.code : HEATSINK_2,
+                             MEM_SLOT_0.code : MEM_SLOT_0,
+                             MEM_SLOTS_PROXIMITY.code: MEM_SLOTS_PROXIMITY,
+                             PALM_REST.code : PALM_REST,
+                             LCD_PROXIMITY.code : LCD_PROXIMITY,
+                             MISC_PROXIMITY.code : MISC_PROXIMITY,
+                             NORTHBRIDGE.code : NORTHBRIDGE,
+                             NORTHBRIDGE_DIODE.code : NORTHBRIDGE_DIODE,
+                             NORTHBRIDGE_PROXIMITY.code : NORTHBRIDGE_PROXIMITY,
+                             ODD_PROXIMITY.code : ODD_PROXIMITY,
+                             PWR_SUPPLY_PROXIMITY.code : PWR_SUPPLY_PROXIMITY,
+                             THUNDERBOLT_0.code : THUNDERBOLT_0,
+                             THUNDERBOLT_1.code : THUNDERBOLT_1]
+}
 
+public struct TemperatureSensor {
+    public let name: String
+    public let code: FourCharCode
+}
 
-    /**
-    Convert value to fpe2 data type. For passing to SMC, used for fan RPM for
-    example.
-    */
-    public static func encodeFPE2(value: UInt16) -> (UInt8, UInt8) {
-        return (UInt8(value >> 6),
-                UInt8((value << 2) ^ ((value >> 6) << 8)))
-    }
+public enum TemperatureUnit {
+    case Celius
+    case Fahrenheit
+    case Kelvin
 
-
-    //--------------------------------------------------------------------------
-    // MARK: PRIVATE METHODS - HELPERS - TEMPERATURE CONVERSION
-    //--------------------------------------------------------------------------
-
-
-    /**
-    Celsius to Fahrenheit
-
-    - parameter temperature: Temperature in Celsius
-    - returns: Temperature in Fahrenheit
-    */
-    private static func toFahrenheit(temperature: Double) -> Double {
+    public static func toFahrenheit(celius: Double) -> Double {
         // https://en.wikipedia.org/wiki/Fahrenheit#Definition_and_conversions
-        return (temperature * 1.8) + 32
+        return (celius * 1.8) + 32
     }
 
-
-    /**
-    Celsius to Kelvin
-
-    - parameter temperature: Temperature in Celsius
-    - returns: Temperature in Kelvin
-    */
-    private static func toKelvin(temperature: Double) -> Double {
+    public static func toKelvin(celius: Double) -> Double {
         // https://en.wikipedia.org/wiki/Kelvin
-        return temperature + 273.15
+        return celius + 273.15
+    }
+}
+
+extension SMCKit {
+
+    public static func allKnownTemperatureSensors() throws ->
+                                                           [TemperatureSensor] {
+        var sensors = [TemperatureSensor]()
+
+        for sensor in TemperatureSensors.all.values {
+            if try isKeyFound(sensor.code) { sensors.append(sensor) }
+        }
+
+        return sensors
+    }
+
+    public static func allUnknownTemperatureSensors() throws -> [TemperatureSensor] {
+        let keys = try allKeys()
+
+        return keys.filter { $0.code.toString().hasPrefix("T") &&
+                             $0.info == DataTypes.SP78 &&
+                             TemperatureSensors.all[$0.code] == nil }
+                   .map { TemperatureSensor(name: "Unknown", code: $0.code) }
+    }
+
+    /// Get current temperature of a sensor
+    public static func temperature(sensorCode: FourCharCode,
+                             unit: TemperatureUnit = .Celius) throws -> Double {
+        let data = try readData(SMCKey(code: sensorCode, info: DataTypes.SP78))
+
+        let temperatureInCelius = Double(fromSP78: (data.0, data.1))
+
+        switch unit {
+        case .Celius:
+            return temperatureInCelius
+        case .Fahrenheit:
+            return TemperatureUnit.toFahrenheit(temperatureInCelius)
+        case .Kelvin:
+            return TemperatureUnit.toKelvin(temperatureInCelius)
+        }
+    }
+}
+
+//------------------------------------------------------------------------------
+// MARK: Fan
+//------------------------------------------------------------------------------
+
+public struct Fan {
+    // TODO: Should we start the fan id from 1 instead of 0?
+    public let id: Int
+    public let name: String
+    public let minSpeed: Int
+    public let maxSpeed: Int
+}
+
+extension SMCKit {
+
+    public static func allFans() throws -> [Fan] {
+        let count = try fanCount()
+        var fans = [Fan]()
+
+        for var i = 0; i < count; ++i {
+            let name = try fanName(i)
+            let minSpeed = try fanMinSpeed(i)
+            let maxSpeed = try fanMaxSpeed(i)
+            fans.append(Fan(id: i, name: name, minSpeed: minSpeed,
+                                               maxSpeed: maxSpeed))
+        }
+
+        return fans
+    }
+
+    /// Number of fans this machine has. All Intel based Macs, except for the
+    /// 2015 MacBook (8,1), have at least 1
+    public static func fanCount() throws -> Int {
+        let key = SMCKey(code: FourCharCode(fromStaticString: "FNum"),
+                                            info: DataTypes.UInt8)
+
+        let data = try readData(key)
+        return Int(data.0)
+    }
+
+    public static func fanName(id: Int) throws -> String {
+        let key = SMCKey(code: FourCharCode(fromString: "F\(id)ID"),
+                                            info: DataTypes.FDS)
+        let data = try readData(key)
+
+        // The last 12 bytes of '{fds' data type, a custom struct defined by the
+        // AppleSMC.kext that is 16 bytes, contains the fan name
+        let c1  = String(UnicodeScalar(data.4))
+        let c2  = String(UnicodeScalar(data.5))
+        let c3  = String(UnicodeScalar(data.6))
+        let c4  = String(UnicodeScalar(data.7))
+        let c5  = String(UnicodeScalar(data.8))
+        let c6  = String(UnicodeScalar(data.9))
+        let c7  = String(UnicodeScalar(data.10))
+        let c8  = String(UnicodeScalar(data.11))
+        let c9  = String(UnicodeScalar(data.12))
+        let c10 = String(UnicodeScalar(data.13))
+        let c11 = String(UnicodeScalar(data.14))
+        let c12 = String(UnicodeScalar(data.15))
+
+        let name = c1 + c2 + c3 + c4 + c5 + c6 + c7 + c8 + c9 + c10 + c11 + c12
+
+        let characterSet = NSCharacterSet.whitespaceCharacterSet()
+        return name.stringByTrimmingCharactersInSet(characterSet)
+    }
+
+    public static func fanCurrentSpeed(id: Int) throws -> Int {
+        let key = SMCKey(code: FourCharCode(fromString: "F\(id)Ac"),
+                                            info: DataTypes.FPE2)
+
+        let data = try readData(key)
+        return Int(fromFPE2: (data.0, data.1))
+    }
+
+    public static func fanMinSpeed(id: Int) throws -> Int {
+        let key = SMCKey(code: FourCharCode(fromString: "F\(id)Mn"),
+                                            info: DataTypes.FPE2)
+
+        let data = try readData(key)
+        return Int(fromFPE2: (data.0, data.1))
+    }
+
+    public static func fanMaxSpeed(id: Int) throws -> Int {
+        let key = SMCKey(code: FourCharCode(fromString: "F\(id)Mx"),
+                                            info: DataTypes.FPE2)
+
+        let data = try readData(key)
+        return Int(fromFPE2: (data.0, data.1))
+    }
+
+    /// Requires root privileges. By minimum we mean that OS X can interject and
+    /// raise the fan speed if needed, however it will not go below this.
+    ///
+    /// WARNING: You are playing with hardware here, BE CAREFUL.
+    public static func fanSetMinSpeed(id: Int, speed: Int) throws {
+        let maxSpeed = try fanMaxSpeed(id)
+        if speed <= 0 || speed > maxSpeed { throw Error.UnsafeFanSpeed }
+
+        let data = speed.toFPE2()
+        let bytes = (data.0, data.1, UInt8(0), UInt8(0), UInt8(0), UInt8(0),
+                     UInt8(0), UInt8(0), UInt8(0), UInt8(0), UInt8(0), UInt8(0),
+                     UInt8(0), UInt8(0), UInt8(0), UInt8(0), UInt8(0), UInt8(0),
+                     UInt8(0), UInt8(0), UInt8(0), UInt8(0), UInt8(0), UInt8(0),
+                     UInt8(0), UInt8(0), UInt8(0), UInt8(0), UInt8(0), UInt8(0),
+                     UInt8(0), UInt8(0))
+
+        let key = SMCKey(code: FourCharCode(fromString: "F\(id)Mn"),
+                         info: DataTypes.FPE2)
+
+        try writeData(key, data: bytes)
+    }
+}
+
+//------------------------------------------------------------------------------
+// MARK: Miscellaneous
+//------------------------------------------------------------------------------
+
+public struct batteryInfo {
+    public let batteryCount: Int
+    public let isACPresent: Bool
+    public let isBatteryPowered: Bool
+    public let isBatteryOk: Bool
+    public let isCharging: Bool
+}
+
+extension SMCKit {
+
+    public static func isOpticalDiskDriveFull() throws -> Bool {
+        // TODO: Should we catch key not found? That just means the machine
+        // doesn't have an ODD. Returning false though is not fully correct.
+        // Maybe we could throw a no ODD error instead?
+        let key = SMCKey(code: FourCharCode(fromStaticString: "MSDI"),
+                         info: DataTypes.Flag)
+
+        let data = try readData(key)
+        return Bool(fromByte: data.0)
+    }
+
+    public static func batteryInformation() throws -> batteryInfo {
+        let batteryCountKey =
+                            SMCKey(code: FourCharCode(fromStaticString: "BNum"),
+                                   info: DataTypes.UInt8)
+        let batteryPoweredKey =
+                            SMCKey(code: FourCharCode(fromStaticString: "BATP"),
+                                   info: DataTypes.Flag)
+        let batteryInfoKey =
+                            SMCKey(code: FourCharCode(fromStaticString: "BSIn"),
+                                   info: DataTypes.UInt8)
+
+        let batteryCountData = try readData(batteryCountKey)
+        let batteryCount = Int(batteryCountData.0)
+
+        let isBatteryPoweredData = try readData(batteryPoweredKey)
+        let isBatteryPowered = Bool(fromByte: isBatteryPoweredData.0)
+
+        let batteryInfoData = try readData(batteryInfoKey)
+        let isCharging = batteryInfoData.0 & 1 == 1 ? true : false
+        let isACPresent = (batteryInfoData.0 >> 1) & 1 == 1 ? true : false
+        let isBatteryOk = (batteryInfoData.0 >> 6) & 1 == 1 ? true : false
+
+        return batteryInfo(batteryCount: batteryCount, isACPresent: isACPresent,
+                           isBatteryPowered: isBatteryPowered,
+                           isBatteryOk: isBatteryOk,
+                           isCharging: isCharging)
     }
 }
