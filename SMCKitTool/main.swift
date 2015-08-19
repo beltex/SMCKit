@@ -61,7 +61,7 @@ let CLIColorOption       = BoolOption(shortFlag: "c", longFlag: "color",
 let CLIDisplayKeysOption = BoolOption(shortFlag: "d", longFlag: "display-keys",
         helpMessage: "Show SMC keys (FourCC) when printing temperature sensors")
 let CLIFanOption         = BoolOption(shortFlag: "f", longFlag: "fan",
-                         helpMessage: "Show Show the machines fan speeds (RPM)")
+                         helpMessage: "Show the machines fan speeds (RPM)")
 let CLIHelpOption        = BoolOption(shortFlag: "h", longFlag: "help",
                                       helpMessage: "Show the list of options")
 let CLICheckKeyOption    = StringOption(shortFlag: "k", longFlag: "check-key",
@@ -75,7 +75,7 @@ let CLIPowerOption       = BoolOption(shortFlag: "p", longFlag: "power",
 let CLIFanSpeedOption    = IntOption(shortFlag: "s", longFlag: "fan-speed",
                            helpMessage: "The min speed (RPM) of the fan to set")
 let CLITemperatureOption = BoolOption(shortFlag: "t", longFlag: "temperature",
-            helpMessage: "Show the list of temperature sensors on this machine")
+      helpMessage: "Show the list of known temperature sensors on this machine")
 let CLIUnknownTemperatureOption = BoolOption(shortFlag: "u",
                                         longFlag: "unknown-temperature-sensors",
       helpMessage: "Show temperature sensors whose hardware mapping is unknown")
