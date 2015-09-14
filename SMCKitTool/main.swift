@@ -189,7 +189,7 @@ func printTemperatureInformation() {
 
         let smcKey  = CLIDisplayKeysOption.value ? "(\(sensor.code.toString()))" : ""
 
-        print("\(sensor.name + padding)   \(smcKey)  ", appendNewline: false)
+        print("\(sensor.name + padding)   \(smcKey)  ", terminator: "")
         print("\(color.rawValue)\(temperature)°C \(level)" +
               "\(ANSIColor.Off.rawValue)")
     }
@@ -229,7 +229,7 @@ func printUnknownTemperatureInformation() {
 
         let smcKey = CLIDisplayKeysOption.value ? "(\(sensor.code.toString()))" : ""
 
-        print("\(sensor.name)   \(smcKey)  ", appendNewline: false)
+        print("\(sensor.name)   \(smcKey)  ", terminator: "")
         print("\(color.rawValue)\(temperature)°C \(level)" +
               "\(ANSIColor.Off.rawValue)")
     }
