@@ -144,32 +144,37 @@ func colorBoolOutput(value: Bool) -> String {
     return "\(color.rawValue)\(value)\(ANSIColor.Off.rawValue)"
 }
 
-func printTemperatureInformation() {
+func printTemperatureInformation(known: Bool = true) {
     print("-- Temperature --")
 
-    let allTemperatureSensors: [TemperatureSensor]
+    let sensors: [TemperatureSensor]
     do {
-        allTemperatureSensors = try SMCKit.allKnownTemperatureSensors().sort
+        if known {
+            sensors = try SMCKit.allKnownTemperatureSensors().sort
                                                            { $0.name < $1.name }
+        } else {
+            sensors = try SMCKit.allUnknownTemperatureSensors()
+        }
+
     } catch {
         print(error)
         return
     }
 
 
-    if allTemperatureSensors.count == 0 {
+    if sensors.count == 0 {
         print("No known temperature sensors found")
         return
     }
 
-    let sensorWithLongestName = allTemperatureSensors.maxElement
+    let sensorWithLongestName = sensors.maxElement
                                 { $0.name.characters.count <
                                   $1.name.characters.count }
 
     let longestSensorNameCount = sensorWithLongestName!.name.characters.count
 
 
-    for sensor in allTemperatureSensors {
+    for sensor in sensors {
         let temperature: Double
         do {
             temperature = try SMCKit.temperature(sensor.code)
@@ -190,46 +195,6 @@ func printTemperatureInformation() {
         let smcKey  = CLIDisplayKeysOption.value ? "(\(sensor.code.toString()))" : ""
 
         print("\(sensor.name + padding)   \(smcKey)  ", terminator: "")
-        print("\(color.rawValue)\(temperature)°C \(level)" +
-              "\(ANSIColor.Off.rawValue)")
-    }
-}
-
-func printUnknownTemperatureInformation() {
-    print("-- Unknown Temperature Sensors --")
-
-    let allUnknownTemperatureSensors: [TemperatureSensor]
-
-    do {
-        allUnknownTemperatureSensors = try SMCKit.allUnknownTemperatureSensors()
-    } catch {
-        print(error)
-        return
-    }
-
-
-    if allUnknownTemperatureSensors.count == 0 {
-        print("None found")
-        return
-    }
-
-    for sensor in allUnknownTemperatureSensors {
-        let temperature: Double
-        do {
-            temperature = try SMCKit.temperature(sensor.code)
-        } catch {
-            // FIXME: Should print NA on error, not 0. Same for known sensors
-            temperature = 0
-        }
-
-
-        let warning = warningLevel(temperature, maxValue: maxTemperatureCelsius)
-        let level = CLIWarnOption.value ? "(\(warning.name))" : ""
-        let color = CLIColorOption.value ? warning.color : ANSIColor.Off
-
-        let smcKey = CLIDisplayKeysOption.value ? "(\(sensor.code.toString()))" : ""
-
-        print("\(sensor.name)   \(smcKey)  ", terminator: "")
         print("\(color.rawValue)\(temperature)°C \(level)" +
               "\(ANSIColor.Off.rawValue)")
     }
@@ -373,7 +338,7 @@ else if CLIFanIdOption.wasSet != CLIFanSpeedOption.wasSet {
 if let key = CLICheckKeyOption.value { checkKey(key) }
 
 if CLITemperatureOption.value { printTemperatureInformation() }
-if CLIUnknownTemperatureOption.wasSet { printUnknownTemperatureInformation() }
+if CLIUnknownTemperatureOption.wasSet { printTemperatureInformation(false) }
 if CLIFanOption.value         { printFanInformation()         }
 if CLIPowerOption.value       { printPowerInformation()       }
 if CLIMiscOption.value        { printMiscInformation()        }
