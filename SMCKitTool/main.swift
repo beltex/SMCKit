@@ -175,26 +175,23 @@ func printTemperatureInformation(known: Bool = true) {
 
 
     for sensor in sensors {
-        let temperature: Double
-        do {
-            temperature = try SMCKit.temperature(sensor.code)
-        } catch {
-            temperature = 0
-        }
-
-        // Padding to line up temperatures
         let padding = String(count: longestSensorNameCount -
                                     sensor.name.characters.count,
                              repeatedValue: Character(" "))
 
+        let smcKey  = CLIDisplayKeysOption.value ? "(\(sensor.code.toString()))" : ""
+        print("\(sensor.name + padding)   \(smcKey)  ", terminator: "")
+
+
+        guard let temperature = try? SMCKit.temperature(sensor.code) else {
+            print("NA")
+            return
+        }
 
         let warning = warningLevel(temperature, maxValue: maxTemperatureCelsius)
         let level   = CLIWarnOption.value ? "(\(warning.name))" : ""
         let color   = CLIColorOption.value ? warning.color : ANSIColor.Off
 
-        let smcKey  = CLIDisplayKeysOption.value ? "(\(sensor.code.toString()))" : ""
-
-        print("\(sensor.name + padding)   \(smcKey)  ", terminator: "")
         print("\(color.rawValue)\(temperature)°C \(level)" +
               "\(ANSIColor.Off.rawValue)")
     }
