@@ -138,8 +138,8 @@ func warningLevel(value: Double, maxValue: Double) -> (name: String,
 
 func colorBoolOutput(value: Bool) -> String {
     let color: ANSIColor
-    if CLIColorOption.value { color = value ? ANSIColor.Green : ANSIColor.Red }
-    else                    { color = ANSIColor.Off }
+    if CLIColorOption.wasSet { color = value ? ANSIColor.Green : ANSIColor.Red }
+    else                     { color = ANSIColor.Off }
 
     return "\(color.rawValue)\(value)\(ANSIColor.Off.rawValue)"
 }
@@ -176,7 +176,7 @@ func printTemperatureInformation(known: Bool = true) {
                                     sensor.name.characters.count,
                              repeatedValue: Character(" "))
 
-        let smcKey  = CLIDisplayKeysOption.value ? "(\(sensor.code.toString()))" : ""
+        let smcKey  = CLIDisplayKeysOption.wasSet ? "(\(sensor.code.toString()))" : ""
         print("\(sensor.name + padding)   \(smcKey)  ", terminator: "")
 
 
@@ -186,8 +186,8 @@ func printTemperatureInformation(known: Bool = true) {
         }
 
         let warning = warningLevel(temperature, maxValue: maxTemperatureCelsius)
-        let level   = CLIWarnOption.value ? "(\(warning.name))" : ""
-        let color   = CLIColorOption.value ? warning.color : ANSIColor.Off
+        let level   = CLIWarnOption.wasSet ? "(\(warning.name))" : ""
+        let color   = CLIColorOption.wasSet ? warning.color : ANSIColor.Off
 
         print("\(color.rawValue)\(temperature)°C \(level)" +
               "\(ANSIColor.Off.rawValue)")
@@ -214,8 +214,8 @@ func printFanInformation() {
             let currentSpeed = try SMCKit.fanCurrentSpeed(fan.id)
             let warning = warningLevel(Double(currentSpeed),
                                        maxValue: Double(fan.maxSpeed))
-            let level = CLIWarnOption.value ? "(\(warning.name))" : ""
-            let color = CLIColorOption.value ? warning.color : ANSIColor.Off
+            let level = CLIWarnOption.wasSet ? "(\(warning.name))" : ""
+            let color = CLIColorOption.wasSet ? warning.color : ANSIColor.Off
             print("\tCurrent:  \(color.rawValue)\(currentSpeed) RPM \(level)" +
                                                     "\(ANSIColor.Off.rawValue)")
         } catch {
@@ -332,10 +332,10 @@ else if CLIFanIdOption.wasSet != CLIFanSpeedOption.wasSet {
 
 if let key = CLICheckKeyOption.value { checkKey(key) }
 
-if CLITemperatureOption.value { printTemperatureInformation() }
+if CLITemperatureOption.wasSet        { printTemperatureInformation() }
 if CLIUnknownTemperatureOption.wasSet { printTemperatureInformation(false) }
-if CLIFanOption.value         { printFanInformation()         }
-if CLIPowerOption.value       { printPowerInformation()       }
-if CLIMiscOption.value        { printMiscInformation()        }
+if CLIFanOption.wasSet                { printFanInformation()         }
+if CLIPowerOption.wasSet              { printPowerInformation()       }
+if CLIMiscOption.wasSet               { printMiscInformation()        }
 
 SMCKit.close()
