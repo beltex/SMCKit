@@ -311,8 +311,9 @@ let wasSetOptions = CLIOptions.filter { $0.wasSet }
 // Want to check that only combination of the follow flags is passed for
 // printAll to occur
 let printAllOptionsCount = wasSetOptions.filter {
-    if $0.shortFlag == nil { return false }
-    switch $0.shortFlag! {
+    guard let shortFlag = $0.shortFlag else { return false }
+
+    switch shortFlag {
     case "c", "d", "w": return true
     default           : return false
     }
