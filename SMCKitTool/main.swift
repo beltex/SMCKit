@@ -162,16 +162,13 @@ func printTemperatureInformation(known: Bool = true) {
     }
 
 
-    if sensors.count == 0 {
+    let sensorWithLongestName = sensors.maxElement { $0.name.characters.count <
+                                                     $1.name.characters.count }
+
+    guard let longestSensorNameCount = sensorWithLongestName?.name.characters.count else {
         print("No known temperature sensors found")
         return
     }
-
-    let sensorWithLongestName = sensors.maxElement
-                                { $0.name.characters.count <
-                                  $1.name.characters.count }
-
-    let longestSensorNameCount = sensorWithLongestName!.name.characters.count
 
 
     for sensor in sensors {
