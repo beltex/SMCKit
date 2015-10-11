@@ -209,21 +209,20 @@ func printFanInformation() {
 
     for fan in allFans {
         print("[id \(fan.id)] \(fan.name)")
-
-        do {
-            let currentSpeed = try SMCKit.fanCurrentSpeed(fan.id)
-            let warning = warningLevel(Double(currentSpeed),
-                                       maxValue: Double(fan.maxSpeed))
-            let level = CLIWarnOption.wasSet ? "(\(warning.name))" : ""
-            let color = CLIColorOption.wasSet ? warning.color : ANSIColor.Off
-            print("\tCurrent:  \(color.rawValue)\(currentSpeed) RPM \(level)" +
-                                                    "\(ANSIColor.Off.rawValue)")
-        } catch {
-            print("\tCurrent:  NA")
-        }
-
         print("\tMin:      \(fan.minSpeed) RPM")
         print("\tMax:      \(fan.maxSpeed) RPM")
+
+        guard let currentSpeed = try? SMCKit.fanCurrentSpeed(fan.id) else {
+            print("\tCurrent:  NA")
+            return
+        }
+
+        let warning = warningLevel(Double(currentSpeed),
+                                   maxValue: Double(fan.maxSpeed))
+        let level = CLIWarnOption.wasSet ? "(\(warning.name))" : ""
+        let color = CLIColorOption.wasSet ? warning.color : ANSIColor.Off
+        print("\tCurrent:  \(color.rawValue)\(currentSpeed) RPM \(level)" +
+                                                    "\(ANSIColor.Off.rawValue)")
     }
 }
 
