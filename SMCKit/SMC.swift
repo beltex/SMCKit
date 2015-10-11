@@ -648,14 +648,17 @@ extension SMCKit {
         var fans = [Fan]()
 
         for var i = 0; i < count; ++i {
-            let name = try fanName(i)
-            let minSpeed = try fanMinSpeed(i)
-            let maxSpeed = try fanMaxSpeed(i)
-            fans.append(Fan(id: i, name: name, minSpeed: minSpeed,
-                                               maxSpeed: maxSpeed))
+            fans.append(try SMCKit.fan(i))
         }
 
         return fans
+    }
+
+    public static func fan(id: Int) throws -> Fan {
+        let name = try fanName(id)
+        let minSpeed = try fanMinSpeed(id)
+        let maxSpeed = try fanMaxSpeed(id)
+        return Fan(id: id, name: name, minSpeed: minSpeed, maxSpeed: maxSpeed)
     }
 
     /// Number of fans this machine has. All Intel based Macs, except for the
