@@ -166,7 +166,7 @@ func printTemperatureInformation(known: Bool = true) {
                                                      $1.name.characters.count }
 
     guard let longestSensorNameCount = sensorWithLongestName?.name.characters.count else {
-        print("No known temperature sensors found")
+        print("No temperature sensors found")
         return
     }
 
@@ -205,7 +205,7 @@ func printFanInformation() {
         return
     }
 
-    if allFans.count == 0 { print("** Fanless **") }
+    if allFans.count == 0 { print("No fans found") }
 
     for fan in allFans {
         print("[id \(fan.id)] \(fan.name)")
@@ -268,22 +268,28 @@ func printAll() {
 
 func checkKey(key: String) {
     if key.characters.count != 4 {
-        print("Must be FourCC")
+        print("Must be a FourCC (four-character code)")
         return
     }
 
     do {
         let isValid = try SMCKit.isKeyFound(FourCharCode(fromString: key))
+        let answer = isValid ? "valid" : "invalid"
 
-        if isValid { print("VALID")   }
-        else       { print("INVALID") }
+        print("\(key) is a \(answer) SMC key on this machine")
     } catch { print(error) }
 }
 
 func setMinFanSpeed(fanId: Int, fanSpeed: Int) {
     do {
+        let fan = try SMCKit.fan(fanId)
+        let currentSpeed = try SMCKit.fanCurrentSpeed(fanId)
+
         try SMCKit.fanSetMinSpeed(fanId, speed: fanSpeed)
-        print("SUCCESS")
+        print("[id \(fan.id)] \(fan.name)")
+        print("\tCurrent:       \(currentSpeed) RPM")
+        print("\tPrevious min:  \(fan.minSpeed) RPM")
+        print("\tTarget min:    \(fanSpeed) RPM")
     } catch SMCKit.Error.KeyNotFound {
         print("This machine has no fan with id \(fanId)")
     } catch SMCKit.Error.NotPrivileged {
@@ -302,13 +308,13 @@ func setMinFanSpeed(fanId: Int, fanSpeed: Int) {
 do {
     try SMCKit.open()
 } catch {
-    print("ERROR: Failed to open connection to SMC")
+    print("Failed to open a connection to the SMC")
     exit(EX_UNAVAILABLE)
 }
 
 let wasSetOptions = CLIOptions.filter { $0.wasSet }
 
-// Want to check that only combination of the follow flags is passed for
+// Want to check that only a combination of the following flags is passed for
 // printAll to occur
 let printAllOptionsCount = wasSetOptions.filter {
     guard let shortFlag = $0.shortFlag else { return false }
