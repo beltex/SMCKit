@@ -285,10 +285,12 @@ func setMinFanSpeed(fanId: Int, fanSpeed: Int) {
         let currentSpeed = try SMCKit.fanCurrentSpeed(fanId)
 
         try SMCKit.fanSetMinSpeed(fanId, speed: fanSpeed)
+
+        print("Min fan speed set successfully")
         print("[id \(fan.id)] \(fan.name)")
-        print("\tCurrent:       \(currentSpeed) RPM")
-        print("\tPrevious min:  \(fan.minSpeed) RPM")
-        print("\tTarget min:    \(fanSpeed) RPM")
+        print("\tMin (Previous):  \(fan.minSpeed) RPM")
+        print("\tMin (Target):    \(fanSpeed) RPM")
+        print("\tCurrent:         \(currentSpeed) RPM")
     } catch SMCKit.Error.KeyNotFound {
         print("This machine has no fan with id \(fanId)")
     } catch SMCKit.Error.NotPrivileged {
