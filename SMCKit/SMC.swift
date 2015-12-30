@@ -725,6 +725,8 @@ extension SMCKit {
     /// raise the fan speed if needed, however it will not go below this.
     ///
     /// WARNING: You are playing with hardware here, BE CAREFUL.
+    ///
+    /// - Throws: Of note, `SMCKit.Error`'s `UnsafeFanSpeed` and `NotPrivileged`
     public static func fanSetMinSpeed(id: Int, speed: Int) throws {
         let maxSpeed = try fanMaxSpeed(id)
         if speed <= 0 || speed > maxSpeed { throw Error.UnsafeFanSpeed }
