@@ -32,7 +32,7 @@ For more see:
 
 ### Requirements
 
-- [Xcode 7](https://developer.apple.com/xcode/downloads/)
+- [Xcode 7.2](https://developer.apple.com/xcode/downloads/)
 - OS X 10.9+
     - This is due to Swift
 
@@ -73,28 +73,28 @@ make install
 
 ```sh
 $ smckit
--- TEMPERATURE --
-AMBIENT_AIR_0           41.0°C
-CPU_0_DIE               50.0°C
-CPU_0_PROXIMITY         46.0°C
-ENCLOSURE_BASE_0        33.0°C
-ENCLOSURE_BASE_1        33.0°C
-ENCLOSURE_BASE_2        30.0°C
-HEATSINK_1              40.0°C
-MEM_SLOTS_PROXIMITY     41.0°C
-PALM_REST               30.0°C
--- FAN --
-[id 0] Exhaust
-  Current:  1324 RPM
-  Min:      1299 RPM
-  Max:      6199 RPM
--- POWER --
+-- Temperature --
+AMBIENT_AIR_0           34.0°C
+CPU_0_DIE               48.0°C
+CPU_0_PROXIMITY         39.0°C
+ENCLOSURE_BASE_0        29.0°C
+ENCLOSURE_BASE_1        29.0°C
+ENCLOSURE_BASE_2        28.0°C
+HEATSINK_1              34.0°C
+MEM_SLOTS_PROXIMITY     36.0°C
+PALM_REST               27.0°C
+-- Fan --
+[id 0] Right Side
+    Min:      1299 RPM
+    Max:      6199 RPM
+    Current:  1292 RPM
+-- Power --
 AC Present:       true
 Battery Powered:  false
 Charging:         false
 Battery Ok:       true
-Max Batteries:    1
--- MISC --
+Battery Count:    1
+-- Misc --
 Disc in ODD:      false
 ```
 
