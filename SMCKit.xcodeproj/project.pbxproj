@@ -284,7 +284,7 @@
 			isa = PBXProject;
 			attributes = {
 				LastSwiftUpdateCheck = 0700;
-				LastUpgradeCheck = 0700;
+				LastUpgradeCheck = 0720;
 				ORGANIZATIONNAME = beltex;
 				TargetAttributes = {
 					4C982BDC1A040CD500F4A639 = {
@@ -396,7 +396,7 @@
 				);
 				OTHER_SWIFT_FLAGS = "-D DEBUG";
 				PRODUCT_NAME = "$(TARGET_NAME)";
-				SWIFT_WHOLE_MODULE_OPTIMIZATION = YES;
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
 			};
 			name = Debug;
 		};
@@ -405,7 +405,7 @@
 			buildSettings = {
 				OTHER_SWIFT_FLAGS = "";
 				PRODUCT_NAME = "$(TARGET_NAME)";
-				SWIFT_WHOLE_MODULE_OPTIMIZATION = YES;
+				SWIFT_OPTIMIZATION_LEVEL = "-Owholemodule";
 			};
 			name = Release;
 		};
