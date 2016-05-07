@@ -422,7 +422,7 @@ extension SMCKit {
         let count = try keyCount()
         var keys = [SMCKey]()
 
-        for var i = 0; i < count; ++i {
+        for i in 0 ..< count {
             let key = try keyInformationAtIndex(i)
             let info = try keyInformation(key)
             keys.append(SMCKey(code: key, info: info))
@@ -647,7 +647,7 @@ extension SMCKit {
         let count = try fanCount()
         var fans = [Fan]()
 
-        for var i = 0; i < count; ++i {
+        for i in 0 ..< count {
             fans.append(try SMCKit.fan(i))
         }
 
