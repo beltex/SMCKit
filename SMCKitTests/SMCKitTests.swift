@@ -140,7 +140,7 @@ class SMCKitTests: XCTestCase {
 
         do {
             ODDStatusSMC = try SMCKit.isOpticalDiskDriveFull()
-        } catch SMCKit.Error.KeyNotFound {
+        } catch SMCKit.SMCError.keyNotFound {
             ODDStatusSMC = false
         } catch {
             print(error)
@@ -160,9 +160,9 @@ class SMCKitTests: XCTestCase {
         // To get the ODD object, need to reg for notification and wait. Since,
         // were looking for an internel device, should be instant.
         // See deviceAppeared() helper.
-        DRNotificationCenter.currentRunLoopCenter().addObserver(self,
-                                             selector: "deviceAppeared:",
-                                             name: DRDeviceAppearedNotification,
+        DRNotificationCenter.currentRunLoop().addObserver(self,
+                                             selector: #selector(SMCKitTests.deviceAppeared(_:)),
+                                             name: NSNotification.Name.DRDeviceAppeared.rawValue,
                                              object: nil)
         
         // TODO: sleep here just incase for notification to be sent?
@@ -174,14 +174,14 @@ class SMCKitTests: XCTestCase {
                                                                     as! NSString
             
             switch ODDStatus {
-            case DRDeviceMediaStateMediaPresent:
+            case DRDeviceMediaStateMediaPresent as String:
                 XCTAssertTrue(ODDStatusSMC)
-            case DRDeviceMediaStateInTransition:
+            case DRDeviceMediaStateInTransition as String:
                 // TODO: Should sleep and wait for state to become "stable",
                 //       DRDeviceStatusChangedNotification
                 // TODO: Throw a fail here?
                 true
-            case DRDeviceMediaStateNone:
+            case DRDeviceMediaStateNone as String:
                 XCTAssertFalse(ODDStatusSMC)
             default:
                 // Unknown state - this should never happen. Only here to
@@ -190,8 +190,8 @@ class SMCKitTests: XCTestCase {
             }
         }
         
-        DRNotificationCenter.currentRunLoopCenter().removeObserver(self,
-                                             name: DRDeviceAppearedNotification,
+        DRNotificationCenter.currentRunLoop().removeObserver(self,
+                                             name: NSNotification.Name.DRDeviceAppeared.rawValue,
                                              object: nil)
     }
     
@@ -210,16 +210,15 @@ class SMCKitTests: XCTestCase {
             isLaptop = true
             
             // Getting these values to cross ref
-            var prop = IORegistryEntryCreateCFProperty(service, "IsCharging",
+            var prop = IORegistryEntryCreateCFProperty(service, "IsCharging" as CFString!,
                                                        kCFAllocatorDefault, 0)
             
-            ASPCharging = prop.takeUnretainedValue() as! Int == 1 ? true : false
+            ASPCharging = prop?.takeUnretainedValue() as! Bool
             
-            
-            prop = IORegistryEntryCreateCFProperty(service, "FullyCharged",
+            prop = IORegistryEntryCreateCFProperty(service, "FullyCharged" as CFString!,
                                                    kCFAllocatorDefault, 0)
             
-            ASPCharged = prop.takeUnretainedValue() as! Int == 1 ? true : false
+            ASPCharged = prop?.takeUnretainedValue() as! Bool
         }
         
         let info = try! SMCKit.batteryInformation()
@@ -304,16 +303,16 @@ class SMCKitTests: XCTestCase {
     /// Callback on disc recording device (ODD) being found.
     ///
     /// NOTE: Must not be private ACL, otherwise selector can't be reached
-    func deviceAppeared(aNotification: NSNotification) {
+    func deviceAppeared(_ aNotification: Notification) {
         let newDevice  = aNotification.object as! DRDevice
         let deviceInfo = newDevice.info()
         
-        let supportLevel = deviceInfo[DRDeviceSupportLevelKey] as! NSString
-        let interconnect = deviceInfo[DRDevicePhysicalInterconnectLocationKey]
+        let supportLevel = deviceInfo?[DRDeviceSupportLevelKey] as! NSString
+        let interconnect = deviceInfo?[DRDevicePhysicalInterconnectLocationKey]
                                                                     as! NSString
         
-        if (interconnect == DRDevicePhysicalInterconnectLocationInternal &&
-            supportLevel == DRDeviceSupportLevelAppleShipping) {
+        if (interconnect as String == DRDevicePhysicalInterconnectLocationInternal &&
+            supportLevel as String == DRDeviceSupportLevelAppleShipping) {
             // The supposition here is that the SMC will only know about
             // internal Apple "made" ODD, and not a 3rd party one that someone
             // swapped in
@@ -330,14 +329,14 @@ class SMCKitTests: XCTestCase {
 
         // Max model name size not defined by sysctl. Instead we use io_name_t
         // via I/O Kit which can also get the model name
-        var size = sizeof(io_name_t)
+        var size = MemoryLayout<io_name_t>.size
 
-        let ptr    = UnsafeMutablePointer<io_name_t>.alloc(1)
+        let ptr    = UnsafeMutablePointer<io_name_t>.allocate(capacity: 1)
         let result = sysctl(&mib, u_int(mib.count), ptr, &size, nil, 0)
 
-        if result == 0 { name = String.fromCString(UnsafePointer(ptr))! }
+        if result == 0 { name = String(cString: UnsafeRawPointer(ptr).assumingMemoryBound(to: CChar.self)) }
 
-        ptr.dealloc(1)
+        ptr.deallocate(capacity: 1)
 
         return name
     }

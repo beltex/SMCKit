@@ -38,12 +38,12 @@ import Foundation
 
 
 // powermetrics added the SMC sampler in 10.10
-let processInfo = NSProcessInfo()
-let Yosemite    = NSOperatingSystemVersion(majorVersion: 10,
+let processInfo = ProcessInfo()
+let Yosemite    = OperatingSystemVersion(majorVersion: 10,
                                            minorVersion: 0,
                                            patchVersion: 0)
 
-if !processInfo.isOperatingSystemAtLeastVersion(Yosemite) {
+if !processInfo.isOperatingSystemAtLeast(Yosemite) {
     print("ERROR: powermetrics requires OS X 10.10 (Yosemite) or greater")
     exit(EX_USAGE)
 }
@@ -59,7 +59,7 @@ do {
 
 
 // Setup command to run powermetrics
-let powermetrics = NSTask()
+let powermetrics = Process()
 powermetrics.launchPath = "/usr/bin/powermetrics"
 
 /*
@@ -70,7 +70,7 @@ TODO: Taking only 1 sample right now. In the future, could change this to take
 */
 powermetrics.arguments  = ["-s", "smc", "-n", "1"]
 
-let pipe = NSPipe()
+let pipe = Pipe()
 powermetrics.standardOutput = pipe
 powermetrics.launch()
 let data = pipe.fileHandleForReading.readDataToEndOfFile()
@@ -90,12 +90,12 @@ let smcCPUDieTemperature = try! SMCKit.temperature(TemperatureSensors.CPU_0_DIE.
 // Parse the output from powermetrics
 // TODO: Unknown format of various cases - multiple fans, no fans, 2 CPUs
 //       (Mac Pro)
-if let output = NSString(data: data, encoding: NSUTF8StringEncoding) as String? {
+if let output = NSString(data: data, encoding: String.Encoding.utf8.rawValue) as String? {
     // Break it down into lines
-    let lines = output.componentsSeparatedByString("\n")
+    let lines = output.components(separatedBy: "\n")
 
     for line in lines {
-        let tokens = line.componentsSeparatedByString(" ")
+        let tokens = line.components(separatedBy: " ")
 
         if line.hasPrefix("Fan:") && line.hasSuffix("rpm") {
             let powermetricsRPM = Int(tokens[1])!

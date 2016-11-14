@@ -99,7 +99,7 @@ public extension FourCharCode {
     }
 
     init(fromStaticString str: StaticString) {
-        precondition(str.byteSize == 4)
+        precondition(str.utf8CodeUnitCount == 4)
 
         self = str.withUTF8Buffer { (buffer) -> UInt32 in
             // FIXME: Compiler hang, need to break up expression
@@ -112,10 +112,10 @@ public extension FourCharCode {
     }
 
     func toString() -> String {
-        return String(UnicodeScalar(self >> 24 & 0xff)) +
-               String(UnicodeScalar(self >> 16 & 0xff)) +
-               String(UnicodeScalar(self >> 8  & 0xff)) +
-               String(UnicodeScalar(self       & 0xff))
+        return String(describing: UnicodeScalar(self >> 24 & 0xff)!) +
+               String(describing: UnicodeScalar(self >> 16 & 0xff)!) +
+               String(describing: UnicodeScalar(self >> 8  & 0xff)!) +
+               String(describing: UnicodeScalar(self       & 0xff)!)
     }
 }
 
@@ -231,7 +231,7 @@ private let kIOReturnNotPrivileged = iokit_common_err(0x2c1)
 /// 32-bit error code.
 ///
 /// - parameter code: The specific I/O Kit error code. Last 14 bits
-private func iokit_common_err(code: Int32) -> kern_return_t {
+private func iokit_common_err(_ code: Int32) -> kern_return_t {
     // I/O Kit system code is 0x38. First 6 bits of error code. Passed to
     // err_system() macro as defined in <mach/error.h>
     let SYS_IOKIT: Int32 = (0x38 & 0x3f) << 26
@@ -282,31 +282,32 @@ public func ==(lhs: DataType, rhs: DataType) -> Bool {
 /// source driver for the SMC.
 public struct SMCKit {
 
-    public enum Error: ErrorType {
+    public enum SMCError: Error {
+
         /// AppleSMC driver not found
-        case DriverNotFound
+        case driverNotFound
 
         /// Failed to open a connection to the AppleSMC driver
-        case FailedToOpen
+        case failedToOpen
 
         /// This SMC key is not valid on this machine
-        case KeyNotFound(code: String)
+        case keyNotFound(code: String)
 
         /// Requires root privileges
-        case NotPrivileged
+        case notPrivileged
 
         /// Fan speed must be > 0 && <= fanMaxSpeed
-        case UnsafeFanSpeed
+        case unsafeFanSpeed
 
         /// https://developer.apple.com/library/mac/qa/qa1075/_index.html
         ///
         /// - parameter kIOReturn: I/O Kit error code
         /// - parameter SMCResult: SMC specific return code
-        case Unknown(kIOReturn: kern_return_t, SMCResult: UInt8)
+        case unknown(kIOReturn: kern_return_t, SMCResult: UInt8)
     }
 
     /// Connection to the SMC driver
-    private static var connection: io_connect_t = 0
+    fileprivate static var connection: io_connect_t = 0
 
     /// Open connection to the SMC driver. This must be done first before any
     /// other calls
@@ -314,13 +315,13 @@ public struct SMCKit {
         let service = IOServiceGetMatchingService(kIOMasterPortDefault,
                                                   IOServiceMatching("AppleSMC"))
 
-        if service == 0 { throw Error.DriverNotFound }
+        if service == 0 { throw SMCError.driverNotFound }
 
         let result = IOServiceOpen(service, mach_task_self_, 0,
                                    &SMCKit.connection)
         IOObjectRelease(service)
 
-        if result != kIOReturnSuccess { throw Error.FailedToOpen }
+        if result != kIOReturnSuccess { throw SMCError.failedToOpen }
     }
 
     /// Close connection to the SMC driver
@@ -330,7 +331,7 @@ public struct SMCKit {
     }
 
     /// Get information about a key
-    public static func keyInformation(key: FourCharCode) throws -> DataType {
+    public static func keyInformation(_ key: FourCharCode) throws -> DataType {
         var inputStruct = SMCParamStruct()
 
         inputStruct.key = key
@@ -343,7 +344,7 @@ public struct SMCKit {
     }
 
     /// Get information about the key at index
-    public static func keyInformationAtIndex(index: Int) throws ->
+    public static func keyInformationAtIndex(_ index: Int) throws ->
                                                                   FourCharCode {
         var inputStruct = SMCParamStruct()
 
@@ -356,7 +357,7 @@ public struct SMCKit {
     }
 
     /// Read data of a key
-    public static func readData(key: SMCKey) throws -> SMCBytes {
+    public static func readData(_ key: SMCKey) throws -> SMCBytes {
         var inputStruct = SMCParamStruct()
 
         inputStruct.key = key.code
@@ -369,7 +370,7 @@ public struct SMCKit {
     }
 
     /// Write data for a key
-    public static func writeData(key: SMCKey, data: SMCBytes) throws {
+    public static func writeData(_ key: SMCKey, data: SMCBytes) throws {
         var inputStruct = SMCParamStruct()
 
         inputStruct.key = key.code
@@ -381,14 +382,14 @@ public struct SMCKit {
     }
 
     /// Make an actual call to the SMC driver
-    public static func callDriver(inout inputStruct: SMCParamStruct,
+    public static func callDriver(_ inputStruct: inout SMCParamStruct,
                         selector: SMCParamStruct.Selector = .kSMCHandleYPCEvent)
                                                       throws -> SMCParamStruct {
-        assert(strideof(SMCParamStruct) == 80, "SMCParamStruct size is != 80")
+        assert(MemoryLayout<SMCParamStruct>.stride == 80, "SMCParamStruct size is != 80")
 
         var outputStruct = SMCParamStruct()
-        let inputStructSize = strideof(SMCParamStruct)
-        var outputStructSize = strideof(SMCParamStruct)
+        let inputStructSize = MemoryLayout<SMCParamStruct>.stride
+        var outputStructSize = MemoryLayout<SMCParamStruct>.stride
 
         let result = IOConnectCallStructMethod(SMCKit.connection,
                                                UInt32(selector.rawValue),
@@ -401,11 +402,11 @@ public struct SMCKit {
         case (kIOReturnSuccess, SMCParamStruct.Result.kSMCSuccess.rawValue):
             return outputStruct
         case (kIOReturnSuccess, SMCParamStruct.Result.kSMCKeyNotFound.rawValue):
-            throw Error.KeyNotFound(code: inputStruct.key.toString())
+            throw SMCError.keyNotFound(code: inputStruct.key.toString())
         case (kIOReturnNotPrivileged, _):
-            throw Error.NotPrivileged
+            throw SMCError.notPrivileged
         default:
-            throw Error.Unknown(kIOReturn: result,
+            throw SMCError.unknown(kIOReturn: result,
                                 SMCResult: outputStruct.result)
         }
     }
@@ -441,10 +442,10 @@ extension SMCKit {
     }
 
     /// Is this key valid on this machine?
-    public static func isKeyFound(code: FourCharCode) throws -> Bool {
+    public static func isKeyFound(_ code: FourCharCode) throws -> Bool {
         do {
             try keyInformation(code)
-        } catch Error.KeyNotFound { return false }
+        } catch SMCError.keyNotFound { return false }
 
         return true
     }
@@ -574,16 +575,16 @@ public struct TemperatureSensor {
 }
 
 public enum TemperatureUnit {
-    case Celius
-    case Fahrenheit
-    case Kelvin
+    case celius
+    case fahrenheit
+    case kelvin
 
-    public static func toFahrenheit(celius: Double) -> Double {
+    public static func toFahrenheit(_ celius: Double) -> Double {
         // https://en.wikipedia.org/wiki/Fahrenheit#Definition_and_conversions
         return (celius * 1.8) + 32
     }
 
-    public static func toKelvin(celius: Double) -> Double {
+    public static func toKelvin(_ celius: Double) -> Double {
         // https://en.wikipedia.org/wiki/Kelvin
         return celius + 273.15
     }
@@ -612,18 +613,18 @@ extension SMCKit {
     }
 
     /// Get current temperature of a sensor
-    public static func temperature(sensorCode: FourCharCode,
-                             unit: TemperatureUnit = .Celius) throws -> Double {
+    public static func temperature(_ sensorCode: FourCharCode,
+                             unit: TemperatureUnit = .celius) throws -> Double {
         let data = try readData(SMCKey(code: sensorCode, info: DataTypes.SP78))
 
         let temperatureInCelius = Double(fromSP78: (data.0, data.1))
 
         switch unit {
-        case .Celius:
+        case .celius:
             return temperatureInCelius
-        case .Fahrenheit:
+        case .fahrenheit:
             return TemperatureUnit.toFahrenheit(temperatureInCelius)
-        case .Kelvin:
+        case .kelvin:
             return TemperatureUnit.toKelvin(temperatureInCelius)
         }
     }
@@ -654,7 +655,7 @@ extension SMCKit {
         return fans
     }
 
-    public static func fan(id: Int) throws -> Fan {
+    public static func fan(_ id: Int) throws -> Fan {
         let name = try fanName(id)
         let minSpeed = try fanMinSpeed(id)
         let maxSpeed = try fanMaxSpeed(id)
@@ -671,7 +672,7 @@ extension SMCKit {
         return Int(data.0)
     }
 
-    public static func fanName(id: Int) throws -> String {
+    public static func fanName(_ id: Int) throws -> String {
         let key = SMCKey(code: FourCharCode(fromString: "F\(id)ID"),
                                             info: DataTypes.FDS)
         let data = try readData(key)
@@ -693,11 +694,11 @@ extension SMCKit {
 
         let name = c1 + c2 + c3 + c4 + c5 + c6 + c7 + c8 + c9 + c10 + c11 + c12
 
-        let characterSet = NSCharacterSet.whitespaceCharacterSet()
-        return name.stringByTrimmingCharactersInSet(characterSet)
+        let characterSet = CharacterSet.whitespaces
+        return name.trimmingCharacters(in: characterSet)
     }
 
-    public static func fanCurrentSpeed(id: Int) throws -> Int {
+    public static func fanCurrentSpeed(_ id: Int) throws -> Int {
         let key = SMCKey(code: FourCharCode(fromString: "F\(id)Ac"),
                                             info: DataTypes.FPE2)
 
@@ -705,7 +706,7 @@ extension SMCKit {
         return Int(fromFPE2: (data.0, data.1))
     }
 
-    public static func fanMinSpeed(id: Int) throws -> Int {
+    public static func fanMinSpeed(_ id: Int) throws -> Int {
         let key = SMCKey(code: FourCharCode(fromString: "F\(id)Mn"),
                                             info: DataTypes.FPE2)
 
@@ -713,7 +714,7 @@ extension SMCKit {
         return Int(fromFPE2: (data.0, data.1))
     }
 
-    public static func fanMaxSpeed(id: Int) throws -> Int {
+    public static func fanMaxSpeed(_ id: Int) throws -> Int {
         let key = SMCKey(code: FourCharCode(fromString: "F\(id)Mx"),
                                             info: DataTypes.FPE2)
 
@@ -726,10 +727,10 @@ extension SMCKit {
     ///
     /// WARNING: You are playing with hardware here, BE CAREFUL.
     ///
-    /// - Throws: Of note, `SMCKit.Error`'s `UnsafeFanSpeed` and `NotPrivileged`
-    public static func fanSetMinSpeed(id: Int, speed: Int) throws {
+    /// - Throws: Of note, `SMCKit.SMCError`'s `UnsafeFanSpeed` and `NotPrivileged`
+    public static func fanSetMinSpeed(_ id: Int, speed: Int) throws {
         let maxSpeed = try fanMaxSpeed(id)
-        if speed <= 0 || speed > maxSpeed { throw Error.UnsafeFanSpeed }
+        if speed <= 0 || speed > maxSpeed { throw SMCError.unsafeFanSpeed }
 
         let data = speed.toFPE2()
         let bytes = (data.0, data.1, UInt8(0), UInt8(0), UInt8(0), UInt8(0),
