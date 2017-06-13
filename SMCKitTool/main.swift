@@ -150,7 +150,7 @@ func printTemperatureInformation(known: Bool = true) {
     let sensors: [TemperatureSensor]
     do {
         if known {
-            sensors = try SMCKit.allKnownTemperatureSensors().sort
+            sensors = try SMCKit.allKnownTemperatureSensors().sorted
                                                            { $0.name < $1.name }
         } else {
             sensors = try SMCKit.allUnknownTemperatureSensors()
@@ -162,7 +162,7 @@ func printTemperatureInformation(known: Bool = true) {
     }
 
 
-    let sensorWithLongestName = sensors.maxElement { $0.name.characters.count <
+    let sensorWithLongestName = sensors.max { $0.name.characters.count <
                                                      $1.name.characters.count }
 
     guard let longestSensorNameCount = sensorWithLongestName?.name.characters.count else {
@@ -172,9 +172,8 @@ func printTemperatureInformation(known: Bool = true) {
 
 
     for sensor in sensors {
-        let padding = String(count: longestSensorNameCount -
-                                    sensor.name.characters.count,
-                             repeatedValue: Character(" "))
+        let padding = String(repeating: " ",
+                             count: longestSensorNameCount - sensor.name.characters.count)
 
         let smcKey  = CLIDisplayKeysOption.wasSet ? "(\(sensor.code.toString()))" : ""
         print("\(sensor.name + padding)   \(smcKey)  ", terminator: "")
@@ -185,7 +184,7 @@ func printTemperatureInformation(known: Bool = true) {
             return
         }
 
-        let warning = warningLevel(temperature, maxValue: maxTemperatureCelsius)
+        let warning = warningLevel(value: temperature, maxValue: maxTemperatureCelsius)
         let level   = CLIWarnOption.wasSet ? "(\(warning.name))" : ""
         let color   = CLIColorOption.wasSet ? warning.color : ANSIColor.Off
 
@@ -217,7 +216,7 @@ func printFanInformation() {
             return
         }
 
-        let warning = warningLevel(Double(currentSpeed),
+        let warning = warningLevel(value: Double(currentSpeed),
                                    maxValue: Double(fan.maxSpeed))
         let level = CLIWarnOption.wasSet ? "(\(warning.name))" : ""
         let color = CLIColorOption.wasSet ? warning.color : ANSIColor.Off
@@ -236,10 +235,10 @@ func printPowerInformation() {
     }
 
     print("-- Power --")
-    print("AC Present:       \(colorBoolOutput(information.isACPresent))")
-    print("Battery Powered:  \(colorBoolOutput(information.isBatteryPowered))")
-    print("Charging:         \(colorBoolOutput(information.isCharging))")
-    print("Battery Ok:       \(colorBoolOutput(information.isBatteryOk))")
+    print("AC Present:       \(colorBoolOutput(value: information.isACPresent))")
+    print("Battery Powered:  \(colorBoolOutput(value: information.isBatteryPowered))")
+    print("Charging:         \(colorBoolOutput(value: information.isCharging))")
+    print("Battery Ok:       \(colorBoolOutput(value: information.isBatteryOk))")
     print("Battery Count:    \(information.batteryCount)")
 }
 
@@ -249,13 +248,13 @@ func printMiscInformation() {
     let ODDStatus: Bool
     do {
         ODDStatus = try SMCKit.isOpticalDiskDriveFull()
-    } catch SMCKit.Error.KeyNotFound { ODDStatus = false }
+    } catch SMCKit.SMCError.keyNotFound { ODDStatus = false }
       catch {
         print(error)
         return
     }
 
-    print("Disc in ODD:      \(colorBoolOutput(ODDStatus))")
+    print("Disc in ODD:      \(colorBoolOutput(value: ODDStatus))")
 }
 
 func printAll() {
@@ -291,11 +290,11 @@ func setMinFanSpeed(fanId: Int, fanSpeed: Int) {
         print("\tMin (Previous):  \(fan.minSpeed) RPM")
         print("\tMin (Target):    \(fanSpeed) RPM")
         print("\tCurrent:         \(currentSpeed) RPM")
-    } catch SMCKit.Error.KeyNotFound {
+    } catch SMCKit.SMCError.keyNotFound {
         print("This machine has no fan with id \(fanId)")
-    } catch SMCKit.Error.NotPrivileged {
+    } catch SMCKit.SMCError.notPrivileged {
         print("This operation must be invoked as the superuser")
-    } catch SMCKit.Error.UnsafeFanSpeed {
+    } catch SMCKit.SMCError.unsafeFanSpeed {
         print("Invalid fan speed. Must be <= max fan speed")
     } catch {
         print(error)
@@ -330,17 +329,17 @@ if printAllOptionsCount == wasSetOptions.count { printAll() }
 
 
 if let fanId = CLIFanIdOption.value, let fanSpeed = CLIFanSpeedOption.value {
-    setMinFanSpeed(fanId, fanSpeed: fanSpeed)
+    setMinFanSpeed(fanId: fanId, fanSpeed: fanSpeed)
 }
 else if CLIFanIdOption.wasSet != CLIFanSpeedOption.wasSet {
     print("Usage: Must set fan number (-n) AND fan speed (-s)")
 }
 
 
-if let key = CLICheckKeyOption.value { checkKey(key) }
+if let key = CLICheckKeyOption.value { checkKey(key: key) }
 
 if CLITemperatureOption.wasSet        { printTemperatureInformation() }
-if CLIUnknownTemperatureOption.wasSet { printTemperatureInformation(false) }
+if CLIUnknownTemperatureOption.wasSet { printTemperatureInformation(known: false) }
 if CLIFanOption.wasSet                { printFanInformation()         }
 if CLIPowerOption.wasSet              { printPowerInformation()       }
 if CLIMiscOption.wasSet               { printMiscInformation()        }
