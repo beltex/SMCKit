@@ -63,9 +63,9 @@
 		4CE5669C1A00A48800787F6B /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		4CE5669D1A00A48800787F6B /* SMCKitTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SMCKitTests.swift; sourceTree = "<group>"; };
 		4CE566A71A00A49600787F6B /* SMC.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SMC.swift; sourceTree = "<group>"; };
-		4CE5BC211B1F85880030FA55 /* CommandLine.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = CommandLine.swift; path = lib/CommandLine/CommandLine/CommandLine.swift; sourceTree = "<group>"; };
-		4CE5BC221B1F85880030FA55 /* Option.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = Option.swift; path = lib/CommandLine/CommandLine/Option.swift; sourceTree = "<group>"; };
-		4CE5BC231B1F85880030FA55 /* StringExtensions.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = StringExtensions.swift; path = lib/CommandLine/CommandLine/StringExtensions.swift; sourceTree = "<group>"; };
+		4CE5BC211B1F85880030FA55 /* CommandLine.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = CommandLine.swift; path = lib/CommandLine/CommandLineKit/CommandLine.swift; sourceTree = "<group>"; };
+		4CE5BC221B1F85880030FA55 /* Option.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = Option.swift; path = lib/CommandLine/CommandLineKit/Option.swift; sourceTree = "<group>"; };
+		4CE5BC231B1F85880030FA55 /* StringExtensions.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = StringExtensions.swift; path = lib/CommandLine/CommandLineKit/StringExtensions.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
