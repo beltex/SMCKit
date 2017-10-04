@@ -58,7 +58,7 @@ git submodule update --init
 A macOS command line tool for interfacing with the SMC using SMCKit. The
 [CommandLine](https://github.com/jatoben/CommandLine) library is used for
 the CLI and [ronn](https://github.com/rtomayko/ronn) for generating the
-[manual page](http://beltex.github.io/SMCKit/smckit.1.html).
+[manual page](https://beltex.github.io/SMCKit).
 
 ##### Install
 
