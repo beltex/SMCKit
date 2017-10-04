@@ -325,6 +325,7 @@ public struct SMCKit {
     }
 
     /// Close connection to the SMC driver
+    @discardableResult
     public static func close() -> Bool {
         let result = IOServiceClose(SMCKit.connection)
         return result == kIOReturnSuccess ? true : false
@@ -378,7 +379,7 @@ public struct SMCKit {
         inputStruct.keyInfo.dataSize = UInt32(key.info.size)
         inputStruct.data8 = SMCParamStruct.Selector.kSMCWriteKey.rawValue
 
-        try callDriver(&inputStruct)
+        _ = try callDriver(&inputStruct)
     }
 
     /// Make an actual call to the SMC driver
@@ -444,7 +445,7 @@ extension SMCKit {
     /// Is this key valid on this machine?
     public static func isKeyFound(_ code: FourCharCode) throws -> Bool {
         do {
-            try keyInformation(code)
+            _ = try keyInformation(code)
         } catch SMCError.keyNotFound { return false }
 
         return true

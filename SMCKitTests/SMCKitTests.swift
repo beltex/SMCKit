@@ -180,13 +180,11 @@ class SMCKitTests: XCTestCase {
                 // TODO: Should sleep and wait for state to become "stable",
                 //       DRDeviceStatusChangedNotification
                 // TODO: Throw a fail here?
-                true
+                break
             case DRDeviceMediaStateNone as String:
                 XCTAssertFalse(ODDStatusSMC)
             default:
-                // Unknown state - this should never happen. Only here to
-                // make compiler happy
-                true
+                break
             }
         }
         
