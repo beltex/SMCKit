@@ -14,7 +14,7 @@
 //
 // The MIT License
 //
-// Copyright (C) 2015  beltex <http://beltex.github.io>
+// Copyright (C) 2015-2017  beltex <https://beltex.github.io>
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
