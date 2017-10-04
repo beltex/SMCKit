@@ -8,7 +8,7 @@ XCODE_BUILD  = xcodebuild -target ${XCODE_TARGET}
 
 install: machine release
 	cp bin/smckit ${INSTALL_DIR}
-	cp SMCKitTool/doc/smckit.1 ${MANPAGE_DIR}
+	cp docs/smckit.1 ${MANPAGE_DIR}
 	du -sh ${INSTALL_DIR}/smckit
 machine:
 	@sysctl hw.model;                                             \
@@ -34,7 +34,8 @@ jazzy:
 	jazzy -a beltex -u http://beltex.github.io -m SMCKit \
           -g https://github.com/beltex/SMCKit
 ronn:
-	ronn --style=toc SMCKitTool/doc/smckit.1.ronn
+	ronn --style=toc docs/smckit.1.ronn
+	mv docs/smckit.1.html docs/index.html
 clean:
 	${XCODE_BUILD} -configuration Debug clean
 	${XCODE_BUILD} -configuration Release clean
