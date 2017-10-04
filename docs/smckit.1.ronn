@@ -1,5 +1,5 @@
-smckit(1) -- OS X SMC tool
-==========================
+smckit(1) -- macOS SMC tool
+===========================
 
 ## SYNOPSIS
 
@@ -11,7 +11,7 @@ smckit(1) -- OS X SMC tool
 
 ## DESCRIPTION
 
-An OS X command line tool for interfacing with the Apple System Management
+A macOS command line tool for interfacing with the Apple System Management
 Controller (SMC) in Swift on Intel based Macs.
 
 ## OPTIONS
@@ -48,7 +48,7 @@ information.
 
   * `-s`, `--fan-speed` <value>:
     The minimum speed (RPM - revolutions per minute) of the fan to set. By
-    minimum we mean that OS X can interject and raise the fan speed if needed,
+    minimum we mean that macOS can interject and raise the fan speed if needed,
     however it will not go below this. Must be used with `--fan-id`. Requires
     root privileges.
 
@@ -94,7 +94,7 @@ information.
 
 ## ENVIRONMENT
 
-Due to Swift, smckit requires OS X 10.9 (Mavericks) and above. This implies an
+Due to Swift, `smckit` requires macOS 10.9 (Mavericks) and above. This implies an
 Intel based 64-bit machine.
 
 ## REPOSITORY
@@ -111,7 +111,7 @@ This project is under the _MIT License_.
 
 ## AUTHOR
 
-beltex <http://beltex.github.io>
+beltex <https://beltex.github.io>
 
 ## SEE ALSO
 
