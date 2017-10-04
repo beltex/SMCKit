@@ -1,14 +1,14 @@
 SMCKit
 ======
 
-An OS X System Management Controller (SMC) library & command line tool in Swift
+An Apple System Management Controller (SMC) library & command line tool in Swift
 for Intel based Macs. The library works by talking to the AppleSMC.kext (kernel
 extension), the private driver for the SMC. Read temperature sensors, get and
 set fan speed (RPM), and more.
 
 - For an example usage of this library, see
-  [dshb](https://github.com/beltex/dshb), an OS X system monitor in Swift
-- For other system related statistics in Swift for OS X, see
+  [dshb](https://github.com/beltex/dshb), a macOS system monitor in Swift
+- For other system related statistics in Swift for macOS, see
   [SystemKit](https://github.com/beltex/SystemKit)
 
 
@@ -32,8 +32,8 @@ For more see:
 
 ### Requirements
 
-- [Xcode 7.3 (Swift 2.2)](https://developer.apple.com/xcode/downloads/)
-- OS X 10.9+
+- [Xcode 8.3.3 (Swift 3.1)](https://developer.apple.com/xcode/downloads/)
+- macOS 10.9+
     - This is due to Swift
 
 
@@ -55,7 +55,7 @@ git submodule update --init
 
 ### SMCKitTool
 
-An OS X command line tool for interfacing with the SMC using SMCKit. The
+A macOS command line tool for interfacing with the SMC using SMCKit. The
 [CommandLine](https://github.com/jatoben/CommandLine) library is used for
 the CLI and [ronn](https://github.com/rtomayko/ronn) for generating the
 [manual page](http://beltex.github.io/SMCKit/smckit.1.html).
@@ -103,7 +103,7 @@ Disc in ODD:      false
 
 - The use of this library  will almost certainly not be allowed in the
   Mac App Store as it is essentially using a private API
-- If you are creating an OS X command line tool, you cannot use SMCKit as a
+- If you are creating a macOS command line tool, you cannot use SMCKit as a
   library as Swift does not currently support static libraries. In such a
   case, the `SMC.swift` file must simply be included in your project as another
   source file. See
