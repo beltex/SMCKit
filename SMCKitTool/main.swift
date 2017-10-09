@@ -37,7 +37,7 @@ import Darwin
 // MARK: Globals
 //------------------------------------------------------------------------------
 
-let SMCKitToolVersion     = "0.1.0-dev"
+let SMCKitToolVersion     = "0.1.0"
 let maxTemperatureCelsius = 128.0
 
 //------------------------------------------------------------------------------
