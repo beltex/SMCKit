@@ -170,18 +170,17 @@ class SMCKitTests: XCTestCase {
         
         // TODO: Ignoring the Mac Pro case for now, with 2 drives
         if internalODD.count == 1 {
-            let ODDStatus = internalODD[0].status()[DRDeviceMediaStateKey]
-                                                                    as! NSString
+            let ODDStatus = internalODD[0].status()[DRDeviceMediaStateKey] as! String
             
             switch ODDStatus {
-            case DRDeviceMediaStateMediaPresent as String:
+            case DRDeviceMediaStateMediaPresent:
                 XCTAssertTrue(ODDStatusSMC)
-            case DRDeviceMediaStateInTransition as String:
+            case DRDeviceMediaStateInTransition:
                 // TODO: Should sleep and wait for state to become "stable",
                 //       DRDeviceStatusChangedNotification
                 // TODO: Throw a fail here?
                 break
-            case DRDeviceMediaStateNone as String:
+            case DRDeviceMediaStateNone:
                 XCTAssertFalse(ODDStatusSMC)
             default:
                 break
