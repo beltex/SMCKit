@@ -219,30 +219,6 @@ public struct SMCParamStruct {
 // MARK: SMC Client
 //------------------------------------------------------------------------------
 
-/// I/O Kit common error codes - as defined in <IOKit/IOReturn.h>
-///
-/// Swift currently can't import complex macros, thus we have to manually add
-/// them here.
-
-/// Privilege violation
-private let kIOReturnNotPrivileged = iokit_common_err(0x2c1)
-
-/// Based on macro of the same name in <IOKit/IOReturn.h>. Generates the full
-/// 32-bit error code.
-///
-/// - parameter code: The specific I/O Kit error code. Last 14 bits
-private func iokit_common_err(_ code: Int32) -> kern_return_t {
-    // I/O Kit system code is 0x38. First 6 bits of error code. Passed to
-    // err_system() macro as defined in <mach/error.h>
-    let SYS_IOKIT: Int32 = (0x38 & 0x3f) << 26
-
-    // I/O Kit subsystem code is 0. Middle 12 bits of error code. Passed to
-    // err_sub() macro as defined in <mach/error.h>
-    let SUB_IOKIT_COMMON: Int32 = (0 & 0xfff) << 14
-
-    return SYS_IOKIT | SUB_IOKIT_COMMON | code
-}
-
 /// SMC data type information
 public struct DataTypes {
 
