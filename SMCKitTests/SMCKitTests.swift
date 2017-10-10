@@ -160,17 +160,20 @@ class SMCKitTests: XCTestCase {
         // To get the ODD object, need to reg for notification and wait. Since,
         // were looking for an internel device, should be instant.
         // See deviceAppeared() helper.
-        DRNotificationCenter.currentRunLoop().addObserver(self,
-                                             selector: #selector(SMCKitTests.deviceAppeared(_:)),
-                                             name: NSNotification.Name.DRDeviceAppeared.rawValue,
-                                             object: nil)
+        DRNotificationCenter.currentRunLoop().addObserver(
+            self,
+            selector: #selector(SMCKitTests.deviceAppeared(_:)),
+            name: NSNotification.Name.DRDeviceAppeared.rawValue,
+            object: nil
+        )
         
         // TODO: sleep here just incase for notification to be sent?
 
         
         // TODO: Ignoring the Mac Pro case for now, with 2 drives
         if internalODD.count == 1 {
-            let ODDStatus = internalODD[0].status()[DRDeviceMediaStateKey] as! String
+            let ODDStatus =
+                internalODD[0].status()[DRDeviceMediaStateKey] as! String
             
             switch ODDStatus {
             case DRDeviceMediaStateMediaPresent:
@@ -187,9 +190,11 @@ class SMCKitTests: XCTestCase {
             }
         }
         
-        DRNotificationCenter.currentRunLoop().removeObserver(self,
-                                             name: NSNotification.Name.DRDeviceAppeared.rawValue,
-                                             object: nil)
+        DRNotificationCenter.currentRunLoop().removeObserver(
+            self,
+            name: NSNotification.Name.DRDeviceAppeared.rawValue,
+            object: nil
+        )
     }
     
     func testBatteryPowerMethods() {
@@ -207,13 +212,19 @@ class SMCKitTests: XCTestCase {
             isLaptop = true
             
             // Getting these values to cross ref
-            var prop = IORegistryEntryCreateCFProperty(service, "IsCharging" as CFString!,
-                                                       kCFAllocatorDefault, 0)
+            var prop = IORegistryEntryCreateCFProperty(
+                service, "IsCharging" as CFString!,
+                kCFAllocatorDefault,
+                0
+            )
             
             ASPCharging = prop?.takeUnretainedValue() as! Bool
             
-            prop = IORegistryEntryCreateCFProperty(service, "FullyCharged" as CFString!,
-                                                   kCFAllocatorDefault, 0)
+            prop = IORegistryEntryCreateCFProperty(
+                service, "FullyCharged" as CFString!,
+                kCFAllocatorDefault,
+                0
+            )
             
             ASPCharged = prop?.takeUnretainedValue() as! Bool
         }
@@ -304,12 +315,12 @@ class SMCKitTests: XCTestCase {
         let newDevice  = aNotification.object as! DRDevice
         let deviceInfo = newDevice.info()
         
-        let supportLevel = deviceInfo?[DRDeviceSupportLevelKey] as! NSString
-        let interconnect = deviceInfo?[DRDevicePhysicalInterconnectLocationKey]
-                                                                    as! NSString
+        let supportLevel = deviceInfo?[DRDeviceSupportLevelKey] as! String
+        let interconnect =
+            deviceInfo?[DRDevicePhysicalInterconnectLocationKey] as! String
         
-        if (interconnect as String == DRDevicePhysicalInterconnectLocationInternal &&
-            supportLevel as String == DRDeviceSupportLevelAppleShipping) {
+        if interconnect == DRDevicePhysicalInterconnectLocationInternal &&
+           supportLevel == DRDeviceSupportLevelAppleShipping {
             // The supposition here is that the SMC will only know about
             // internal Apple "made" ODD, and not a 3rd party one that someone
             // swapped in
@@ -331,7 +342,11 @@ class SMCKitTests: XCTestCase {
         let ptr    = UnsafeMutablePointer<io_name_t>.allocate(capacity: 1)
         let result = sysctl(&mib, u_int(mib.count), ptr, &size, nil, 0)
 
-        if result == 0 { name = String(cString: UnsafeRawPointer(ptr).assumingMemoryBound(to: CChar.self)) }
+        if result == 0 {
+            let cString =
+                UnsafeRawPointer(ptr).assumingMemoryBound(to: CChar.self)
+            name = String(cString: cString)
+        }
 
         ptr.deallocate(capacity: 1)
 
