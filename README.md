@@ -32,9 +32,9 @@ For more see:
 
 ### Requirements
 
-- [Xcode 8.3.3 (Swift 3.1)](https://developer.apple.com/xcode/downloads/)
-- macOS 10.9+
-    - This is due to Swift
+- [Xcode 9.0 (Swift 4.0)](https://developer.apple.com/xcode/downloads/)
+- macOS 10.12 Sierra and above **for development** (due to Xcode)
+- OS X 10.9 Mavericks and above **for use** (due to Swift)
 
 
 ### Clone
