@@ -52,10 +52,15 @@ public typealias SMCBytes = (UInt8, UInt8, UInt8, UInt8, UInt8, UInt8, UInt8,
 extension UInt32 {
 
     init(fromBytes bytes: (UInt8, UInt8, UInt8, UInt8)) {
-        self = UInt32(bytes.0) << 24 |
-               UInt32(bytes.1) << 16 |
-               UInt32(bytes.2) << 8  |
-               UInt32(bytes.3)
+        // TODO: Broken up due to "Expression was too complex" error as of
+        //       Swift 4.
+
+        let byte0 = UInt32(bytes.0) << 24
+        let byte1 = UInt32(bytes.1) << 16
+        let byte2 = UInt32(bytes.2) << 8
+        let byte3 = UInt32(bytes.3)
+
+        self = byte0 | byte1 | byte2 | byte3
     }
 }
 
@@ -101,13 +106,16 @@ public extension FourCharCode {
     init(fromStaticString str: StaticString) {
         precondition(str.utf8CodeUnitCount == 4)
 
-        self = str.withUTF8Buffer { (buffer) -> UInt32 in
-            // FIXME: Compiler hang, need to break up expression
-            let temp = UInt32(buffer[0]) << 24
-            return temp                    |
-                   UInt32(buffer[1]) << 16 |
-                   UInt32(buffer[2]) << 8  |
-                   UInt32(buffer[3])
+        self = str.withUTF8Buffer { buffer in
+            // TODO: Broken up due to "Expression was too complex" error as of
+            //       Swift 4.
+
+            let byte0 = UInt32(buffer[0]) << 24
+            let byte1 = UInt32(buffer[1]) << 16
+            let byte2 = UInt32(buffer[2]) << 8
+            let byte3 = UInt32(buffer[3])
+
+            return byte0 | byte1 | byte2 | byte3
         }
     }
 
