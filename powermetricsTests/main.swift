@@ -84,13 +84,14 @@ let smcRPM               = try! SMCKit.fanCurrentSpeed(0)
 
 // The key used by powermetrics was determined via DTrace script below
 // https://gist.github.com/beltex/acbbeef815a7be938abf
-let smcCPUDieTemperature = try! SMCKit.temperature(TemperatureSensors.CPU_0_DIE.code)
+let smcCPUDieTemperature =
+    try! SMCKit.temperature(TemperatureSensors.CPU_0_DIE.code)
 
 
 // Parse the output from powermetrics
 // TODO: Unknown format of various cases - multiple fans, no fans, 2 CPUs
 //       (Mac Pro)
-if let output = NSString(data: data, encoding: String.Encoding.utf8.rawValue) as String? {
+if let output = NSString(data: data, encoding: String.Encoding.utf8.rawValue) {
     // Break it down into lines
     let lines = output.components(separatedBy: "\n")
 
@@ -105,14 +106,17 @@ if let output = NSString(data: data, encoding: String.Encoding.utf8.rawValue) as
             print("powermetrics fan RPM: \(powermetricsRPM)")
             assert(diff >= 0 && diff <= 5, "RPM differs by more than +/- 5")
 
-        }
-        else if line.hasPrefix("CPU die temperature:") && line.hasSuffix("C") {
-            let powermetricsCPUDieTemperature = (tokens[3] as NSString).doubleValue
+        } else if line.hasPrefix("CPU die temperature:") &&
+                  line.hasSuffix("C") {
+            let powermetricsCPUDieTemperature =
+                (tokens[3] as NSString).doubleValue
             let diff = abs(smcCPUDieTemperature - powermetricsCPUDieTemperature)
 
             print("SMCKit CPU_0_DIE:                 \(smcCPUDieTemperature)")
-            print("powermetrics CPU die temperature: \(powermetricsCPUDieTemperature)")
-            assert(diff >= 0 && diff <= 1, "Temperature differs by more than +/- 1")
+            print("powermetrics CPU die temperature: " +
+                  "\(powermetricsCPUDieTemperature)")
+            assert(diff >= 0 && diff <= 1,
+                   "Temperature differs by more than +/- 1")
         }
     }
 }
